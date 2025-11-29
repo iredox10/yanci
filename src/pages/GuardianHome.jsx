@@ -33,6 +33,8 @@ const highlightPanels = [
   },
 ];
 
+import { Link } from 'react-router-dom';
+
 const GuardianHome = () => {
   const heroStory = GUARDIAN_DATA.headlines.find((headline) => headline.type === 'hero') ?? GUARDIAN_DATA.headlines[0];
   const supportingHeadlines = GUARDIAN_DATA.headlines.filter((headline) => headline.id !== heroStory?.id);
@@ -80,7 +82,7 @@ const GuardianHome = () => {
                 </div>
                 <div className="space-y-0 divide-y divide-gray-100 flex-1">
                   {supportingHeadlines.slice(0, 4).map((item) => (
-                    <div key={item.id} className="group cursor-pointer py-4 first:pt-0 last:pb-0">
+                    <Link to={`/article/${item.id}`} key={item.id} className="group cursor-pointer py-4 first:pt-0 last:pb-0 block">
                       <div className="flex gap-3 mb-2">
                         <span className="text-[10px] uppercase font-bold tracking-widest text-[#8a2c2c]">{item.kicker}</span>
                         <span className="text-[10px] text-gray-400 font-medium">10:30 AM</span>
@@ -91,7 +93,7 @@ const GuardianHome = () => {
                       <div className="flex items-center gap-2 text-xs font-bold text-[#c59d5f] opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
                         Karanta <LuArrowUpRight />
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>

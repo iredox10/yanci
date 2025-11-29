@@ -6,6 +6,11 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"DM Sans"', 'sans-serif'],
+        serif: ['"Frank Ruhl Libre"', 'serif'],
+        body: ['"Merriweather"', 'serif'],
+      },
       colors: {
         yanci: {
           primary: '#0f3036', // Deep Teal/Green (Islam/Agriculture/Northern Identity)

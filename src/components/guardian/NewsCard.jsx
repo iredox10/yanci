@@ -1,5 +1,6 @@
 import { PILLARS } from '../../data/guardianData';
 import { LuClock, LuShare2, LuBookmark } from 'react-icons/lu';
+import { Link } from 'react-router-dom';
 
 const NewsCard = ({ data, variant = 'standard' }) => {
   const colors = PILLARS[data.pillar] || PILLARS.news;
@@ -8,7 +9,7 @@ const NewsCard = ({ data, variant = 'standard' }) => {
   // Hero Card (Large, Immersive)
   if (data.type === 'hero') {
     return (
-      <article className="group relative h-full min-h-[500px] overflow-hidden rounded-sm shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer">
+      <Link to={`/article/${data.id}`} className="group relative h-full min-h-[500px] overflow-hidden rounded-sm shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer block">
         <div className="absolute inset-0">
           <img 
             src={data.image} 
@@ -48,14 +49,14 @@ const NewsCard = ({ data, variant = 'standard' }) => {
             </div>
           </div>
         </div>
-      </article>
+      </Link>
     );
   }
 
   // Compact Card (Sidebar / List)
   if (data.type === 'compact') {
     return (
-      <article className="group flex gap-4 py-4 border-b border-gray-100 last:border-0 cursor-pointer hover:bg-gray-50 transition-colors px-2 -mx-2 rounded-sm">
+      <Link to={`/article/${data.id}`} className="group flex gap-4 py-4 border-b border-gray-100 last:border-0 cursor-pointer hover:bg-gray-50 transition-colors px-2 -mx-2 rounded-sm block">
         <div className="flex-1">
           <span className="text-[10px] font-bold uppercase tracking-widest block mb-2" style={kickerStyle}>
             {data.kicker}
@@ -72,13 +73,13 @@ const NewsCard = ({ data, variant = 'standard' }) => {
             <img src={data.image} alt={data.headline} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
           </div>
         )}
-      </article>
+      </Link>
     );
   }
 
   // Standard Card (Grid)
   return (
-    <article className="group h-full flex flex-col bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 rounded-sm overflow-hidden cursor-pointer">
+    <Link to={`/article/${data.id}`} className="group h-full flex flex-col bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 rounded-sm overflow-hidden cursor-pointer block">
       {data.image && (
         <div className="relative aspect-[3/2] overflow-hidden">
           <img 
@@ -111,7 +112,7 @@ const NewsCard = ({ data, variant = 'standard' }) => {
           <span className="flex items-center gap-1"><LuClock className="w-3 h-3" /> 4h</span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 };
 
