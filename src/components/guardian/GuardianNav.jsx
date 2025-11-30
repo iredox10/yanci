@@ -1,103 +1,158 @@
 import { useState, useEffect } from 'react';
-import { LuChevronDown, LuMenu, LuSearch, LuUser, LuX } from 'react-icons/lu';
+import { LuChevronDown, LuMenu, LuSearch, LuUser, LuX, LuGlobe } from 'react-icons/lu';
 
 const GuardianNav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    const handleScroll = () => setIsScrolled(window.scrollY > 100);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const currentDate = new Date().toLocaleDateString('ha-NG', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-[#0f3036] shadow-lg py-2' : 'bg-[#0f3036] py-4'} text-white font-sans border-b-4 border-[#c59d5f]`}>
-        {/* Top Utility Bar - Hidden on Scroll */}
-        <div className={`max-w-[1400px] mx-auto px-6 transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 opacity-0' : 'h-8 opacity-100'} hidden md:block`}>
-          <div className="flex justify-between items-center text-xs font-medium tracking-wider text-gray-300 border-b border-white/10 pb-2">
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              Asabar, 29 ga Nuwamba, 2025
-            </span>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-yanci-accent transition-colors">Bugun Yau</a>
-              <a href="#" className="hover:text-yanci-accent transition-colors">Ayyuka</a>
-              <a href="#" className="hover:text-yanci-accent transition-colors">Tuntube Mu</a>
+      <header className="font-sans relative z-50">
+        {/* 1. Top Utility Bar (Darkest) */}
+        <div className="bg-[#0a2125] text-gray-300 text-xs py-2 border-b border-white/10">
+          <div className="max-w-[1400px] mx-auto px-4 md:px-6 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <span className="text-yanci-accent font-bold">{currentDate}</span>
+              <span className="hidden md:inline text-gray-500">|</span>
+              <span className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
+                <LuGlobe className="w-3 h-3" /> International
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <a href="#" className="hover:text-white transition-colors">Ayyuka</a>
+              <a href="#" className="hover:text-white transition-colors">Tuntube Mu</a>
+              <button className="flex items-center gap-1 font-bold text-white hover:text-yanci-accent transition-colors">
+                <LuUser className="w-3 h-3" /> Shiga
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Main Header */}
-        <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <button 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center gap-2 text-sm font-bold hover:text-yanci-accent transition-colors group"
-            >
-              <div className="p-1 border border-white/20 rounded group-hover:border-yanci-accent transition-colors">
-                <LuMenu className="w-6 h-6" />
-              </div>
-              <span className="hidden lg:inline">Rukuni</span>
-            </button>
+        {/* 2. Main Brand Header (Primary Color) */}
+        <div className={`bg-[#0f3036] text-white transition-all duration-300 ${isScrolled ? 'py-2' : 'py-6 md:py-8'}`}>
+          <div className="max-w-[1400px] mx-auto px-4 md:px-6 flex items-center justify-between">
             
-            <a href="/" className="flex flex-col group">
-              <div className="font-serif font-black text-4xl tracking-tighter leading-none text-white group-hover:text-gray-100 transition-colors">
-                Yanci<span className="text-yanci-accent">.</span>
-              </div>
-            </a>
-          </div>
-
-          {/* Desktop Nav Links */}
-          <div className={`hidden lg:flex items-center gap-8 text-sm font-bold tracking-wide transition-all duration-300 ${isScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none absolute'}`}>
-            {['Labarai', 'Ra\'ayi', 'Wasanni', 'Al\'adu', 'Rayuwa'].map((item) => (
-              <a key={item} href="#" className="hover:text-yanci-accent transition-colors relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-0 after:h-0.5 after:bg-yanci-accent after:transition-all hover:after:w-full">
-                {item}
+            {/* Logo Area */}
+            <div className="flex items-center gap-6">
+              <a href="/" className="group block">
+                <h1 className={`font-serif font-black tracking-tighter leading-none transition-all duration-300 ${isScrolled ? 'text-3xl' : 'text-4xl md:text-6xl'}`}>
+                  Yanci<span className="text-yanci-accent">.</span>
+                </h1>
               </a>
-            ))}
-          </div>
-          
-          <div className="flex items-center gap-4 sm:gap-6 text-sm font-bold">
-            <button className="hidden md:flex bg-yanci-accent text-yanci-primary px-6 py-2.5 rounded-sm hover:bg-white transition-all items-center gap-2 font-serif shadow-lg shadow-yanci-accent/20 hover:shadow-yanci-accent/40 transform hover:-translate-y-0.5">
-              Tallafa mana <LuChevronDown className="w-4 h-4" />
-            </button>
-            <div className="h-8 w-px bg-white/10 hidden md:block"></div>
-            <button className="flex items-center gap-2 hover:text-yanci-accent transition-colors group">
-              <LuUser className="w-5 h-5 group-hover:scale-110 transition-transform" /> 
-              <span className="hidden md:inline">Shiga</span>
-            </button>
-            <button className="hover:text-yanci-accent transition-colors p-2 hover:bg-white/5 rounded-full" aria-label="Bincike">
-              <LuSearch className="w-5 h-5" />
-            </button>
+            </div>
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-4 md:gap-6">
+              <button className="hidden md:flex bg-yanci-accent text-[#0f3036] px-5 py-2 rounded-full font-bold text-sm hover:bg-white transition-all items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                Tallafa mana <LuChevronDown className="w-4 h-4" />
+              </button>
+              
+              <div className="flex items-center gap-2 border-l border-white/10 pl-6">
+                <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-yanci-accent">
+                  <LuSearch className="w-6 h-6" />
+                </button>
+                <button 
+                  onClick={() => setIsMenuOpen(true)}
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors flex items-center gap-2 font-bold"
+                >
+                  <div className="flex flex-col gap-1.5 items-end">
+                    <span className="w-6 h-0.5 bg-white"></span>
+                    <span className="w-4 h-0.5 bg-white"></span>
+                    <span className="w-6 h-0.5 bg-white"></span>
+                  </div>
+                  <span className="hidden md:inline text-sm uppercase tracking-wider">Rukuni</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </nav>
-      
-      {/* Spacer for fixed nav */}
-      <div className={`${isScrolled ? 'h-20' : 'h-32'} transition-all duration-300 hidden md:block`}></div>
-      <div className="h-20 md:hidden"></div>
+
+        {/* 3. Sticky Navigation Bar (Accent/Contrast) */}
+        <div className={`bg-[#1a454c] border-y border-[#2a5d66] sticky top-0 z-40 shadow-md transition-transform duration-300 ${isScrolled ? 'translate-y-0' : 'translate-y-0'}`}>
+          <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+            <nav className="flex items-center justify-between h-12 overflow-x-auto no-scrollbar">
+              <ul className="flex items-center gap-1 md:gap-6 text-sm font-bold text-gray-200 whitespace-nowrap">
+                {['Labarai', 'Siyasa', 'Kasuwanci', 'Wasanni', 'Fasaha', 'Ra\'ayi', 'Al\'adu', 'Bidiyo'].map((item, idx) => (
+                  <li key={item}>
+                    <a 
+                      href="#" 
+                      className={`block px-3 py-3 hover:text-white hover:bg-[#0f3036] transition-colors border-b-2 border-transparent hover:border-yanci-accent ${idx === 0 ? 'text-white border-yanci-accent bg-[#0f3036]' : ''}`}
+                    >
+                      {item}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden lg:flex items-center gap-2 text-xs font-bold text-yanci-accent pl-4 border-l border-[#2a5d66]">
+                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                KAI TSAYE
+              </div>
+            </nav>
+          </div>
+        </div>
+      </header>
 
       {/* Mobile/Mega Menu Overlay */}
-      <div className={`fixed inset-0 bg-yanci-primary/95 backdrop-blur-sm z-40 transition-all duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-        <div className="max-w-[1400px] mx-auto px-6 py-24 h-full overflow-y-auto">
-          <button 
-            onClick={() => setIsMenuOpen(false)}
-            className="absolute top-8 right-6 p-2 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <LuX className="w-8 h-8 text-white" />
-          </button>
+      <div className={`fixed inset-0 bg-[#0f3036]/98 backdrop-blur-xl z-[60] transition-all duration-500 ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full'}`}>
+        <div className="max-w-[1400px] mx-auto px-6 py-8 h-full overflow-y-auto">
+          <div className="flex justify-between items-center mb-12 border-b border-white/10 pb-6">
+            <h2 className="font-serif font-black text-3xl text-white">Yanci<span className="text-yanci-accent">.</span></h2>
+            <button 
+              onClick={() => setIsMenuOpen(false)}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors group"
+            >
+              <LuX className="w-8 h-8 text-white group-hover:rotate-90 transition-transform" />
+            </button>
+          </div>
           
           <div className="grid md:grid-cols-4 gap-12 text-white">
-            <div className="space-y-6">
-              <h3 className="text-yanci-accent font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-4">Rukuni</h3>
-              <ul className="space-y-4 text-2xl font-serif font-bold">
-                {['Labarai', 'Ra\'ayi', 'Wasanni', 'Al\'adu', 'Rayuwa', 'Kari'].map((item) => (
+            <div className="space-y-8">
+              <h3 className="text-yanci-accent font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-2">Labarai</h3>
+              <ul className="space-y-4 text-xl font-serif font-bold">
+                {['Najeriya', 'Afirka', 'Duniya', 'Siyasa', 'Tsaro', 'Lafiya'].map((item) => (
                   <li key={item}><a href="#" className="hover:text-yanci-accent transition-colors block hover:translate-x-2 duration-300">{item}</a></li>
                 ))}
               </ul>
             </div>
-            {/* Add more menu columns here if needed */}
+            
+            <div className="space-y-8">
+              <h3 className="text-[#90cfff] font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-2">Wasanni</h3>
+              <ul className="space-y-4 text-xl font-serif font-bold">
+                {['Kwallon Kafa', 'NPFL', 'Premier League', 'La Liga', 'Champions League'].map((item) => (
+                  <li key={item}><a href="#" className="hover:text-[#90cfff] transition-colors block hover:translate-x-2 duration-300">{item}</a></li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="space-y-8">
+              <h3 className="text-[#eacca0] font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-2">Al'adu & Rayuwa</h3>
+              <ul className="space-y-4 text-xl font-serif font-bold">
+                {['Fina-finai', 'Waka', 'Abinci', 'Sutura', 'Tarihi'].map((item) => (
+                  <li key={item}><a href="#" className="hover:text-[#eacca0] transition-colors block hover:translate-x-2 duration-300">{item}</a></li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-[#0a2125] p-6 rounded-lg border border-white/5">
+              <h3 className="text-white font-bold mb-4">Biyan Kuɗi</h3>
+              <p className="text-gray-400 text-sm mb-6">Samun labarai masu inganci yana bukatar tallafi. Taimaka mana mu ci gaba da aiki.</p>
+              <button className="w-full bg-yanci-accent text-[#0f3036] py-3 rounded font-bold hover:bg-white transition-colors">
+                Bada Tallafi
+              </button>
+            </div>
           </div>
         </div>
       </div>

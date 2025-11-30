@@ -234,66 +234,67 @@ const LiveArticlePage = () => {
           </div>
 
           {/* Sidebar Column */}
-          <div className="lg:col-span-4 space-y-8">
+          <div className="lg:col-span-4">
+            <div className="sticky top-24 space-y-8">
             
-            {/* Live Video Placeholder */}
-            <div className="bg-[#1c1917] text-white rounded-sm overflow-hidden shadow-lg sticky top-20">
-              <div className="bg-[#8a2c2c] px-4 py-2 flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                  <LuCirclePlay className="w-4 h-4" /> Bidiyo Kai Tsaye
-                </span>
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-              </div>
-              <div className="aspect-video bg-gray-800 relative group cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center group-hover:scale-110 transition-transform bg-black/30 backdrop-blur-sm">
-                    <LuCirclePlay className="w-8 h-8 text-white" />
+              {/* Live Video Placeholder */}
+              <div className="bg-[#1c1917] text-white rounded-sm overflow-hidden shadow-lg">
+                <div className="bg-[#8a2c2c] px-4 py-2 flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                    <LuCirclePlay className="w-4 h-4" /> Bidiyo Kai Tsaye
+                  </span>
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                </div>
+                <div className="aspect-video bg-gray-800 relative group cursor-pointer">
+                  <img src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center group-hover:scale-110 transition-transform bg-black/30 backdrop-blur-sm">
+                      <LuCirclePlay className="w-8 h-8 text-white" />
+                    </div>
                   </div>
-                </div>
-                <div className="absolute bottom-4 left-4 right-4">
-                  <p className="font-bold text-sm text-white shadow-black drop-shadow-md">Tashar Idu: Ana ci gaba da gwajin jirgi</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Key Figures */}
-            <div className="bg-white border border-gray-200 p-6 shadow-sm rounded-sm">
-              <h3 className="font-bold text-[#0f3036] uppercase tracking-widest text-xs mb-4 border-b border-gray-100 pb-2">Masu Ruwa da Tsaki</h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 group cursor-pointer">
-                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop" className="w-12 h-12 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" />
-                  <div>
-                    <p className="font-bold text-sm text-[#1c1917] group-hover:text-[#c59d5f] transition-colors">Sa'idu Alkali</p>
-                    <p className="text-xs text-gray-400">Ministan Sufuri</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 group cursor-pointer">
-                  <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop" className="w-12 h-12 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" />
-                  <div>
-                    <p className="font-bold text-sm text-[#1c1917] group-hover:text-[#c59d5f] transition-colors">Fidet Okhiria</p>
-                    <p className="text-xs text-gray-400">MD, NRC</p>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <p className="font-bold text-sm text-white shadow-black drop-shadow-md">Tashar Idu: Ana ci gaba da gwajin jirgi</p>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Map Placeholder */}
-            <div className="bg-[#fbf8f3] border border-[#c59d5f]/20 p-6 rounded-sm">
-              <h3 className="font-bold text-[#c59d5f] uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
-                <LuMapPin className="w-4 h-4" /> Taswira
-              </h3>
-              <div className="aspect-square bg-[#e5e0d8] rounded-sm relative overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
-                <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-50 mix-blend-multiply" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-4 h-4 bg-[#8a2c2c] rounded-full border-2 border-white shadow-lg animate-bounce"></div>
+              {/* Key Figures */}
+              <div className="bg-white border border-gray-200 p-6 shadow-sm rounded-sm">
+                <h3 className="font-bold text-[#0f3036] uppercase tracking-widest text-xs mb-4 border-b border-gray-100 pb-2">Masu Ruwa da Tsaki</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 group cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop" className="w-12 h-12 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+                    <div>
+                      <p className="font-bold text-sm text-[#1c1917] group-hover:text-[#c59d5f] transition-colors">Sa'idu Alkali</p>
+                      <p className="text-xs text-gray-400">Ministan Sufuri</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 group cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop" className="w-12 h-12 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+                    <div>
+                      <p className="font-bold text-sm text-[#1c1917] group-hover:text-[#c59d5f] transition-colors">Fidet Okhiria</p>
+                      <p className="text-xs text-gray-400">MD, NRC</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="absolute bottom-2 left-2 bg-white/90 px-2 py-1 text-[10px] font-bold rounded-sm shadow-sm">
-                  Abuja - Kaduna Rail Line
+              </div>
+
+              {/* Map Placeholder */}
+              <div className="bg-[#fbf8f3] border border-[#c59d5f]/20 p-6 rounded-sm">
+                <h3 className="font-bold text-[#c59d5f] uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
+                  <LuMapPin className="w-4 h-4" /> Taswira
+                </h3>
+                <div className="aspect-square bg-[#e5e0d8] rounded-sm relative overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
+                  <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-50 mix-blend-multiply" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 bg-[#8a2c2c] rounded-full border-2 border-white shadow-lg animate-bounce"></div>
+                  </div>
+                  <div className="absolute bottom-2 left-2 bg-white/90 px-2 py-1 text-[10px] font-bold rounded-sm shadow-sm">
+                    Abuja - Kaduna Rail Line
+                  </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
