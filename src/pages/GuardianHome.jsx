@@ -1,4 +1,4 @@
-import { LuArrowUpRight, LuRadio, LuSparkles, LuTrendingUp, LuPlay, LuCalendar } from 'react-icons/lu';
+import { FaArrowUpRightFromSquare, FaTowerBroadcast, FaWandMagicSparkles, FaArrowTrendUp, FaPlay, FaCalendar } from 'react-icons/fa6';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import GuardianNav from '../components/guardian/GuardianNav';
 import NewsCard from '../components/guardian/NewsCard';
@@ -14,7 +14,7 @@ const highlightPanels = [
     tag: 'Kasuwanci',
     title: 'Kasuwar hannayen jari ta yi sama da kashi 4 cikin yini biyu',
     copy: 'Masu zuba jari sun amince da kudurin gwamnati na saukaka haraji ga masana’antun kere-kere.',
-    icon: LuTrendingUp,
+    icon: FaArrowTrendUp,
     accent: PILLARS.news.main,
   },
   {
@@ -22,7 +22,7 @@ const highlightPanels = [
     tag: 'Sauti',
     title: 'Shirin rediyon Yanci Live ya dawo da sabbin makalu daga jihohi 8',
     copy: 'Masu sauraro na iya kallo kai tsaye tare da mika tambaya daga manhajar mu.',
-    icon: LuRadio,
+    icon: FaTowerBroadcast,
     accent: '#005689',
   },
   {
@@ -30,7 +30,7 @@ const highlightPanels = [
     tag: 'Kirkire-kirkire',
     title: 'Matasa a Zaria sun ƙirƙiri manhajar gano gonaki ta tauraron dan adam',
     copy: 'Aikin ya samu tallafin dala 150,000 daga hadin gwiwar ƙungiyoyin noma na duniya.',
-    icon: LuSparkles,
+    icon: FaWandMagicSparkles,
     accent: '#bb3b80',
   },
 ];
@@ -103,7 +103,7 @@ const GuardianHome = () => {
                         {item.headline}
                       </h3>
                       <div className="flex items-center gap-2 text-xs font-bold text-[#c59d5f] opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
-                        Karanta <LuArrowUpRight />
+                        Karanta <FaArrowUpRightFromSquare />
                       </div>
                     </Link>
                   ))}
@@ -130,7 +130,7 @@ const GuardianHome = () => {
                   <h3 className="text-2xl font-serif font-bold mb-3 leading-tight">{panel.title}</h3>
                   <p className="text-sm text-gray-300 leading-relaxed mb-6 border-l-2 border-[#c59d5f]/30 pl-4">{panel.copy}</p>
                   <button className="text-sm font-bold uppercase tracking-wider flex items-center gap-2 hover:gap-4 transition-all text-white">
-                    Bincika <LuArrowUpRight />
+                    Bincika <FaArrowUpRightFromSquare />
                   </button>
                 </div>
               </article>
@@ -187,7 +187,7 @@ const GuardianHome = () => {
                 </div>
               </div>
               <button className="mt-6 text-xs font-bold uppercase tracking-wider text-[#0f3036] flex items-center gap-2 group-hover:gap-3 transition-all">
-                Aiko da naka <LuArrowUpRight />
+                Aiko da naka <FaArrowUpRightFromSquare />
               </button>
             </div>
           </div>
@@ -203,10 +203,10 @@ const GuardianHome = () => {
               </h2>
               <div className="flex gap-4">
                 <button className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-[#2c7a7b] hover:text-white hover:border-transparent transition-all">
-                  <LuCalendar className="w-4 h-4" />
+                  <FaCalendar className="w-4 h-4" />
                 </button>
                 <a href="#" className="px-6 py-2 border border-[#2c7a7b] text-[#2c7a7b] font-bold text-sm uppercase tracking-wider hover:bg-[#2c7a7b] hover:text-white transition-all rounded-sm flex items-center gap-2">
-                  Duba sakamakon yau <LuArrowUpRight />
+                  Duba sakamakon yau <FaArrowUpRightFromSquare />
                 </a>
               </div>
             </div>
@@ -245,7 +245,7 @@ const GuardianHome = () => {
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-2 justify-end text-[#2c7a7b] mb-1">
-                        <LuPlay className="w-4 h-4 fill-current" />
+                        <FaPlay className="w-4 h-4 fill-current" />
                         <span className="text-xs font-bold uppercase">Kalli Yanzu</span>
                       </div>
                     </div>
@@ -282,7 +282,7 @@ const GuardianHome = () => {
                   <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
                     <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">Minti 5</span>
                     <button className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center group-hover:bg-[#d69e2e] group-hover:text-white group-hover:border-transparent transition-all">
-                      <LuArrowUpRight className="w-4 h-4" />
+                      <FaArrowUpRightFromSquare className="w-4 h-4" />
                     </button>
                   </div>
                 </article>
@@ -296,7 +296,7 @@ const GuardianHome = () => {
               <div className="relative z-10 flex flex-col h-full">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-2xl font-serif font-black text-white border-b-4 border-[#c59d5f] pb-2 inline-block">Al'adu</h2>
-                  <LuSparkles className="w-6 h-6 text-[#c59d5f]" />
+                  <FaWandMagicSparkles className="w-6 h-6 text-[#c59d5f]" />
                 </div>
                 
                 <div className="space-y-8 flex-1">

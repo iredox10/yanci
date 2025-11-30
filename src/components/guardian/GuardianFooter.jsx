@@ -32,7 +32,7 @@ const GuardianFooter = () => (
           </div>
 
           <div className="flex gap-4">
-            {[LuTwitter, LuFacebook, LuInstagram, LuLinkedin].map((Icon, i) => (
+            {[FaTwitter, FaFacebook, FaInstagram, FaLinkedin].map((Icon, i) => (
               <a key={i} href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-yanci-accent hover:text-yanci-primary transition-all">
                 <Icon className="w-5 h-5" />
               </a>

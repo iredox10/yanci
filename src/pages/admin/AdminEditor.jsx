@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNews } from '../../context/NewsContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { LuSave, LuArrowLeft } from 'react-icons/lu';
+import { FaSave, FaArrowLeft } from 'react-icons/fa6';
 
 const AdminEditor = () => {
   const { id } = useParams();
@@ -59,7 +59,7 @@ const AdminEditor = () => {
             onClick={() => navigate('/admin/articles')}
             className="p-2 hover:bg-gray-200 rounded-full transition-colors"
           >
-            <LuArrowLeft className="w-5 h-5" />
+            <FaArrowLeft className="w-5 h-5" />
           </button>
           <h2 className="text-2xl font-bold text-gray-800">
             {isEditing ? 'Edit Article' : 'Create New Article'}
@@ -69,7 +69,7 @@ const AdminEditor = () => {
           onClick={handleSubmit}
           className="bg-[#0f3036] text-white px-6 py-2 rounded-md flex items-center gap-2 hover:bg-[#1a454c] transition-colors font-bold"
         >
-          <LuSave className="w-4 h-4" /> Save Article
+          <FaSave className="w-4 h-4" /> Save Article
         </button>
       </div>
 

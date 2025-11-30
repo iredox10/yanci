@@ -1,5 +1,5 @@
 import { PILLARS } from '../../data/guardianData';
-import { LuQuote } from 'react-icons/lu';
+import { FaQuoteLeft } from 'react-icons/fa6';
 
 const OpinionCard = ({ data }) => {
   return (

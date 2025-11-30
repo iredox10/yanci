@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { LuClock, LuShare2, LuBookmark, LuFacebook, LuTwitter, LuLinkedin, LuPrinter } from 'react-icons/lu';
+import { FaClock, FaShareNodes, FaBookmark, FaFacebook, FaTwitter, FaLinkedin, FaPrint } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import { useNews } from '../context/NewsContext';
@@ -37,7 +37,7 @@ const ArticlePage = () => {
             <span>{article.pillar === 'news' ? 'Najeriya' : article.pillar}</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
-            <span className="flex items-center gap-1"><LuClock className="w-3 h-3" /> An wallafa: 29 Nuwamba, 2025</span>
+            <span className="flex items-center gap-1"><FaClock className="w-3 h-3" /> An wallafa: 29 Nuwamba, 2025</span>
           </div>
         </div>
 
@@ -63,12 +63,12 @@ const ArticlePage = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#3b5998] hover:text-white hover:border-transparent transition-colors"><LuFacebook className="w-4 h-4" /></button>
-              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#000000] hover:text-white hover:border-transparent transition-colors"><LuTwitter className="w-4 h-4" /></button>
-              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#0077b5] hover:text-white hover:border-transparent transition-colors"><LuLinkedin className="w-4 h-4" /></button>
+              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#3b5998] hover:text-white hover:border-transparent transition-colors"><FaFacebook className="w-4 h-4" /></button>
+              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#000000] hover:text-white hover:border-transparent transition-colors"><FaTwitter className="w-4 h-4" /></button>
+              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#0077b5] hover:text-white hover:border-transparent transition-colors"><FaLinkedin className="w-4 h-4" /></button>
               <div className="w-px h-6 bg-gray-200 mx-1"></div>
-              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#0f3036] hover:text-white hover:border-transparent transition-colors"><LuBookmark className="w-4 h-4" /></button>
-              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#0f3036] hover:text-white hover:border-transparent transition-colors"><LuPrinter className="w-4 h-4" /></button>
+              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#0f3036] hover:text-white hover:border-transparent transition-colors"><FaBookmark className="w-4 h-4" /></button>
+              <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-[#0f3036] hover:text-white hover:border-transparent transition-colors"><FaPrint className="w-4 h-4" /></button>
             </div>
           </div>
 

@@ -1,5 +1,5 @@
 import { useNews } from '../../context/NewsContext';
-import { LuFileText, LuEye, LuTrendingUp, LuUsers } from 'react-icons/lu';
+import { FaFileLines, FaEye, FaArrowTrendUp, FaUsers } from 'react-icons/fa6';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center justify-between">
@@ -31,25 +31,25 @@ const AdminDashboard = () => {
         <StatCard 
           title="Total Articles" 
           value={totalArticles} 
-          icon={LuFileText} 
+          icon={FaFileLines} 
           color="bg-blue-500" 
         />
         <StatCard 
           title="Live Stories" 
           value={liveArticles} 
-          icon={LuTrendingUp} 
+          icon={FaArrowTrendUp} 
           color="bg-red-500" 
         />
         <StatCard 
           title="News Pillar" 
           value={newsArticles} 
-          icon={LuEye} 
+          icon={FaEye} 
           color="bg-green-500" 
         />
         <StatCard 
           title="Total Users" 
           value="12.5k" 
-          icon={LuUsers} 
+          icon={FaUsers} 
           color="bg-purple-500" 
         />
       </div>

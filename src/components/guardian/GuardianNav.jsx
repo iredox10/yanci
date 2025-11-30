@@ -28,14 +28,14 @@ const GuardianNav = () => {
               <span className="text-yanci-accent font-bold">{currentDate}</span>
               <span className="hidden md:inline text-gray-500">|</span>
               <span className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
-                <LuGlobe className="w-3 h-3" /> International
+                <FaGlobe className="w-3 h-3" /> International
               </span>
             </div>
             <div className="flex items-center gap-4">
               <a href="#" className="hover:text-white transition-colors">Ayyuka</a>
               <a href="#" className="hover:text-white transition-colors">Tuntube Mu</a>
               <button className="flex items-center gap-1 font-bold text-white hover:text-yanci-accent transition-colors">
-                <LuUser className="w-3 h-3" /> Shiga
+                <FaUser className="w-3 h-3" /> Shiga
               </button>
             </div>
           </div>
@@ -62,7 +62,7 @@ const GuardianNav = () => {
               
               <div className="flex items-center gap-2 border-l border-white/10 pl-6">
                 <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-yanci-accent">
-                  <LuSearch className="w-6 h-6" />
+                  <FaSearch className="w-6 h-6" />
                 </button>
                 <button 
                   onClick={() => setIsMenuOpen(true)}
@@ -114,7 +114,7 @@ const GuardianNav = () => {
               onClick={() => setIsMenuOpen(false)}
               className="p-2 hover:bg-white/10 rounded-full transition-colors group"
             >
-              <LuX className="w-8 h-8 text-white group-hover:rotate-90 transition-transform" />
+              <FaXmark className="w-8 h-8 text-white group-hover:rotate-90 transition-transform" />
             </button>
           </div>
           

@@ -1,6 +1,6 @@
 import { useNews } from '../../context/NewsContext';
 import { Link } from 'react-router-dom';
-import { LuPencil, LuTrash2, LuPlus } from 'react-icons/lu';
+import { FaPencil, FaTrash, FaPlus } from 'react-icons/fa6';
 
 const AdminArticles = () => {
   const { articles, deleteArticle } = useNews();
@@ -19,7 +19,7 @@ const AdminArticles = () => {
           to="/admin/create" 
           className="bg-[#0f3036] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#1a454c] transition-colors"
         >
-          <LuPlus className="w-4 h-4" /> Add New
+          <FaPlus className="w-4 h-4" /> Add New
         </Link>
       </div>
 
@@ -66,14 +66,14 @@ const AdminArticles = () => {
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                       title="Edit"
                     >
-                      <LuPencil className="w-4 h-4" />
+                      <FaPencil className="w-4 h-4" />
                     </Link>
                     <button 
                       onClick={() => handleDelete(article.id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
                       title="Delete"
                     >
-                      <LuTrash2 className="w-4 h-4" />
+                      <FaTrash className="w-4 h-4" />
                     </button>
                   </div>
                 </td>

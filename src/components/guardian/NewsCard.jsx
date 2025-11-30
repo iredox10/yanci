@@ -1,5 +1,5 @@
 import { PILLARS } from '../../data/guardianData';
-import { LuClock, LuShare2, LuBookmark } from 'react-icons/lu';
+import { FaClock, FaShareNodes, FaBookmark } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 
 const NewsCard = ({ data, variant = 'standard' }) => {

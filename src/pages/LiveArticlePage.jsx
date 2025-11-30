@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { LuClock, LuShare2, LuBookmark, LuFacebook, LuTwitter, LuLinkedin, LuPrinter, LuRadio, LuRefreshCw, LuMapPin, LuArrowDown, LuTriangleAlert, LuCirclePlay, LuFilter } from 'react-icons/lu';
+import { FaClock, FaShareNodes, FaBookmark, FaFacebook, FaTwitter, FaLinkedin, FaPrint, FaTowerBroadcast, FaRotate, FaMapMarkerAlt, FaArrowDown, FaTriangleExclamation, FaCirclePlay, FaFilter } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import { useNews } from '../context/NewsContext';
@@ -86,7 +86,7 @@ const LiveArticlePage = () => {
           </div>
           <div className="flex items-center gap-4 text-xs font-medium">
             <button className="hidden md:flex items-center gap-1 hover:text-gray-200 transition-colors">
-              <LuRefreshCw className="w-3 h-3" /> Sabuntawa ta atomatik
+              <FaRotate className="w-3 h-3" /> Sabuntawa ta atomatik
             </button>
             <span className="bg-white/20 px-2 py-1 rounded text-[10px] font-bold">Sabuwar wallafa: Yanzu</span>
           </div>
@@ -123,7 +123,7 @@ const LiveArticlePage = () => {
                   <span className="font-bold text-[#0f3036]">Ibrahim Sani</span> da <span className="font-bold text-[#0f3036]">Amina Yusuf</span>
                 </div>
                 <span className="hidden md:inline text-gray-300">|</span>
-                <span className="flex items-center gap-1"><LuClock className="w-4 h-4" /> An fara: 09:00 AM</span>
+                <span className="flex items-center gap-1"><FaClock className="w-4 h-4" /> An fara: 09:00 AM</span>
               </div>
             </header>
 
@@ -131,7 +131,7 @@ const LiveArticlePage = () => {
             <div className="bg-[#fbf8f3] border-l-4 border-[#8a2c2c] p-6 shadow-sm mb-10 relative rounded-r-sm">
               <div className="flex items-center gap-2 mb-4">
                 <span className="bg-[#8a2c2c] text-white p-1.5 rounded-full">
-                  <LuTriangleAlert className="w-4 h-4" />
+                  <FaTriangleExclamation className="w-4 h-4" />
                 </span>
                 <h3 className="font-bold text-[#8a2c2c] uppercase tracking-widest text-sm">Muhimman Abubuwa</h3>
               </div>
@@ -142,7 +142,7 @@ const LiveArticlePage = () => {
                     <div className="flex-1">
                       <span className="text-[#1c1917] font-serif font-bold text-lg leading-tight group-hover:text-[#8a2c2c] transition-colors block mb-1">{event.title}</span>
                       <span className="text-xs text-gray-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Je zuwa labarin <LuArrowDown className="w-3 h-3" />
+                        Je zuwa labarin <FaArrowDown className="w-3 h-3" />
                       </span>
                     </div>
                   </li>
@@ -162,10 +162,10 @@ const LiveArticlePage = () => {
               
               <div className="flex items-center gap-2">
                 <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 rounded-full text-xs font-bold text-gray-600 hover:border-[#0f3036] hover:text-[#0f3036] transition-colors">
-                  <LuFilter className="w-3 h-3" /> Zaba
+                  <FaFilter className="w-3 h-3" /> Zaba
                 </button>
                 <button className="flex items-center gap-2 px-3 py-1.5 bg-[#0f3036] text-white rounded-full text-xs font-bold hover:bg-[#1c478a] transition-colors shadow-sm">
-                  <LuRefreshCw className="w-3 h-3" /> Sabunta
+                  <FaRotate className="w-3 h-3" /> Sabunta
                 </button>
               </div>
             </div>
@@ -204,7 +204,7 @@ const LiveArticlePage = () => {
                       <figure className="mb-4">
                         <img src={event.image} alt={event.title} className="w-full h-auto rounded-sm" />
                         <figcaption className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                          <LuMapPin className="w-3 h-3" /> Tashar Idu, Abuja
+                          <FaMapMarkerAlt className="w-3 h-3" /> Tashar Idu, Abuja
                         </figcaption>
                       </figure>
                     )}
@@ -217,14 +217,14 @@ const LiveArticlePage = () => {
                     <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
                       <div className="flex gap-4">
                         <button className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-[#3b5998] transition-colors">
-                          <LuFacebook className="w-4 h-4" />
+                          <FaFacebook className="w-4 h-4" />
                         </button>
                         <button className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-black transition-colors">
-                          <LuTwitter className="w-4 h-4" />
+                          <FaTwitter className="w-4 h-4" />
                         </button>
                       </div>
                       <button className="text-xs font-bold text-[#0f3036] hover:text-[#c59d5f] transition-colors flex items-center gap-1">
-                        <LuShare2 className="w-3 h-3" /> Raba
+                        <FaShareNodes className="w-3 h-3" /> Raba
                       </button>
                     </div>
                   </div>
@@ -246,7 +246,7 @@ const LiveArticlePage = () => {
               <div className="bg-[#1c1917] text-white rounded-sm overflow-hidden shadow-lg">
                 <div className="bg-[#8a2c2c] px-4 py-2 flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                    <LuCirclePlay className="w-4 h-4" /> Bidiyo Kai Tsaye
+                    <FaCirclePlay className="w-4 h-4" /> Bidiyo Kai Tsaye
                   </span>
                   <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                 </div>
@@ -254,7 +254,7 @@ const LiveArticlePage = () => {
                   <img src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center group-hover:scale-110 transition-transform bg-black/30 backdrop-blur-sm">
-                      <LuCirclePlay className="w-8 h-8 text-white" />
+                      <FaCirclePlay className="w-8 h-8 text-white" />
                     </div>
                   </div>
                   <div className="absolute bottom-4 left-4 right-4">
@@ -287,7 +287,7 @@ const LiveArticlePage = () => {
               {/* Map Placeholder */}
               <div className="bg-[#fbf8f3] border border-[#c59d5f]/20 p-6 rounded-sm">
                 <h3 className="font-bold text-[#c59d5f] uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
-                  <LuMapPin className="w-4 h-4" /> Taswira
+                  <FaMapMarkerAlt className="w-4 h-4" /> Taswira
                 </h3>
                 <div className="aspect-square bg-[#e5e0d8] rounded-sm relative overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
                   <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-50 mix-blend-multiply" />
