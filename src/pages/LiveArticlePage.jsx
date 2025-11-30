@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { FaClock, FaShareNodes, FaBookmark, FaFacebook, FaTwitter, FaLinkedin, FaPrint, FaTowerBroadcast, FaRotate, FaMapMarkerAlt, FaArrowDown, FaTriangleExclamation, FaCirclePlay, FaFilter } from 'react-icons/fa6';
+import { FaClock, FaShareNodes, FaBookmark, FaFacebook, FaTwitter, FaLinkedin, FaPrint, FaTowerBroadcast, FaRotate, FaLocationDot, FaArrowDown, FaTriangleExclamation, FaCirclePlay, FaFilter } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import { useNews } from '../context/NewsContext';
@@ -136,8 +136,8 @@ const LiveArticlePage = () => {
                 <h3 className="font-bold text-[#8a2c2c] uppercase tracking-widest text-sm">Muhimman Abubuwa</h3>
               </div>
               <ul className="space-y-4">
-                {keyEvents.map((event, idx) => (
-                  <li key={idx} className="flex items-start gap-4 group cursor-pointer hover:bg-white p-3 rounded-sm transition-all border border-transparent hover:border-gray-200 hover:shadow-sm">
+                {keyEvents.map((event) => (
+                  <li key={event.id} className="flex items-start gap-4 group cursor-pointer hover:bg-white p-3 rounded-sm transition-all border border-transparent hover:border-gray-200 hover:shadow-sm">
                     <span className="font-mono font-bold text-[#0f3036] text-sm whitespace-nowrap pt-1">{event.time}</span>
                     <div className="flex-1">
                       <span className="text-[#1c1917] font-serif font-bold text-lg leading-tight group-hover:text-[#8a2c2c] transition-colors block mb-1">{event.title}</span>
@@ -172,7 +172,7 @@ const LiveArticlePage = () => {
 
             {/* Timeline */}
             <div className="space-y-0 relative border-l-2 border-gray-200 ml-4 md:ml-6">
-              {timeline.map((event, idx) => (
+              {timeline.map((event) => (
                 <article key={event.id} id={event.id} className={`relative pl-8 md:pl-12 pb-12 last:pb-0 group ${event.isKey ? 'is-key-event' : ''}`}>
                   {/* Timeline Dot */}
                   <div className={`absolute left-[-9px] top-0 w-4 h-4 rounded-full border-2 border-[#f4f1ea] ${event.isKey ? 'bg-[#8a2c2c] w-5 h-5 left-[-11px]' : 'bg-gray-400'} group-hover:scale-125 transition-transform z-10`}></div>
@@ -204,7 +204,7 @@ const LiveArticlePage = () => {
                       <figure className="mb-4">
                         <img src={event.image} alt={event.title} className="w-full h-auto rounded-sm" />
                         <figcaption className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                          <FaMapMarkerAlt className="w-3 h-3" /> Tashar Idu, Abuja
+                          <FaLocationDot className="w-3 h-3" /> Tashar Idu, Abuja
                         </figcaption>
                       </figure>
                     )}
@@ -287,7 +287,7 @@ const LiveArticlePage = () => {
               {/* Map Placeholder */}
               <div className="bg-[#fbf8f3] border border-[#c59d5f]/20 p-6 rounded-sm">
                 <h3 className="font-bold text-[#c59d5f] uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
-                  <FaMapMarkerAlt className="w-4 h-4" /> Taswira
+                  <FaLocationDot className="w-4 h-4" /> Taswira
                 </h3>
                 <div className="aspect-square bg-[#e5e0d8] rounded-sm relative overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
                   <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-50 mix-blend-multiply" />

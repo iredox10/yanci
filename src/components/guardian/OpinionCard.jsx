@@ -20,7 +20,7 @@ const OpinionCard = ({ data }) => {
               )}
             </div>
             <div className="absolute -bottom-1 -right-1 bg-yanci-accent text-yanci-primary rounded-full p-1">
-              <LuQuote className="w-3 h-3" />
+              <FaQuoteLeft className="w-3 h-3" />
             </div>
           </div>
           <div>

@@ -1,17 +1,20 @@
 import { useNews } from '../../context/NewsContext';
 import { FaFileLines, FaEye, FaArrowTrendUp, FaUsers } from 'react-icons/fa6';
 
-const StatCard = ({ title, value, icon: Icon, color }) => (
-  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center justify-between">
-    <div>
-      <p className="text-sm text-gray-500 font-medium uppercase tracking-wider">{title}</p>
-      <h3 className="text-3xl font-bold text-gray-900 mt-1">{value}</h3>
+const StatCard = ({ title, value, icon, color }) => {
+  const Icon = icon;
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center justify-between">
+      <div>
+        <p className="text-sm text-gray-500 font-medium uppercase tracking-wider">{title}</p>
+        <h3 className="text-3xl font-bold text-gray-900 mt-1">{value}</h3>
+      </div>
+      <div className={`p-3 rounded-full ${color}`}>
+        <Icon className="w-6 h-6 text-white" />
+      </div>
     </div>
-    <div className={`p-3 rounded-full ${color}`}>
-      <Icon className="w-6 h-6 text-white" />
-    </div>
-  </div>
-);
+  );
+};
 
 const AdminDashboard = () => {
   const { articles } = useNews();
