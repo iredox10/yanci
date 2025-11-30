@@ -29,6 +29,7 @@ export const GUARDIAN_DATA = {
       headline: 'Sabon tsarin jirgin kasa mai sauri ya fara gwaji tsakanin Abuja da Kaduna',
       type: 'compact',
       pillar: 'news',
+      isLive: true,
     },
     {
       id: 4,

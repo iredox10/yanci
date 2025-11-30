@@ -84,7 +84,11 @@ const GuardianHome = () => {
                   {supportingHeadlines.slice(0, 4).map((item) => (
                     <Link to={`/article/${item.id}`} key={item.id} className="group cursor-pointer py-4 first:pt-0 last:pb-0 block">
                       <div className="flex gap-3 mb-2">
-                        <span className="text-[10px] uppercase font-bold tracking-widest text-[#8a2c2c]">{item.kicker}</span>
+                        {item.isLive ? (
+                          <span className="text-[10px] uppercase font-bold tracking-widest text-white bg-[#8a2c2c] px-2 py-0.5 rounded-sm animate-pulse">Kai Tsaye</span>
+                        ) : (
+                          <span className="text-[10px] uppercase font-bold tracking-widest text-[#8a2c2c]">{item.kicker}</span>
+                        )}
                         <span className="text-[10px] text-gray-400 font-medium">10:30 AM</span>
                       </div>
                       <h3 className="font-serif text-lg font-bold leading-snug text-[#1c1917] group-hover:text-[#0f3036] transition-colors mb-1">
