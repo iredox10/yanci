@@ -3,6 +3,7 @@ import { GUARDIAN_DATA } from '../data/guardianData';
 
 const NewsContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNews = () => {
   const context = useContext(NewsContext);
   if (!context) {
@@ -11,23 +12,24 @@ export const useNews = () => {
   return context;
 };
 
-export const NewsProvider = ({ children }) => {
-  // Flatten the initial data for easier management
-  const initialArticles = [
-    ...GUARDIAN_DATA.headlines.map(a => ({ ...a, section: 'headlines' })), // pillar is already in object
+const getInitialArticles = () => {
+  return [
+    ...GUARDIAN_DATA.headlines.map(a => ({ ...a, section: 'headlines' })),
     ...GUARDIAN_DATA.sport.map(a => ({ ...a, section: 'sport' })),
     ...GUARDIAN_DATA.opinion.map(a => ({ ...a, section: 'opinion' })),
     ...GUARDIAN_DATA.culture.map(a => ({ ...a, section: 'culture' })),
     ...GUARDIAN_DATA.lifestyle.map(a => ({ ...a, section: 'lifestyle' })),
   ];
+};
 
+export const NewsProvider = ({ children }) => {
   // Load from localStorage if available, else use initial data
   const [articles, setArticles] = useState(() => {
     const saved = localStorage.getItem('yanci_articles');
-    return saved ? JSON.parse(saved) : initialArticles;
+    return saved ? JSON.parse(saved) : getInitialArticles();
   });
 
-  const [ticker, setTicker] = useState(() => {
+  const [ticker] = useState(() => {
     const saved = localStorage.getItem('yanci_ticker');
     return saved ? JSON.parse(saved) : GUARDIAN_DATA.ticker;
   });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaChevronDown, FaBars, FaSearch, FaUser, FaXmark, FaGlobe } from 'react-icons/fa6';
+import { FaChevronDown, FaBars, FaMagnifyingGlass, FaUser, FaXmark, FaGlobe } from 'react-icons/fa6';
 
 const GuardianNav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -62,7 +62,7 @@ const GuardianNav = () => {
               
               <div className="flex items-center gap-2 border-l border-white/10 pl-6">
                 <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-yanci-accent">
-                  <FaSearch className="w-6 h-6" />
+                  <FaMagnifyingGlass className="w-6 h-6" />
                 </button>
                 <button 
                   onClick={() => setIsMenuOpen(true)}

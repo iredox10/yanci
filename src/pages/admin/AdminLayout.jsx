@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 // Icons updated
-import { FaChartPie, FaFileLines, FaPlusCircle, FaCog, FaSignOutAlt, FaUsers, FaTowerBroadcast } from 'react-icons/fa6';
+import { FaChartPie, FaFileLines, FaCirclePlus, FaGear, FaRightFromBracket, FaUsers, FaTowerBroadcast } from 'react-icons/fa6';
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -50,20 +50,20 @@ const AdminLayout = () => {
             to="/admin/create" 
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/create') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
-            <FaPlusCircle className="w-5 h-5" /> New Article
+            <FaCirclePlus className="w-5 h-5" /> New Article
           </Link>
           
           <Link 
             to="/admin/settings" 
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/settings') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
-            <FaCog className="w-5 h-5" /> Settings
+            <FaGear className="w-5 h-5" /> Settings
           </Link>
         </nav>
         
         <div className="p-4 border-t border-white/10">
           <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-red-600/20 text-red-400 hover:text-red-300 transition-colors">
-            <FaSignOutAlt className="w-5 h-5" /> Back to Site
+            <FaRightFromBracket className="w-5 h-5" /> Back to Site
           </Link>
         </div>
       </aside>

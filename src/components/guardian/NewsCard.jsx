@@ -2,7 +2,7 @@ import { PILLARS } from '../../data/guardianData';
 import { FaClock, FaShareNodes, FaBookmark } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 
-const NewsCard = ({ data, variant = 'standard' }) => {
+const NewsCard = ({ data }) => {
   const colors = PILLARS[data.pillar] || PILLARS.news;
   const kickerStyle = { color: colors.main };
 
@@ -36,15 +36,15 @@ const NewsCard = ({ data, variant = 'standard' }) => {
             
             <div className="flex items-center gap-6 text-xs font-bold uppercase tracking-wider text-gray-300 border-t border-white/20 pt-6 mt-2">
               <span className="flex items-center gap-2">
-                <LuClock className="w-4 h-4" /> Minti 15 da suka wuce
+                <FaClock className="w-4 h-4" /> Minti 15 da suka wuce
               </span>
               <span className="flex items-center gap-2">
                 <span className="w-1 h-1 bg-yanci-accent rounded-full"></span> Abuja
               </span>
               <div className="flex-1"></div>
               <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><LuShare2 className="w-4 h-4" /></button>
-                <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><LuBookmark className="w-4 h-4" /></button>
+                <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><FaShareNodes className="w-4 h-4" /></button>
+                <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><FaBookmark className="w-4 h-4" /></button>
               </div>
             </div>
           </div>
@@ -65,7 +65,7 @@ const NewsCard = ({ data, variant = 'standard' }) => {
             {data.headline}
           </h3>
           <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-            <LuClock className="w-3 h-3" /> 2h
+            <FaClock className="w-3 h-3" /> 2h
           </div>
         </div>
         {data.image && (
@@ -96,7 +96,7 @@ const NewsCard = ({ data, variant = 'standard' }) => {
           <span className="text-[10px] font-bold uppercase tracking-widest" style={kickerStyle}>
             {data.kicker}
           </span>
-          <button className="text-gray-300 hover:text-yanci-primary transition-colors"><LuBookmark className="w-4 h-4" /></button>
+          <button className="text-gray-300 hover:text-yanci-primary transition-colors"><FaBookmark className="w-4 h-4" /></button>
         </div>
         
         <h3 className="text-xl font-serif font-bold text-yanci-dark leading-tight mb-3 group-hover:text-yanci-primary transition-colors flex-1">
@@ -109,7 +109,7 @@ const NewsCard = ({ data, variant = 'standard' }) => {
 
         <div className="pt-4 mt-auto border-t border-gray-50 flex items-center justify-between text-xs text-gray-400 font-medium">
           <span>Rahama Ibrahim</span>
-          <span className="flex items-center gap-1"><LuClock className="w-3 h-3" /> 4h</span>
+          <span className="flex items-center gap-1"><FaClock className="w-3 h-3" /> 4h</span>
         </div>
       </div>
     </Link>

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNews } from '../../context/NewsContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaSave, FaArrowLeft } from 'react-icons/fa6';
+import { FaFloppyDisk, FaArrowLeft } from 'react-icons/fa6';
 
 const AdminEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { articles, addArticle, updateArticle, getArticleById } = useNews();
+  const { addArticle, updateArticle, getArticleById } = useNews();
   
   const isEditing = !!id;
   
@@ -23,15 +23,22 @@ const AdminEditor = () => {
   });
 
   useEffect(() => {
+    let ignore = false;
     if (isEditing) {
       const article = getArticleById(id);
       if (article) {
-        setFormData(article);
+        if (!ignore) {
+            setFormData(article);
+        }
       } else {
-        navigate('/admin/articles');
+        if (!ignore) {
+            navigate('/admin/articles');
+        }
       }
     }
-  }, [id, isEditing, getArticleById, navigate]);
+    return () => { ignore = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isEditing, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -69,7 +76,7 @@ const AdminEditor = () => {
           onClick={handleSubmit}
           className="bg-[#0f3036] text-white px-6 py-2 rounded-md flex items-center gap-2 hover:bg-[#1a454c] transition-colors font-bold"
         >
-          <FaSave className="w-4 h-4" /> Save Article
+          <FaFloppyDisk className="w-4 h-4" /> Save Article
         </button>
       </div>
 

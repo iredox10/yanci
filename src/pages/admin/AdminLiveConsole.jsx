@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { FaArrowLeft, FaPaperPlane, FaImage, FaBold, FaItalic, FaTrash, FaClock } from 'react-icons/fa6';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FaArrowLeft, FaPaperPlane, FaImage, FaBold, FaItalic, FaTrash } from 'react-icons/fa6';
 
 const AdminLiveConsole = () => {
-  const { id } = useParams();
   const [updateText, setUpdateText] = useState('');
   const [updates, setUpdates] = useState([
     { id: 1, time: "10:45", content: "The keynote speaker has just arrived at the venue.", author: "AY" },
