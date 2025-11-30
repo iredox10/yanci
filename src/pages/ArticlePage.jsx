@@ -2,16 +2,16 @@ import { useParams } from 'react-router-dom';
 import { LuClock, LuShare2, LuBookmark, LuFacebook, LuTwitter, LuLinkedin, LuPrinter } from 'react-icons/lu';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
-import { GUARDIAN_DATA } from '../data/guardianData';
+import { useNews } from '../context/NewsContext';
 
 const ArticlePage = () => {
   const { id } = useParams();
-  // Fallback to first article if not found or if id is weird, just for demo
-  const article = GUARDIAN_DATA.headlines.find(h => h.id.toString() === id) || 
-                  GUARDIAN_DATA.sport.find(h => h.id.toString() === id) ||
-                  GUARDIAN_DATA.opinion.find(h => h.id.toString() === id) ||
-                  GUARDIAN_DATA.culture.find(h => h.id.toString() === id) ||
-                  GUARDIAN_DATA.headlines[0];
+  const { getArticleById, articles } = useNews();
+  
+  // Fallback to first article if not found
+  const article = getArticleById(id) || articles[0];
+
+  if (!article) return <div>Loading...</div>;
 
   // Mock body text in Hausa
   const bodyText = [
@@ -111,7 +111,7 @@ const ArticlePage = () => {
               <div className="bg-white p-6 border-t-4 border-[#8a2c2c] shadow-sm">
                 <h3 className="text-sm font-bold uppercase tracking-widest text-[#8a2c2c] mb-4">Labarai Masu Alaka</h3>
                 <div className="space-y-4">
-                  {GUARDIAN_DATA.headlines.slice(1, 4).map(item => (
+                  {articles.filter(a => a.section === 'headlines' && a.id !== article.id).slice(0, 3).map(item => (
                     <a href={`/article/${item.id}`} key={item.id} className="block group">
                       <h4 className="font-serif font-bold text-[#1c1917] group-hover:text-[#8a2c2c] transition-colors mb-1">{item.headline}</h4>
                       <span className="text-xs text-gray-400">Minti 30 da suka wuce</span>

@@ -2,11 +2,16 @@ import { useParams } from 'react-router-dom';
 import { LuClock, LuShare2, LuBookmark, LuFacebook, LuTwitter, LuLinkedin, LuPrinter, LuRadio, LuRefreshCw, LuMapPin, LuArrowDown, LuTriangleAlert, LuCirclePlay, LuFilter } from 'react-icons/lu';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
-import { GUARDIAN_DATA } from '../data/guardianData';
+import { useNews } from '../context/NewsContext';
 
 const LiveArticlePage = () => {
   const { id } = useParams();
-  const article = GUARDIAN_DATA.headlines.find(h => h.id.toString() === id) || GUARDIAN_DATA.headlines[2];
+  const { getArticleById } = useNews();
+  
+  // Try to find the article by ID, or fallback to the known live article (ID 3) if not found or if ID is missing
+  const article = getArticleById(id) || getArticleById(3);
+
+  if (!article) return <div>Loading...</div>;
 
   const keyEvents = [
     { time: "10:45", title: "Ministan Sufuri ya isa tashar Idu", id: "event-1" },

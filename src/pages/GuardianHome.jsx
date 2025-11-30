@@ -4,7 +4,9 @@ import GuardianNav from '../components/guardian/GuardianNav';
 import NewsCard from '../components/guardian/NewsCard';
 import OpinionCard from '../components/guardian/OpinionCard';
 import SectionContainer from '../components/guardian/SectionContainer';
-import { GUARDIAN_DATA, PILLARS } from '../data/guardianData';
+import { PILLARS } from '../data/guardianData';
+import { useNews } from '../context/NewsContext';
+import { Link } from 'react-router-dom';
 
 const highlightPanels = [
   {
@@ -33,11 +35,17 @@ const highlightPanels = [
   },
 ];
 
-import { Link } from 'react-router-dom';
-
 const GuardianHome = () => {
-  const heroStory = GUARDIAN_DATA.headlines.find((headline) => headline.type === 'hero') ?? GUARDIAN_DATA.headlines[0];
-  const supportingHeadlines = GUARDIAN_DATA.headlines.filter((headline) => headline.id !== heroStory?.id);
+  const { articles, ticker } = useNews();
+
+  const headlines = articles.filter(a => a.section === 'headlines');
+  const heroStory = headlines.find((headline) => headline.type === 'hero') ?? headlines[0];
+  const supportingHeadlines = headlines.filter((headline) => headline.id !== heroStory?.id);
+  
+  const opinionArticles = articles.filter(a => a.section === 'opinion');
+  const sportArticles = articles.filter(a => a.section === 'sport');
+  const lifestyleArticles = articles.filter(a => a.section === 'lifestyle');
+  const cultureArticles = articles.filter(a => a.section === 'culture');
 
   return (
     <div className="bg-[#f4f1ea] min-h-screen font-sans text-[#1c1917] selection:bg-[#c59d5f] selection:text-[#0f3036]">
@@ -46,7 +54,7 @@ const GuardianHome = () => {
       <main className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 md:py-12 space-y-20">
         
         {/* Ticker - Moved to top for urgency */}
-        {GUARDIAN_DATA.ticker?.length > 0 && (
+        {ticker?.length > 0 && (
           <section className="bg-white border border-gray-200 rounded-sm py-3 px-4 flex items-center gap-4 shadow-sm relative overflow-hidden">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#8a2c2c] whitespace-nowrap z-10 bg-white pr-4 border-r border-gray-100">
               <span className="w-2 h-2 bg-[#8a2c2c] rounded-full animate-pulse"></span>
@@ -54,7 +62,7 @@ const GuardianHome = () => {
             </div>
             <div className="flex-1 overflow-hidden">
               <div className="flex gap-12 animate-marquee whitespace-nowrap font-medium text-sm text-[#0f3036]">
-                {[...GUARDIAN_DATA.ticker, ...GUARDIAN_DATA.ticker].map((item, index) => (
+                {[...ticker, ...ticker].map((item, index) => (
                   <span key={`${item}-${index}`} className="flex items-center gap-3">
                     <span className="w-1.5 h-1.5 rotate-45 bg-gray-300 inline-block" />
                     {item}
@@ -137,7 +145,7 @@ const GuardianHome = () => {
           ctaLabel="Duba duk ra'ayoyi"
         >
           <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {GUARDIAN_DATA.opinion.map((item) => (
+            {opinionArticles.map((item) => (
               <OpinionCard key={item.id} data={item} />
             ))}
             
@@ -247,7 +255,7 @@ const GuardianHome = () => {
 
               {/* Sport News Grid */}
               <div className="md:col-span-8 grid gap-6 sm:grid-cols-2">
-                {GUARDIAN_DATA.sport.map((item) => (
+                {sportArticles.map((item) => (
                   <NewsCard key={item.id} data={item} />
                 ))}
               </div>
@@ -266,7 +274,7 @@ const GuardianHome = () => {
               <a href="#" className="text-xs font-bold uppercase tracking-widest hover:text-[#d69e2e] transition-colors">Bincika ƙarin</a>
             </div>
             <div className="grid gap-6 sm:grid-cols-2">
-              {GUARDIAN_DATA.lifestyle.map((item, idx) => (
+              {lifestyleArticles.map((item, idx) => (
                 <article key={item.id} className={`bg-white p-8 shadow-sm hover:shadow-lg transition-all border-t-4 border-transparent hover:border-[#d69e2e] group ${idx === 0 ? 'sm:col-span-2 bg-orange-50/50' : ''}`}>
                   <span className="text-[10px] uppercase font-bold tracking-widest text-[#d69e2e] mb-3 block">{item.kicker}</span>
                   <h3 className={`${idx === 0 ? 'text-3xl' : 'text-xl'} font-serif font-bold text-[#1c1917] leading-tight group-hover:text-[#d69e2e] transition-colors mb-3`}>{item.headline}</h3>
@@ -292,7 +300,7 @@ const GuardianHome = () => {
                 </div>
                 
                 <div className="space-y-8 flex-1">
-                  {GUARDIAN_DATA.culture.map((item) => (
+                  {cultureArticles.map((item) => (
                     <div key={item.id} className="group cursor-pointer">
                       <div className="aspect-video rounded-sm overflow-hidden mb-3">
                         <img src={item.image} alt={item.headline} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
