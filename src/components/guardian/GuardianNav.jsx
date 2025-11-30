@@ -86,13 +86,22 @@ const GuardianNav = () => {
           <div className="max-w-[1400px] mx-auto px-4 md:px-6">
             <nav className="flex items-center justify-between h-12 overflow-x-auto no-scrollbar">
               <ul className="flex items-center gap-1 md:gap-6 text-sm font-bold text-gray-200 whitespace-nowrap">
-                {['Labarai', 'Siyasa', 'Kasuwanci', 'Wasanni', 'Fasaha', 'Ra\'ayi', 'Al\'adu', 'Bidiyo'].map((item, idx) => (
-                  <li key={item}>
+                {[
+                  { label: 'Labarai', path: '/labarai' },
+                  { label: 'Siyasa', path: '/siyasa' },
+                  { label: 'Kasuwanci', path: '/kasuwanci' },
+                  { label: 'Wasanni', path: '/wasanni' },
+                  { label: 'Fasaha', path: '/fasaha' },
+                  { label: 'Ra\'ayi', path: '/raayi' },
+                  { label: 'Al\'adu', path: '/aladu' },
+                  { label: 'Bidiyo', path: '/bidiyo' }
+                ].map((item, idx) => (
+                  <li key={item.label}>
                     <a
-                      href={item === 'Siyasa' ? '/siyasa' : '#'}
+                      href={item.path}
                       className={`block px-3 py-3 hover:text-white hover:bg-[#0f3036] transition-colors border-b-2 border-transparent hover:border-yanci-accent ${idx === 0 ? 'text-white border-yanci-accent bg-[#0f3036]' : ''}`}
                     >
-                      {item}
+                      {item.label}
                     </a>
                   </li>
                 ))}
@@ -123,8 +132,15 @@ const GuardianNav = () => {
             <div className="space-y-8">
               <h3 className="text-yanci-accent font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-2">Labarai</h3>
               <ul className="space-y-4 text-xl font-serif font-bold">
-                {['Najeriya', 'Afirka', 'Duniya', 'Siyasa', 'Tsaro', 'Lafiya'].map((item) => (
-                  <li key={item}><a href={item === 'Siyasa' ? '/siyasa' : '#'} className="hover:text-yanci-accent transition-colors block hover:translate-x-2 duration-300">{item}</a></li>
+                {[
+                  { label: 'Najeriya', path: '/labarai' },
+                  { label: 'Afirka', path: '/labarai' },
+                  { label: 'Duniya', path: '/labarai' },
+                  { label: 'Siyasa', path: '/siyasa' },
+                  { label: 'Tsaro', path: '/labarai' },
+                  { label: 'Lafiya', path: '/labarai' }
+                ].map((item) => (
+                  <li key={item.label}><a href={item.path} className="hover:text-yanci-accent transition-colors block hover:translate-x-2 duration-300">{item.label}</a></li>
                 ))}
               </ul>
             </div>
@@ -132,8 +148,14 @@ const GuardianNav = () => {
             <div className="space-y-8">
               <h3 className="text-[#90cfff] font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-2">Wasanni</h3>
               <ul className="space-y-4 text-xl font-serif font-bold">
-                {['Kwallon Kafa', 'NPFL', 'Premier League', 'La Liga', 'Champions League'].map((item) => (
-                  <li key={item}><a href="#" className="hover:text-[#90cfff] transition-colors block hover:translate-x-2 duration-300">{item}</a></li>
+                {[
+                  { label: 'Kwallon Kafa', path: '/wasanni' },
+                  { label: 'NPFL', path: '/wasanni' },
+                  { label: 'Premier League', path: '/wasanni' },
+                  { label: 'La Liga', path: '/wasanni' },
+                  { label: 'Champions League', path: '/wasanni' }
+                ].map((item) => (
+                  <li key={item.label}><a href={item.path} className="hover:text-[#90cfff] transition-colors block hover:translate-x-2 duration-300">{item.label}</a></li>
                 ))}
               </ul>
             </div>
@@ -141,8 +163,14 @@ const GuardianNav = () => {
             <div className="space-y-8">
               <h3 className="text-[#eacca0] font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-2">Al'adu & Rayuwa</h3>
               <ul className="space-y-4 text-xl font-serif font-bold">
-                {['Fina-finai', 'Waka', 'Abinci', 'Sutura', 'Tarihi'].map((item) => (
-                  <li key={item}><a href="#" className="hover:text-[#eacca0] transition-colors block hover:translate-x-2 duration-300">{item}</a></li>
+                {[
+                  { label: 'Fina-finai', path: '/aladu' },
+                  { label: 'Waka', path: '/aladu' },
+                  { label: 'Abinci', path: '/aladu' },
+                  { label: 'Sutura', path: '/aladu' },
+                  { label: 'Tarihi', path: '/aladu' }
+                ].map((item) => (
+                  <li key={item.label}><a href={item.path} className="hover:text-[#eacca0] transition-colors block hover:translate-x-2 duration-300">{item.label}</a></li>
                 ))}
               </ul>
             </div>

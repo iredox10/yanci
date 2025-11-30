@@ -5,6 +5,13 @@ import ArticlePage from './pages/ArticlePage';
 import LiveArticlePage from './pages/LiveArticlePage';
 
 import SiyasaPage from './pages/SiyasaPage';
+import LabaraiPage from './pages/LabaraiPage';
+import KasuwanciPage from './pages/KasuwanciPage';
+import WasanniPage from './pages/WasanniPage';
+import FasahaPage from './pages/FasahaPage';
+import RaayiPage from './pages/RaayiPage';
+import AladuPage from './pages/AladuPage';
+import BidiyoPage from './pages/BidiyoPage';
 
 // Admin Imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -28,6 +35,13 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<GuardianHome />} />
             <Route path="/siyasa" element={<SiyasaPage />} />
+            <Route path="/labarai" element={<LabaraiPage />} />
+            <Route path="/kasuwanci" element={<KasuwanciPage />} />
+            <Route path="/wasanni" element={<WasanniPage />} />
+            <Route path="/fasaha" element={<FasahaPage />} />
+            <Route path="/raayi" element={<RaayiPage />} />
+            <Route path="/aladu" element={<AladuPage />} />
+            <Route path="/bidiyo" element={<BidiyoPage />} />
             <Route path="/article/3" element={<LiveArticlePage />} />
             <Route path="/article/:id" element={<ArticlePage />} />
 
