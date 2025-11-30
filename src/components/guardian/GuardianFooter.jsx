@@ -1,4 +1,4 @@
-import { LuMail, LuTwitter, LuFacebook, LuInstagram, LuLinkedin } from 'react-icons/lu';
+import { FaEnvelope, FaTwitter, FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa6';
 
 const GuardianFooter = () => (
   <footer className="bg-[#0f3036] text-white pt-20 pb-10 mt-20 border-t-8 border-[#c59d5f] relative overflow-hidden">
@@ -26,7 +26,7 @@ const GuardianFooter = () => (
                 className="bg-white/10 border border-white/20 text-white text-sm px-4 py-2 rounded-sm w-full focus:outline-none focus:border-yanci-accent transition-colors placeholder-gray-500"
               />
               <button className="bg-yanci-accent text-yanci-primary px-4 py-2 rounded-sm hover:bg-white transition-colors">
-                <LuMail className="w-5 h-5" />
+                <FaEnvelope className="w-5 h-5" />
               </button>
             </div>
           </div>

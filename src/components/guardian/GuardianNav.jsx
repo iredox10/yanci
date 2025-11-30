@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LuChevronDown, LuMenu, LuSearch, LuUser, LuX, LuGlobe } from 'react-icons/lu';
+import { FaChevronDown, FaBars, FaSearch, FaUser, FaXmark, FaGlobe } from 'react-icons/fa6';
 
 const GuardianNav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -57,7 +57,7 @@ const GuardianNav = () => {
             {/* Right Actions */}
             <div className="flex items-center gap-4 md:gap-6">
               <button className="hidden md:flex bg-yanci-accent text-[#0f3036] px-5 py-2 rounded-full font-bold text-sm hover:bg-white transition-all items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                Tallafa mana <LuChevronDown className="w-4 h-4" />
+                Tallafa mana <FaChevronDown className="w-4 h-4" />
               </button>
               
               <div className="flex items-center gap-2 border-l border-white/10 pl-6">
