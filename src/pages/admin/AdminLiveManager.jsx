@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Radio, Plus, Calendar, Clock } from 'lucide-react';
+import { FaTowerBroadcast, FaPlus, FaCalendar, FaClock } from 'react-icons/fa6';
 
 const LIVE_EVENTS = [
   { 
@@ -38,7 +38,7 @@ const AdminLiveManager = () => {
           <p className="text-gray-500">Manage live blogs and real-time reporting.</p>
         </div>
         <button className="bg-[#c70000] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#a10000] transition-colors animate-pulse">
-          <Radio className="w-4 h-4" /> Start New Live Blog
+          <FaTowerBroadcast className="w-4 h-4" /> Start New Live Blog
         </button>
       </div>
 
@@ -54,7 +54,7 @@ const AdminLiveManager = () => {
                 {event.status}
               </span>
               <div className="text-gray-400 text-xs flex items-center gap-1">
-                <Clock className="w-3 h-3" /> {event.startTime}
+                <FaClock className="w-3 h-3" /> {event.startTime}
               </div>
             </div>
             

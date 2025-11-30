@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Trash2, Shield, Mail } from 'lucide-react';
+import { FaUserPlus, FaTrash, FaShieldHalved, FaEnvelope } from 'react-icons/fa6';
 
 const MOCK_STAFF = [
   { id: 1, name: "Amina Yusuf", email: "amina.y@yanci.ng", role: "Editor-in-Chief", status: "Active", avatar: "AY" },
@@ -25,7 +25,7 @@ const AdminStaff = () => {
           <p className="text-gray-500">Manage access and roles for the editorial team.</p>
         </div>
         <button className="bg-[#0f3036] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#1a4a52] transition-colors">
-          <UserPlus className="w-4 h-4" /> Add Staff
+          <FaUserPlus className="w-4 h-4" /> Add Staff
         </button>
       </div>
 
@@ -50,14 +50,14 @@ const AdminStaff = () => {
                     <div>
                       <div className="font-bold text-[#0f3036]">{member.name}</div>
                       <div className="text-gray-400 text-xs flex items-center gap-1">
-                        <Mail className="w-3 h-3" /> {member.email}
+                        <FaEnvelope className="w-3 h-3" /> {member.email}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                    <Shield className="w-3 h-3" /> {member.role}
+                    <FaShieldHalved className="w-3 h-3" /> {member.role}
                   </span>
                 </td>
                 <td className="px-6 py-4">
@@ -74,7 +74,7 @@ const AdminStaff = () => {
                     onClick={() => handleDelete(member.id)}
                     className="text-gray-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-full"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <FaTrash className="w-4 h-4" />
                   </button>
                 </td>
               </tr>

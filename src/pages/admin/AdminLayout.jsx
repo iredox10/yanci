@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 // Icons updated
-import { LuLayoutDashboard, LuFileText, LuCirclePlus, LuSettings, LuLogOut, LuUsers, LuRadio } from 'react-icons/lu';
+import { FaChartPie, FaFileLines, FaPlusCircle, FaCog, FaSignOutAlt, FaUsers, FaTowerBroadcast } from 'react-icons/fa6';
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -22,48 +22,48 @@ const AdminLayout = () => {
             to="/admin" 
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
-            <LuLayoutDashboard className="w-5 h-5" /> Dashboard
+            <FaChartPie className="w-5 h-5" /> Dashboard
           </Link>
           
           <Link 
             to="/admin/articles" 
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/articles') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
-            <LuFileText className="w-5 h-5" /> Articles
+            <FaFileLines className="w-5 h-5" /> Articles
           </Link>
 
           <Link 
             to="/admin/live" 
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/live') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
-            <LuRadio className="w-5 h-5" /> Live Coverage
+            <FaTowerBroadcast className="w-5 h-5" /> Live Coverage
           </Link>
 
           <Link 
             to="/admin/staff" 
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/staff') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
-            <LuUsers className="w-5 h-5" /> Staff
+            <FaUsers className="w-5 h-5" /> Staff
           </Link>
           
           <Link 
             to="/admin/create" 
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/create') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
-            <LuCirclePlus className="w-5 h-5" /> New Article
+            <FaPlusCircle className="w-5 h-5" /> New Article
           </Link>
           
           <Link 
             to="/admin/settings" 
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/settings') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
-            <LuSettings className="w-5 h-5" /> Settings
+            <FaCog className="w-5 h-5" /> Settings
           </Link>
         </nav>
         
         <div className="p-4 border-t border-white/10">
           <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-red-600/20 text-red-400 hover:text-red-300 transition-colors">
-            <LuLogOut className="w-5 h-5" /> Back to Site
+            <FaSignOutAlt className="w-5 h-5" /> Back to Site
           </Link>
         </div>
       </aside>

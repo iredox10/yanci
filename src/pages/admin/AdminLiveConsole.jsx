@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Send, Image, Bold, Italic, Trash2, Clock } from 'lucide-react';
+import { FaArrowLeft, FaPaperPlane, FaImage, FaBold, FaItalic, FaTrash, FaClock } from 'react-icons/fa6';
 
 const AdminLiveConsole = () => {
   const { id } = useParams();
@@ -30,7 +30,7 @@ const AdminLiveConsole = () => {
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
         <div className="flex items-center gap-4">
           <Link to="/admin/live" className="p-2 hover:bg-gray-100 rounded-full text-gray-500">
-            <ArrowLeft className="w-5 h-5" />
+            <FaArrowLeft className="w-5 h-5" />
           </Link>
           <div>
             <div className="flex items-center gap-2">
@@ -55,10 +55,10 @@ const AdminLiveConsole = () => {
         <div className="w-2/3 flex flex-col gap-4">
           <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex-1 flex flex-col">
             <div className="flex items-center gap-2 mb-2 border-b border-gray-100 pb-2">
-              <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500"><Bold className="w-4 h-4" /></button>
-              <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500"><Italic className="w-4 h-4" /></button>
+              <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500"><FaBold className="w-4 h-4" /></button>
+              <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500"><FaItalic className="w-4 h-4" /></button>
               <div className="w-px h-4 bg-gray-200 mx-1"></div>
-              <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500"><Image className="w-4 h-4" /></button>
+              <button className="p-1.5 hover:bg-gray-100 rounded text-gray-500"><FaImage className="w-4 h-4" /></button>
             </div>
             <textarea 
               className="flex-1 w-full resize-none outline-none text-lg placeholder:text-gray-300"
@@ -72,7 +72,7 @@ const AdminLiveConsole = () => {
                 onClick={handlePost}
                 className="bg-[#c70000] text-white px-6 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-[#a10000] transition-colors"
               >
-                <Send className="w-4 h-4" /> Post Update
+                <FaPaperPlane className="w-4 h-4" /> Post Update
               </button>
             </div>
           </div>
@@ -92,7 +92,7 @@ const AdminLiveConsole = () => {
                     <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">{update.author}</span>
                   </div>
                   <button className="text-gray-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Trash2 className="w-4 h-4" />
+                    <FaTrash className="w-4 h-4" />
                   </button>
                 </div>
                 <p className="text-gray-800 text-sm leading-relaxed">{update.content}</p>
