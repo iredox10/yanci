@@ -6,6 +6,7 @@ import OpinionCard from '../components/guardian/OpinionCard';
 import SectionContainer from '../components/guardian/SectionContainer';
 import { PILLARS } from '../data/guardianData';
 import { useNews } from '../context/NewsContext';
+import { useAudio } from '../context/AudioContext';
 import { Link } from 'react-router-dom';
 
 const highlightPanels = [
@@ -37,11 +38,12 @@ const highlightPanels = [
 
 const GuardianHome = () => {
   const { articles, ticker } = useNews();
+  const { playTrack } = useAudio();
 
   const headlines = articles.filter(a => a.section === 'headlines');
   const heroStory = headlines.find((headline) => headline.type === 'hero') ?? headlines[0];
   const supportingHeadlines = headlines.filter((headline) => headline.id !== heroStory?.id);
-  
+
   const opinionArticles = articles.filter(a => a.section === 'opinion');
   const sportArticles = articles.filter(a => a.section === 'sport');
   const lifestyleArticles = articles.filter(a => a.section === 'lifestyle');
@@ -52,7 +54,7 @@ const GuardianHome = () => {
       <GuardianNav />
 
       <main className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 md:py-12 space-y-20">
-        
+
         {/* Ticker - Moved to top for urgency */}
         {ticker?.length > 0 && (
           <section className="bg-white border border-gray-200 rounded-sm py-3 px-4 flex items-center gap-4 shadow-sm relative overflow-hidden">
@@ -148,7 +150,7 @@ const GuardianHome = () => {
             {opinionArticles.map((item) => (
               <OpinionCard key={item.id} data={item} />
             ))}
-            
+
             {/* Editorial Column */}
             <div className="bg-[#1c1917] text-white p-8 flex flex-col justify-between relative overflow-hidden group cursor-pointer">
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
@@ -210,7 +212,7 @@ const GuardianHome = () => {
                 </a>
               </div>
             </div>
-            
+
             <div className="grid gap-8 md:grid-cols-12">
               {/* Live Score Card */}
               <div className="md:col-span-4 bg-[#0f3036] text-white rounded-sm p-8 relative overflow-hidden shadow-xl">
@@ -220,7 +222,7 @@ const GuardianHome = () => {
                     <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-sm animate-pulse">Kai Tsaye</span>
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Gasara ta kasa</span>
                   </div>
-                  
+
                   <div className="flex-1 flex flex-col justify-center gap-6">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-4">
@@ -298,7 +300,7 @@ const GuardianHome = () => {
                   <h2 className="text-2xl font-serif font-black text-white border-b-4 border-[#c59d5f] pb-2 inline-block">Al'adu</h2>
                   <FaWandMagicSparkles className="w-6 h-6 text-[#c59d5f]" />
                 </div>
-                
+
                 <div className="space-y-8 flex-1">
                   {cultureArticles.map((item) => (
                     <div key={item.id} className="group cursor-pointer">

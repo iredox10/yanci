@@ -11,11 +11,11 @@ const GuardianNav = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const currentDate = new Date().toLocaleDateString('ha-NG', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const currentDate = new Date().toLocaleDateString('ha-NG', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
 
   return (
@@ -44,10 +44,11 @@ const GuardianNav = () => {
         {/* 2. Main Brand Header (Primary Color) */}
         <div className={`bg-[#0f3036] text-white transition-all duration-300 ${isScrolled ? 'py-2' : 'py-6 md:py-8'}`}>
           <div className="max-w-[1400px] mx-auto px-4 md:px-6 flex items-center justify-between">
-            
+
             {/* Logo Area */}
             <div className="flex items-center gap-6">
-              <a href="/" className="group block">
+              <a href="/" className="group flex items-center gap-3">
+                <img src="/pwa-192x192.png" alt="Yanci Logo" className="w-10 h-10 md:w-14 md:h-14 object-contain" />
                 <h1 className={`font-serif font-black tracking-tighter leading-none transition-all duration-300 ${isScrolled ? 'text-3xl' : 'text-4xl md:text-6xl'}`}>
                   Yanci<span className="text-yanci-accent">.</span>
                 </h1>
@@ -59,12 +60,12 @@ const GuardianNav = () => {
               <button className="hidden md:flex bg-yanci-accent text-[#0f3036] px-5 py-2 rounded-full font-bold text-sm hover:bg-white transition-all items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                 Tallafa mana <FaChevronDown className="w-4 h-4" />
               </button>
-              
+
               <div className="flex items-center gap-2 border-l border-white/10 pl-6">
                 <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-yanci-accent">
                   <FaMagnifyingGlass className="w-6 h-6" />
                 </button>
-                <button 
+                <button
                   onClick={() => setIsMenuOpen(true)}
                   className="p-2 hover:bg-white/10 rounded-full transition-colors flex items-center gap-2 font-bold"
                 >
@@ -87,8 +88,8 @@ const GuardianNav = () => {
               <ul className="flex items-center gap-1 md:gap-6 text-sm font-bold text-gray-200 whitespace-nowrap">
                 {['Labarai', 'Siyasa', 'Kasuwanci', 'Wasanni', 'Fasaha', 'Ra\'ayi', 'Al\'adu', 'Bidiyo'].map((item, idx) => (
                   <li key={item}>
-                    <a 
-                      href="#" 
+                    <a
+                      href={item === 'Siyasa' ? '/siyasa' : '#'}
                       className={`block px-3 py-3 hover:text-white hover:bg-[#0f3036] transition-colors border-b-2 border-transparent hover:border-yanci-accent ${idx === 0 ? 'text-white border-yanci-accent bg-[#0f3036]' : ''}`}
                     >
                       {item}
@@ -110,24 +111,24 @@ const GuardianNav = () => {
         <div className="max-w-[1400px] mx-auto px-6 py-8 h-full overflow-y-auto">
           <div className="flex justify-between items-center mb-12 border-b border-white/10 pb-6">
             <h2 className="font-serif font-black text-3xl text-white">Yanci<span className="text-yanci-accent">.</span></h2>
-            <button 
+            <button
               onClick={() => setIsMenuOpen(false)}
               className="p-2 hover:bg-white/10 rounded-full transition-colors group"
             >
               <FaXmark className="w-8 h-8 text-white group-hover:rotate-90 transition-transform" />
             </button>
           </div>
-          
+
           <div className="grid md:grid-cols-4 gap-12 text-white">
             <div className="space-y-8">
               <h3 className="text-yanci-accent font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-2">Labarai</h3>
               <ul className="space-y-4 text-xl font-serif font-bold">
                 {['Najeriya', 'Afirka', 'Duniya', 'Siyasa', 'Tsaro', 'Lafiya'].map((item) => (
-                  <li key={item}><a href="#" className="hover:text-yanci-accent transition-colors block hover:translate-x-2 duration-300">{item}</a></li>
+                  <li key={item}><a href={item === 'Siyasa' ? '/siyasa' : '#'} className="hover:text-yanci-accent transition-colors block hover:translate-x-2 duration-300">{item}</a></li>
                 ))}
               </ul>
             </div>
-            
+
             <div className="space-y-8">
               <h3 className="text-[#90cfff] font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-2">Wasanni</h3>
               <ul className="space-y-4 text-xl font-serif font-bold">
