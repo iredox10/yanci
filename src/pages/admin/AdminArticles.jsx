@@ -1,9 +1,16 @@
 import { useNews } from '../../context/NewsContext';
+import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { FaPencil, FaTrash, FaPlus } from 'react-icons/fa6';
 
 const AdminArticles = () => {
   const { articles, deleteArticle } = useNews();
+  const { user } = useAuth();
+
+  // Filter articles based on user category if not super admin
+  const relevantArticles = user?.category 
+    ? articles.filter(a => a.pillar === user.category)
+    : articles;
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this article?')) {
@@ -14,7 +21,7 @@ const AdminArticles = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">Manage Articles</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Manage Articles {user?.category && `(${user.category})`}</h2>
         <Link 
           to="/admin/create" 
           className="bg-[#0f3036] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#1a454c] transition-colors"
@@ -34,7 +41,7 @@ const AdminArticles = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {articles.map(article => (
+            {relevantArticles.map(article => (
               <tr key={article.id} className="hover:bg-gray-50 group">
                 <td className="p-4">
                   <div className="flex items-center gap-4">
@@ -82,7 +89,7 @@ const AdminArticles = () => {
           </tbody>
         </table>
         
-        {articles.length === 0 && (
+        {relevantArticles.length === 0 && (
           <div className="p-8 text-center text-gray-500">
             No articles found. Create one to get started.
           </div>

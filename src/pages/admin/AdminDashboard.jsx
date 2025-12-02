@@ -1,4 +1,5 @@
 import { useNews } from '../../context/NewsContext';
+import { useAuth } from '../../context/AuthContext';
 import { FaFileLines, FaEye, FaArrowTrendUp, FaUsers } from 'react-icons/fa6';
 
 const StatCard = ({ title, value, icon, color }) => {
@@ -18,16 +19,26 @@ const StatCard = ({ title, value, icon, color }) => {
 
 const AdminDashboard = () => {
   const { articles } = useNews();
+  const { user } = useAuth();
 
-  const totalArticles = articles.length;
-  const liveArticles = articles.filter(a => a.isLive).length;
-  const newsArticles = articles.filter(a => a.pillar === 'news').length;
+  // Filter articles based on user category if not super admin
+  const relevantArticles = user?.category 
+    ? articles.filter(a => a.pillar === user.category)
+    : articles;
+
+  const totalArticles = relevantArticles.length;
+  const liveArticles = relevantArticles.filter(a => a.isLive).length;
+  const categoryArticles = user?.category 
+    ? relevantArticles.length 
+    : articles.filter(a => a.pillar === 'news').length;
   
+  const thirdCardTitle = user?.category ? `${user.label} Articles` : "News Pillar";
+
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
-        <p className="text-gray-500">Welcome back, Admin.</p>
+        <p className="text-gray-500">Welcome back, <span className="font-bold">{user?.name}</span>.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -44,8 +55,8 @@ const AdminDashboard = () => {
           color="bg-red-500" 
         />
         <StatCard 
-          title="News Pillar" 
-          value={newsArticles} 
+          title={thirdCardTitle} 
+          value={categoryArticles} 
           icon={FaEye} 
           color="bg-green-500" 
         />
@@ -58,7 +69,7 @@ const AdminDashboard = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="font-bold text-lg mb-4">Recent Articles</h3>
+        <h3 className="font-bold text-lg mb-4">Recent Articles {user?.category && `(${user.category})`}</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-600 uppercase tracking-wider">
@@ -70,7 +81,7 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {articles.slice(0, 5).map(article => (
+              {relevantArticles.slice(0, 5).map(article => (
                 <tr key={article.id} className="hover:bg-gray-50">
                   <td className="p-3 font-medium text-gray-900">{article.headline}</td>
                   <td className="p-3 capitalize">
@@ -93,6 +104,11 @@ const AdminDashboard = () => {
                   </td>
                 </tr>
               ))}
+              {relevantArticles.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="p-4 text-center text-gray-500">No articles found for this category.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

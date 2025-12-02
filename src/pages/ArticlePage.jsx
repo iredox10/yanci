@@ -3,15 +3,20 @@ import { FaClock, FaShareNodes, FaBookmark, FaFacebook, FaTwitter, FaLinkedin, F
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import { useNews } from '../context/NewsContext';
+import LiveArticlePage from './LiveArticlePage';
 
 const ArticlePage = () => {
   const { id } = useParams();
   const { getArticleById, articles } = useNews();
-  
+
   // Fallback to first article if not found
   const article = getArticleById(id) || articles[0];
 
   if (!article) return <div>Loading...</div>;
+
+  if (article.isLive) {
+    return <LiveArticlePage />;
+  }
 
   // Mock body text in Hausa
   const bodyText = [
@@ -28,7 +33,7 @@ const ArticlePage = () => {
       <GuardianNav />
 
       <main className="max-w-[1000px] mx-auto px-4 md:px-6 py-8 md:py-12">
-        
+
         {/* Breadcrumbs & Meta */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-gray-200 pb-4">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#8a2c2c]">
@@ -46,7 +51,7 @@ const ArticlePage = () => {
           <h1 className="text-3xl md:text-5xl font-serif font-black leading-tight text-[#0f3036] mb-6">
             {article.headline}
           </h1>
-          
+
           <p className="text-xl font-serif text-gray-600 leading-relaxed mb-8 border-l-4 border-[#c59d5f] pl-4">
             {article.trail || "Takaitaccen bayani game da labarin zai kasance a nan domin baiwa mai karatu haske."}
           </p>
@@ -87,22 +92,31 @@ const ArticlePage = () => {
           {/* Article Body */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-8 font-body text-lg leading-loose text-gray-800 space-y-6">
-              <p className="first-letter:text-5xl first-letter:font-black first-letter:text-[#0f3036] first-letter:float-left first-letter:mr-3 first-letter:mt-[-10px]">
-                {bodyText[0]}
-              </p>
-              {bodyText.slice(1).map((paragraph, idx) => (
-                <p key={idx}>{paragraph}</p>
-              ))}
-              
-              {/* In-article Quote */}
-              <blockquote className="my-8 p-6 bg-white border-l-4 border-[#c59d5f] shadow-sm">
-                <p className="font-serif text-xl font-bold italic text-[#0f3036] mb-4">
-                  "Wannan ba karamin ci gaba bane ga kasarmu. Muna sa ran ganin sauye-sauye masu ma'ana."
-                </p>
-                <footer className="text-sm font-bold text-gray-500 uppercase tracking-wider">— Ministan Yada Labarai</footer>
-              </blockquote>
+              {article.body ? (
+                <div
+                  className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:font-bold prose-a:text-[#0f3036] prose-a:no-underline hover:prose-a:underline prose-img:rounded-sm"
+                  dangerouslySetInnerHTML={{ __html: article.body }}
+                />
+              ) : (
+                <>
+                  <p className="first-letter:text-5xl first-letter:font-black first-letter:text-[#0f3036] first-letter:float-left first-letter:mr-3 first-letter:mt-[-10px]">
+                    {bodyText[0]}
+                  </p>
+                  {bodyText.slice(1).map((paragraph, idx) => (
+                    <p key={idx}>{paragraph}</p>
+                  ))}
 
-              <p>{bodyText[0]}</p>
+                  {/* In-article Quote */}
+                  <blockquote className="my-8 p-6 bg-white border-l-4 border-[#c59d5f] shadow-sm">
+                    <p className="font-serif text-xl font-bold italic text-[#0f3036] mb-4">
+                      "Wannan ba karamin ci gaba bane ga kasarmu. Muna sa ran ganin sauye-sauye masu ma'ana."
+                    </p>
+                    <footer className="text-sm font-bold text-gray-500 uppercase tracking-wider">— Ministan Yada Labarai</footer>
+                  </blockquote>
+
+                  <p>{bodyText[0]}</p>
+                </>
+              )}
             </div>
 
             {/* Sidebar */}

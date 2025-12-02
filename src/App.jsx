@@ -22,47 +22,50 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminStaff from './pages/admin/AdminStaff';
 import AdminLiveManager from './pages/admin/AdminLiveManager';
 import AdminLiveConsole from './pages/admin/AdminLiveConsole';
+import AdminLogin from './pages/admin/AdminLogin';
 
 import { AudioProvider } from './context/AudioContext';
+import { AuthProvider } from './context/AuthContext';
 import AudioPlayer from './components/guardian/AudioPlayer';
 
 function App() {
   return (
-    <NewsProvider>
-      <AudioProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<GuardianHome />} />
-            <Route path="/siyasa" element={<SiyasaPage />} />
-            <Route path="/labarai" element={<LabaraiPage />} />
-            <Route path="/kasuwanci" element={<KasuwanciPage />} />
-            <Route path="/wasanni" element={<WasanniPage />} />
-            <Route path="/fasaha" element={<FasahaPage />} />
-            <Route path="/raayi" element={<RaayiPage />} />
-            <Route path="/aladu" element={<AladuPage />} />
-            <Route path="/bidiyo" element={<BidiyoPage />} />
-            <Route path="/article/3" element={<LiveArticlePage />} />
-            <Route path="/article/:id" element={<ArticlePage />} />
+    <AuthProvider>
+      <NewsProvider>
+        <AudioProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<GuardianHome />} />
+              <Route path="/siyasa" element={<SiyasaPage />} />
+              <Route path="/labarai" element={<LabaraiPage />} />
+              <Route path="/kasuwanci" element={<KasuwanciPage />} />
+              <Route path="/wasanni" element={<WasanniPage />} />
+              <Route path="/fasaha" element={<FasahaPage />} />
+              <Route path="/raayi" element={<RaayiPage />} />
+                          <Route path="/aladu" element={<AladuPage />} />
+                          <Route path="/bidiyo" element={<BidiyoPage />} />
+                          <Route path="/article/:id" element={<ArticlePage />} />
+              
+                          {/* Admin Routes */}              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="articles" element={<AdminArticles />} />
+                <Route path="create" element={<AdminEditor />} />
+                <Route path="edit/:id" element={<AdminEditor />} />
+                <Route path="staff" element={<AdminStaff />} />
+                <Route path="live" element={<AdminLiveManager />} />
+                <Route path="live/:id" element={<AdminLiveConsole />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="articles" element={<AdminArticles />} />
-              <Route path="create" element={<AdminEditor />} />
-              <Route path="edit/:id" element={<AdminEditor />} />
-              <Route path="staff" element={<AdminStaff />} />
-              <Route path="live" element={<AdminLiveManager />} />
-              <Route path="live/:id" element={<AdminLiveConsole />} />
-              <Route path="settings" element={<AdminSettings />} />
-            </Route>
-
-            <Route path="*" element={<GuardianHome />} />
-          </Routes>
-          <AudioPlayer />
-        </BrowserRouter>
-      </AudioProvider>
-    </NewsProvider>
+              <Route path="*" element={<GuardianHome />} />
+            </Routes>
+            <AudioPlayer />
+          </BrowserRouter>
+        </AudioProvider>
+      </NewsProvider>
+    </AuthProvider>
   );
 }
 

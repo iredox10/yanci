@@ -11,6 +11,7 @@ export const GUARDIAN_DATA = {
       kicker: 'Kai Tsaye',
       headline: 'Majalisa ta amince da dokar tsare bayanan dijital domin kare ’yan kasa',
       trail: 'Sabuwar dokar za ta tilasta kamfanonin fasaha bin sharudan adana bayanai a cikin kasar tare da samar da ayyuka 25,000 a shekarar farko.',
+      body: '<p>Majalisar dokokin Najeriya ta amince da wani muhimmin kudiri da ke nufin kare bayanan ‘yan kasa a yanar gizo. Wannan doka, wacce aka dade ana tafka muhawara a kanta, za ta tilasta wa manyan kamfanonin fasaha kamar Facebook, Google, da Twitter su adana bayanan masu amfani da su na Najeriya a cikin kasar.</p><p>Shugaban kwamitin sadarwa na majalisar, ya bayyana cewa wannan mataki zai taimaka wajen bunkasa tattalin arzikin dijital na kasar tare da samar da ayyukan yi ga matasa.</p><h3>Me dokar ta kunsa?</h3><ul><li>Dole ne kamfanoni su yi rajista da hukumar NITDA.</li><li>Dole ne a adana bayanan gwamnati a cikin Najeriya.</li><li>Za a ci tarar duk kamfanin da ya saba wa dokar.</li></ul>',
       image: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=2000&auto=format&fit=crop',
       type: 'hero',
       pillar: 'news',

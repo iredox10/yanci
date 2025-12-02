@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { FaUserPlus, FaTrash, FaShieldHalved, FaEnvelope } from 'react-icons/fa6';
 
 const MOCK_STAFF = [
@@ -9,13 +11,23 @@ const MOCK_STAFF = [
 ];
 
 const AdminStaff = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [staff, setStaff] = useState(MOCK_STAFF);
+
+  useEffect(() => {
+    if (user && user.role !== 'super_admin') {
+      navigate('/admin');
+    }
+  }, [user, navigate]);
 
   const handleDelete = (id) => {
     if (confirm('Are you sure you want to remove this staff member?')) {
       setStaff(staff.filter(s => s.id !== id));
     }
   };
+
+  if (!user || user.role !== 'super_admin') return null;
 
   return (
     <div className="space-y-6">
