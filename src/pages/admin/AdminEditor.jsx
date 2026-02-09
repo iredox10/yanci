@@ -1,9 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNews } from '../../context/NewsContext';
 import { useAuth } from '../../context/AuthContext';
 import { appwriteService } from '../../lib/appwrite';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaFloppyDisk, FaArrowLeft, FaCloudArrowUp, FaSpinner } from 'react-icons/fa6';
+import { 
+  FaFloppyDisk, 
+  FaArrowLeft, 
+  FaCloudArrowUp, 
+  FaSpinner, 
+  FaEye, 
+  FaTowerBroadcast,
+  FaClock,
+  FaCheck,
+  FaTrash
+} from 'react-icons/fa6';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
@@ -15,6 +25,9 @@ const AdminEditor = () => {
 
   const isEditing = !!id;
   const [uploading, setUploading] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
 
   const [formData, setFormData] = useState({
     headline: '',
@@ -30,6 +43,15 @@ const AdminEditor = () => {
     author: user?.name || '',
     isLive: false
   });
+
+  const saveTimeoutRef = useRef(null);
+
+  // Calculate word count
+  useEffect(() => {
+    const text = formData.body.replace(/<[^>]*>/g, ' ');
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    setWordCount(words.length);
+  }, [formData.body]);
 
   // Ensure pillar matches user category on mount or user change
   useEffect(() => {
@@ -60,8 +82,7 @@ const AdminEditor = () => {
       }
     }
     return () => { ignore = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, isEditing, navigate, user]);
+  }, [id, isEditing, navigate, user, getArticleById]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -69,6 +90,7 @@ const AdminEditor = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    setIsDirty(true);
   };
 
   const handleFileUpload = async (e, field) => {
@@ -80,6 +102,7 @@ const AdminEditor = () => {
       const response = await appwriteService.uploadFile(file);
       const fileUrl = appwriteService.getFilePreview(response.$id);
       setFormData(prev => ({ ...prev, [field]: fileUrl }));
+      setIsDirty(true);
     } catch (error) {
       alert('File upload failed. Check console.');
       console.error(error);
@@ -88,223 +111,330 @@ const AdminEditor = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (isEditing) {
-      await updateArticle(parseInt(id) || id, formData);
-    } else {
-      await addArticle(formData);
+  const handleSave = async () => {
+    try {
+      if (isEditing) {
+        await updateArticle(parseInt(id) || id, formData);
+      } else {
+        const newId = await addArticle(formData);
+        if (newId) navigate(`/admin/edit/${newId}`, { replace: true });
+      }
+      setLastSaved(new Date());
+      setIsDirty(false);
+    } catch (error) {
+      console.error('Failed to save article:', error);
     }
-    navigate('/admin/articles');
+  };
+
+  // Auto-save logic
+  useEffect(() => {
+    if (isDirty) {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = setTimeout(() => {
+        handleSave();
+      }, 5000); // Auto-save after 5 seconds of inactivity
+    }
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, [formData, isDirty]);
+
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      ['link', 'image', 'blockquote'],
+      ['clean']
+    ],
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="flex flex-col min-h-full bg-[#f5f5f5]">
+      {/* Sticky Composer Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/admin/articles')}
-            className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+            title="Back to Articles"
           >
-            <FaArrowLeft className="w-5 h-5" />
+            <FaArrowLeft className="w-4 h-4" />
           </button>
-          <h2 className="text-2xl font-bold text-gray-800">
-            {isEditing ? 'Edit Article' : 'Create New Article'}
-          </h2>
+          <div className="h-6 w-px bg-gray-200" />
+          <div className="flex flex-col">
+            <h1 className="text-sm font-bold text-gray-900 truncate max-w-[300px]">
+              {formData.headline || 'Untitled Article'}
+            </h1>
+            <div className="flex items-center gap-2 text-[10px]">
+              {lastSaved ? (
+                <span className="text-green-600 flex items-center gap-1">
+                  <FaCheck className="w-2 h-2" /> Saved at {lastSaved.toLocaleTimeString()}
+                </span>
+              ) : (
+                <span className="text-gray-400">Not saved yet</span>
+              )}
+              {isDirty && <span className="text-amber-500 font-bold">• Unsaved changes</span>}
+            </div>
+          </div>
         </div>
-        <button
-          onClick={handleSubmit}
-          disabled={uploading}
-          className={`bg-[#0f3036] text-white px-6 py-2 rounded-md flex items-center gap-2 transition-colors font-bold ${uploading ? 'opacity-50 cursor-wait' : 'hover:bg-[#1a454c]'}`}
-        >
-          <FaFloppyDisk className="w-4 h-4" /> Save Article
-        </button>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => window.open(`/article/${id}`, '_blank')}
+            disabled={!isEditing}
+            className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <FaEye /> Preview
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={uploading || !isDirty}
+            className={`px-6 py-2 rounded text-xs font-bold flex items-center gap-2 transition-all ${
+              isDirty 
+                ? 'bg-[#0f3036] text-white hover:bg-[#1a454c] shadow-md' 
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            {uploading ? <FaSpinner className="animate-spin" /> : <FaFloppyDisk />}
+            Save changes
+          </button>
+        </div>
+      </header>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Main Editor Column */}
+        <main className="flex-1 overflow-y-auto bg-white p-8 md:p-16">
+          <div className="max-w-[800px] mx-auto space-y-12">
+            {/* Kicker Input */}
+            <div className="relative">
+              <input
+                type="text"
+                name="kicker"
+                value={formData.kicker}
+                onChange={handleChange}
+                className="w-full text-xs font-bold uppercase tracking-widest text-[#c70000] border-none focus:ring-0 p-0 placeholder-gray-300"
+                placeholder="ADD KICKER / CATEGORY"
+              />
+            </div>
+
+            {/* Headline Input - Massive serif */}
+            <textarea
+              name="headline"
+              value={formData.headline}
+              onChange={handleChange}
+              rows="1"
+              onInput={(e) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }}
+              className="w-full text-4xl md:text-6xl font-serif font-black text-[#0f3036] border-none focus:ring-0 p-0 resize-none placeholder-gray-200 leading-tight"
+              placeholder="Article headline"
+            />
+
+            {/* Trail Text - Smaller serif */}
+            <textarea
+              name="trail"
+              value={formData.trail}
+              onChange={handleChange}
+              rows="2"
+              onInput={(e) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }}
+              className="w-full text-xl font-serif text-gray-500 border-none focus:ring-0 p-0 resize-none border-l-4 border-gray-100 pl-6 placeholder-gray-200 italic"
+              placeholder="Trail text: A short summary that appears below the headline..."
+            />
+
+            {/* Author Input */}
+            <div className="flex items-center gap-4 py-6 border-y border-gray-50">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-400">
+                {formData.author?.[0] || 'Y'}
+              </div>
+              <input
+                type="text"
+                name="author"
+                value={formData.author}
+                onChange={handleChange}
+                className="flex-1 text-sm font-bold text-gray-700 border-none focus:ring-0 p-0 placeholder-gray-300"
+                placeholder="Author name"
+              />
+            </div>
+
+            {/* Rich Text Editor */}
+            <div className="composer-editor pb-32">
+              <ReactQuill
+                theme="snow"
+                value={formData.body || ''}
+                onChange={(content) => {
+                  setFormData(prev => ({ ...prev, body: content }));
+                  setIsDirty(true);
+                }}
+                modules={quillModules}
+                placeholder="Start writing your story..."
+                className="font-body text-lg leading-loose"
+              />
+            </div>
+          </div>
+        </main>
+
+        {/* Sidebar Column */}
+        <aside className="w-[350px] border-l border-gray-200 bg-gray-50 overflow-y-auto p-6 hidden xl:block">
+          <div className="space-y-8">
+            {/* Meta Section */}
+            <section className="space-y-4">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                Metadata
+              </h3>
+              
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-600">Publication Pillar</label>
+                <select
+                  name="pillar"
+                  value={formData.pillar}
+                  onChange={handleChange}
+                  disabled={!!user?.category}
+                  className="w-full text-sm p-2 bg-white border border-gray-200 rounded shadow-sm focus:ring-2 focus:ring-[#c59d5f] outline-none capitalize"
+                >
+                  <option value="news">News</option>
+                  <option value="sport">Sport</option>
+                  <option value="opinion">Opinion</option>
+                  <option value="culture">Culture</option>
+                  <option value="lifestyle">Lifestyle</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-600">Display Type</label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="w-full text-sm p-2 bg-white border border-gray-200 rounded shadow-sm focus:ring-2 focus:ring-[#c59d5f] outline-none"
+                >
+                  <option value="standard">Standard</option>
+                  <option value="hero">Hero (Priority)</option>
+                  <option value="compact">Compact (Side)</option>
+                </select>
+              </div>
+
+              <div className="p-4 bg-white rounded border border-gray-200 shadow-sm space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="isLive"
+                    checked={formData.isLive}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-[#c70000] rounded focus:ring-[#c70000]"
+                  />
+                  <span className="text-xs font-bold text-gray-700 flex items-center gap-2">
+                    <FaTowerBroadcast className={formData.isLive ? 'text-red-600' : 'text-gray-300'} />
+                    Is Live Blog?
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            {/* Featured Image Section */}
+            <section className="space-y-4 pt-8 border-t border-gray-200">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                Main Media
+              </h3>
+              
+              <div className="space-y-3">
+                {formData.image ? (
+                  <div className="relative group rounded-lg overflow-hidden border border-gray-200 shadow-md">
+                    <img src={formData.image} alt="Featured" className="w-full aspect-video object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <label className="p-2 bg-white text-gray-800 rounded-full cursor-pointer hover:bg-gray-100">
+                        <FaCloudArrowUp />
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
+                      </label>
+                      <button 
+                        onClick={() => setFormData({...formData, image: ''})}
+                        className="p-2 bg-white text-red-600 rounded-full hover:bg-red-50"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center aspect-video bg-gray-100 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:bg-gray-200 transition-all text-gray-400">
+                    {uploading ? <FaSpinner className="animate-spin text-2xl" /> : (
+                      <>
+                        <FaCloudArrowUp className="text-2xl mb-2" />
+                        <span className="text-[10px] font-bold uppercase">Add Main Image</span>
+                      </>
+                    )}
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
+                  </label>
+                )}
+                <input
+                  type="text"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleChange}
+                  className="w-full text-[10px] p-2 bg-white border border-gray-200 rounded outline-none"
+                  placeholder="Or paste image URL..."
+                />
+              </div>
+            </section>
+
+            {/* Key Figures Section */}
+            <section className="space-y-4 pt-8 border-t border-gray-200">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                Key Figures
+              </h3>
+              <textarea
+                name="keyFigures"
+                value={formData.keyFigures}
+                onChange={handleChange}
+                rows="4"
+                className="w-full text-xs p-3 bg-white border border-gray-200 rounded shadow-sm focus:ring-2 focus:ring-[#c59d5f] outline-none"
+                placeholder="Name - Role (one per line)"
+              />
+            </section>
+
+            {/* Stats */}
+            <section className="pt-8 border-t border-gray-200 text-[10px] font-bold text-gray-400 flex justify-between">
+              <span>WORDS: {wordCount}</span>
+              <span>READ TIME: {Math.max(1, Math.ceil(wordCount / 200))} MIN</span>
+            </section>
+          </div>
+        </aside>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 space-y-6">
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-bold text-gray-700">Kicker (Tag)</label>
-            <input
-              type="text"
-              name="kicker"
-              value={formData.kicker}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#c59d5f] focus:border-transparent outline-none"
-              placeholder="e.g. Politics, Sport, Live"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-bold text-gray-700">Author</label>
-            <input
-              type="text"
-              name="author"
-              value={formData.author || ''}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#c59d5f] focus:border-transparent outline-none"
-              placeholder="Author Name"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-bold text-gray-700">Headline</label>
-          <input
-            type="text"
-            name="headline"
-            value={formData.headline}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#c59d5f] focus:border-transparent outline-none font-serif text-lg"
-            placeholder="Enter the main headline"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-bold text-gray-700">Trail Text (Summary)</label>
-          <textarea
-            name="trail"
-            value={formData.trail || ''}
-            onChange={handleChange}
-            rows="3"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#c59d5f] focus:border-transparent outline-none"
-            placeholder="A short summary of the article..."
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-bold text-gray-700">Article Body</label>
-          <div className="bg-white">
-            <ReactQuill
-              theme="snow"
-              value={formData.body || ''}
-              onChange={(content) => setFormData(prev => ({ ...prev, body: content }))}
-              className="h-64 mb-12"
-              modules={{
-                toolbar: [
-                  [{ 'header': [1, 2, 3, false] }],
-                  ['bold', 'italic', 'underline', 'strike'],
-                  [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                  ['link', 'image'],
-                  ['clean']
-                ],
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-bold text-gray-700">Featured Image</label>
-          <div className="flex gap-4">
-            <input
-              type="text"
-              name="image"
-              value={formData.image || ''}
-              onChange={handleChange}
-              className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#c59d5f] outline-none"
-              placeholder="Image URL (or upload file)"
-            />
-            <label className={`flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-200 transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-              {uploading ? <FaSpinner className="animate-spin" /> : <FaCloudArrowUp />}
-              <span className="text-sm font-bold">Upload</span>
-              <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
-            </label>
-          </div>
-          {formData.image && (
-            <div className="mt-2 h-40 w-full bg-gray-100 rounded-md overflow-hidden relative group">
-              <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-              <button 
-                type="button"
-                onClick={() => setFormData({...formData, image: ''})}
-                className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-              >
-                Remove
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-bold text-gray-700">Live Video (Embed URL or File)</label>
-          <div className="flex gap-4">
-            <input
-              type="text"
-              name="videoUrl"
-              value={formData.videoUrl || ''}
-              onChange={handleChange}
-              className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#c59d5f] outline-none"
-              placeholder="Video URL (or upload file)"
-            />
-            <label className={`flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-200 transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-              {uploading ? <FaSpinner className="animate-spin" /> : <FaCloudArrowUp />}
-              <span className="text-sm font-bold">Upload</span>
-              <input type="file" accept="video/*" className="hidden" onChange={(e) => handleFileUpload(e, 'videoUrl')} />
-            </label>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-bold text-gray-700">Key Figures (Masu Ruwa da Tsaki)</label>
-          <textarea
-            name="keyFigures"
-            value={formData.keyFigures || ''}
-            onChange={handleChange}
-            rows="4"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#c59d5f] focus:border-transparent outline-none"
-            placeholder="Format: Name - Role (One per line)&#10;e.g.&#10;Sa'idu Alkali - Ministan Sufuri&#10;Fidet Okhiria - MD, NRC"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-bold text-gray-700">Pillar (Category)</label>
-            <select
-              name="pillar"
-              value={formData.pillar}
-              onChange={handleChange}
-              disabled={!!user?.category} // Disable if user has a specific category
-              className={`w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#c59d5f] focus:border-transparent outline-none capitalize ${user?.category ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-            >
-              <option value="news">News</option>
-              <option value="sport">Sport</option>
-              <option value="opinion">Opinion</option>
-              <option value="culture">Culture</option>
-              <option value="lifestyle">Lifestyle</option>
-            </select>
-            {user?.category && <p className="text-xs text-gray-500">Locked to your assigned category.</p>}
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-bold text-gray-700">Display Type</label>
-            <select
-              name="type"
-              value={formData.type || 'standard'}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#c59d5f] focus:border-transparent outline-none capitalize"
-            >
-              <option value="standard">Standard</option>
-              <option value="hero">Hero (Big)</option>
-              <option value="compact">Compact (Small)</option>
-            </select>
-          </div>
-
-          <div className="flex items-center pt-8">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="isLive"
-                checked={formData.isLive || false}
-                onChange={handleChange}
-                className="w-5 h-5 text-[#c59d5f] rounded focus:ring-[#c59d5f]"
-              />
-              <span className="font-bold text-gray-700">Is Live Article?</span>
-            </label>
-          </div>
-        </div>
-
-      </form>
+      {/* Editor CSS Overrides */}
+      <style>{`
+        .composer-editor .ql-container.ql-snow {
+          border: none !important;
+          font-family: 'Source Serif 4', Georgia, serif;
+        }
+        .composer-editor .ql-editor {
+          padding: 0 !important;
+          font-size: 1.125rem;
+          line-height: 1.8;
+          color: #171717;
+        }
+        .composer-editor .ql-toolbar.ql-snow {
+          border: none !important;
+          border-bottom: 1px solid #f0f0f0 !important;
+          position: sticky;
+          top: 56px;
+          z-index: 40;
+          background: white;
+          margin-bottom: 2rem;
+          padding: 8px 0 !important;
+        }
+        .composer-editor .ql-editor.ql-blank::before {
+          left: 0 !important;
+          font-style: italic;
+          color: #d1d5db;
+        }
+        .composer-editor .ql-editor h1 { font-family: 'Playfair Display', serif; font-weight: 900; }
+        .composer-editor .ql-editor h2 { font-family: 'Playfair Display', serif; font-weight: 800; }
+        .composer-editor .ql-editor h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+      `}</style>
     </div>
   );
 };

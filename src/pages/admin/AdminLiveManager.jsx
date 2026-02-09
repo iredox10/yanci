@@ -48,7 +48,7 @@ const AdminLiveManager = () => {
   };
 
   return (
-    <div className="space-y-6 relative">
+    <div className="p-8 space-y-6 relative">
       {/* Create Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
