@@ -18,6 +18,15 @@ const AdminLiveManager = () => {
   // Filter for live articles
   const liveEvents = articles.filter(article => article.isLive);
 
+  const handleOpenModal = () => {
+    setShowModal(true);
+  };
+
+  const handleCreate = (e) => {
+    e.preventDefault();
+    handleCreateNewLiveBlog();
+  };
+
   const handleCreateNewLiveBlog = async () => {
     const newLiveArticle = {
       headline: formData.title || "Sabon Labarin Kai Tsaye",
