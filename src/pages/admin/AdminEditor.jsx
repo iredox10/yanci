@@ -12,7 +12,12 @@ import {
   FaTowerBroadcast,
   FaClock,
   FaCheck,
-  FaTrash
+  FaTrash,
+  FaMapLocationDot,
+  FaQuoteLeft,
+  FaCircleInfo,
+  FaLayerGroup,
+  FaPlus
 } from 'react-icons/fa6';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
@@ -28,6 +33,7 @@ const AdminEditor = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
   const [wordCount, setWordCount] = useState(0);
+  const [showComponentMenu, setShowComponentMenu] = useState(false);
 
   const [formData, setFormData] = useState({
     headline: '',
@@ -37,6 +43,7 @@ const AdminEditor = () => {
     image: '',
     videoUrl: '',
     keyFigures: '',
+    series: '',
     pillar: user?.category || 'news',
     section: 'headlines',
     type: 'standard',
@@ -45,6 +52,7 @@ const AdminEditor = () => {
   });
 
   const saveTimeoutRef = useRef(null);
+  const quillRef = useRef(null);
 
   // Calculate word count
   useEffect(() => {
@@ -73,7 +81,10 @@ const AdminEditor = () => {
           return;
         }
         if (!ignore) {
-          setFormData(article);
+          setFormData({
+            ...article,
+            series: article.series || ''
+          });
         }
       } else {
         if (!ignore) {
@@ -132,12 +143,41 @@ const AdminEditor = () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
         handleSave();
-      }, 5000); // Auto-save after 5 seconds of inactivity
+      }, 10000); // Auto-save after 10 seconds of inactivity
     }
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
   }, [formData, isDirty]);
+
+  const insertComponent = (type) => {
+    const quill = quillRef.current?.getEditor();
+    if (!quill) return;
+
+    const range = quill.getSelection(true);
+    let placeholder = '';
+
+    switch(type) {
+      case 'map':
+        const mapUrl = prompt('Enter Google Maps Embed URL:');
+        if (mapUrl) placeholder = `<div class="yanci-atom-map" data-url="${mapUrl}">[MAP COMPONENT]</div>`;
+        break;
+      case 'quote':
+        placeholder = `<blockquote><p>"Shigar da maganar da kake so a nan."</p><footer>— Sunan Marubuci</footer></blockquote>`;
+        break;
+      case 'highlight':
+        placeholder = `<div class="yanci-atom-highlight" style="background:#fbf8f3; border-left:4px solid #c59d5f; padding:1.5rem; margin:2rem 0;"><strong>MUHIMMIN ABIN LURA:</strong><br/>Shigar da muhimman bayanai a nan...</div>`;
+        break;
+      default:
+        break;
+    }
+
+    if (placeholder) {
+      quill.clipboard.dangerouslyPasteHTML(range.index, placeholder);
+      setIsDirty(true);
+    }
+    setShowComponentMenu(false);
+  };
 
   const quillModules = {
     toolbar: [
@@ -150,9 +190,9 @@ const AdminEditor = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-[#f5f5f5]">
-      {/* Sticky Composer Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm">
+    <div className="flex flex-col h-full bg-white overflow-hidden">
+      {/* Header - Fixed height, no absolute positioning needed as it's the first child of h-full flex col */}
+      <header className="shrink-0 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm z-50">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/admin/articles')}
@@ -183,7 +223,7 @@ const AdminEditor = () => {
           <button
             onClick={() => window.open(`/article/${id}`, '_blank')}
             disabled={!isEditing}
-            className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded flex items-center gap-2 disabled:opacity-30"
           >
             <FaEye /> Preview
           </button>
@@ -202,9 +242,10 @@ const AdminEditor = () => {
         </div>
       </header>
 
+      {/* Main Content Area - Split into Editor and Sidebar */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Main Editor Column */}
-        <main className="flex-1 overflow-y-auto bg-white p-8 md:p-16">
+        {/* Main Editor Column - Independent Scroll */}
+        <main className="flex-1 overflow-y-auto bg-white p-8 md:p-16 relative">
           <div className="max-w-[800px] mx-auto space-y-12">
             {/* Kicker Input */}
             <div className="relative">
@@ -264,6 +305,7 @@ const AdminEditor = () => {
             {/* Rich Text Editor */}
             <div className="composer-editor pb-32">
               <ReactQuill
+                ref={quillRef}
                 theme="snow"
                 value={formData.body || ''}
                 onChange={(content) => {
@@ -276,9 +318,46 @@ const AdminEditor = () => {
               />
             </div>
           </div>
+
+          {/* Floating Block Inserter (Bottom Right) */}
+          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-[400px] z-40">
+            <div className="relative">
+              {showComponentMenu && (
+                <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-large border border-gray-100 p-2 min-w-[200px] animate-fade-in-up">
+                  <p className="text-[10px] font-bold uppercase text-gray-400 px-4 py-2">Add Component</p>
+                  <button 
+                    onClick={() => insertComponent('map')}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-sm transition-colors"
+                  >
+                    <FaMapLocationDot className="text-blue-500" /> Interactive Map
+                  </button>
+                  <button 
+                    onClick={() => insertComponent('quote')}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-sm transition-colors"
+                  >
+                    <FaQuoteLeft className="text-accent" /> Pull Quote
+                  </button>
+                  <button 
+                    onClick={() => insertComponent('highlight')}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-sm transition-colors"
+                  >
+                    <FaCircleInfo className="text-amber-500" /> Highlight Box
+                  </button>
+                </div>
+              )}
+              <button 
+                onClick={() => setShowComponentMenu(!showComponentMenu)}
+                className={`w-14 h-14 rounded-full shadow-large flex items-center justify-center transition-all ${
+                  showComponentMenu ? 'bg-[#c70000] rotate-45 text-white' : 'bg-[#0f3036] text-white hover:scale-110'
+                }`}
+              >
+                <FaPlus className="text-xl" />
+              </button>
+            </div>
+          </div>
         </main>
 
-        {/* Sidebar Column */}
+        {/* Sidebar Column - Independent Scroll */}
         <aside className="w-[350px] border-l border-gray-200 bg-gray-50 overflow-y-auto p-6 hidden xl:block">
           <div className="space-y-8">
             {/* Meta Section */}
@@ -302,6 +381,21 @@ const AdminEditor = () => {
                   <option value="culture">Culture</option>
                   <option value="lifestyle">Lifestyle</option>
                 </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-600">Article Series</label>
+                <div className="relative">
+                  <FaLayerGroup className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                  <input
+                    type="text"
+                    name="series"
+                    value={formData.series}
+                    onChange={handleChange}
+                    className="w-full text-sm pl-8 p-2 bg-white border border-gray-200 rounded shadow-sm focus:ring-2 focus:ring-[#c59d5f] outline-none"
+                    placeholder="e.g. Poverty Project"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -415,12 +509,13 @@ const AdminEditor = () => {
           font-size: 1.125rem;
           line-height: 1.8;
           color: #171717;
+          min-height: 500px;
         }
         .composer-editor .ql-toolbar.ql-snow {
           border: none !important;
           border-bottom: 1px solid #f0f0f0 !important;
           position: sticky;
-          top: 56px;
+          top: 0;
           z-index: 40;
           background: white;
           margin-bottom: 2rem;
@@ -434,6 +529,18 @@ const AdminEditor = () => {
         .composer-editor .ql-editor h1 { font-family: 'Playfair Display', serif; font-weight: 900; }
         .composer-editor .ql-editor h2 { font-family: 'Playfair Display', serif; font-weight: 800; }
         .composer-editor .ql-editor h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+        
+        /* Atom Placeholder Styling */
+        .yanci-atom-map {
+          background: #f0f9ff;
+          border: 2px dashed #0ea5e9;
+          color: #0369a1;
+          padding: 2rem;
+          text-align: center;
+          font-weight: bold;
+          margin: 2rem 0;
+          border-radius: 0.5rem;
+        }
       `}</style>
     </div>
   );

@@ -25,9 +25,9 @@ const AdminLayout = () => {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
+    <div className="flex h-screen bg-gray-100 font-sans overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0f3036] text-white flex flex-col">
+      <aside className="w-64 bg-[#0f3036] text-white flex flex-col shrink-0">
         <div className="p-6 border-b border-white/10">
           <h1 className="font-serif font-black text-2xl tracking-tighter">
             Yanci<span className="text-[#c59d5f]">.</span> Admin
@@ -39,7 +39,7 @@ const AdminLayout = () => {
           </div>
         </div>
         
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           <Link 
             to="/admin" 
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
@@ -95,8 +95,8 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      {/* Main Content Area - No scroll here, sub-pages handle their own scroll */}
+      <main className="flex-1 flex flex-col min-w-0 bg-gray-50 h-full overflow-hidden">
         <Outlet />
       </main>
     </div>

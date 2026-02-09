@@ -15,9 +15,6 @@ const AdminLiveManager = () => {
     authors: ''
   });
 
-  // Filter for live articles
-  const liveEvents = articles.filter(article => article.isLive);
-
   const handleOpenModal = () => {
     setShowModal(true);
   };
@@ -26,6 +23,9 @@ const AdminLiveManager = () => {
     e.preventDefault();
     handleCreateNewLiveBlog();
   };
+
+  // Filter for live articles
+  const liveEvents = articles.filter(article => article.isLive);
 
   const handleCreateNewLiveBlog = async () => {
     const newLiveArticle = {
@@ -48,11 +48,11 @@ const AdminLiveManager = () => {
   };
 
   return (
-    <div className="p-8 space-y-6 relative">
+    <div className="flex-1 overflow-y-auto p-8 space-y-6 relative">
       {/* Create Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden animate-scale-in">
             <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
               <h3 className="font-bold text-lg text-[#0f3036]">Start New Live Blog</h3>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">

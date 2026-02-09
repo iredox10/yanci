@@ -30,7 +30,7 @@ const AdminStaff = () => {
   if (!user || user.role !== 'super_admin') return null;
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="flex-1 overflow-y-auto p-8 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-[#0f3036]">Staff Management</h2>

@@ -32,10 +32,10 @@ const AdminDashboard = () => {
     ? relevantArticles.length 
     : articles.filter(a => a.pillar === 'news').length;
   
-  const thirdCardTitle = user?.category ? `${user.label} Articles` : "News Pillar";
+  const thirdCardTitle = user?.category ? `${user.category} Articles` : "News Pillar";
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="flex-1 overflow-y-auto p-8 space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
         <p className="text-gray-500">Welcome back, <span className="font-bold">{user?.name}</span>.</p>
