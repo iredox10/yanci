@@ -103,11 +103,26 @@ export const NewsProvider = ({ children }) => {
     
     if (isAppwriteConfigured) {
       try {
-        const doc = await appwriteService.createArticle(newArticle);
+        // Appwrite is strict about unknown attributes. 
+        // If you get an 'Unknown attribute' error, add the field in Appwrite Console 
+        // or add it to this list.
+        const allowedAttributes = [
+          'headline', 'kicker', 'trail', 'body', 'image', 'videoUrl', 
+          'keyFigures', 'pillar', 'section', 'type', 'author', 'isLive', 'liveUpdates'
+        ];
+
+        const cleanArticle = {};
+        allowedAttributes.forEach(attr => {
+          if (Object.prototype.hasOwnProperty.call(newArticle, attr)) {
+            cleanArticle[attr] = newArticle[attr];
+          }
+        });
+
+        const doc = await appwriteService.createArticle(cleanArticle);
         return doc.$id;
       } catch (error) {
         console.error("Failed to create article", error);
-        alert("Failed to save to cloud.");
+        alert(`Failed to save to cloud: ${error.message}`);
         return null;
       }
     } else {
@@ -119,16 +134,26 @@ export const NewsProvider = ({ children }) => {
 
   const updateArticle = async (id, updatedData) => {
     if (isAppwriteConfigured) {
-        // Remove Appwrite system attributes if present in updatedData to avoid errors
-        // eslint-disable-next-line no-unused-vars
-        const { $id, $createdAt, $updatedAt, $databaseId, $collectionId, $permissions, id: _id, ...cleanData } = updatedData;
         try {
+            const allowedAttributes = [
+              'headline', 'kicker', 'trail', 'body', 'image', 'videoUrl', 
+              'keyFigures', 'pillar', 'section', 'type', 'author', 'isLive', 'liveUpdates', 'series'
+            ];
+
+            const cleanData = {};
+            allowedAttributes.forEach(attr => {
+              if (Object.prototype.hasOwnProperty.call(updatedData, attr)) {
+                cleanData[attr] = updatedData[attr];
+              }
+            });
+
             await appwriteService.updateArticle(id, cleanData);
         } catch (error) {
             console.error("Failed to update article", error);
+            alert(`Failed to update cloud: ${error.message}`);
         }
     } else {
-      setArticles(articles.map(a => a.id === id || a.id === parseInt(id) ? { ...a, ...updatedData } : a));
+      setArticles(articles.map(a => String(a.id) === String(id) ? { ...a, ...updatedData } : a));
     }
   };
 
@@ -140,7 +165,7 @@ export const NewsProvider = ({ children }) => {
             console.error("Failed to delete article", error);
         }
     } else {
-        setArticles(articles.filter(a => a.id !== id && a.id !== parseInt(id)));
+        setArticles(articles.filter(a => String(a.id) !== String(id)));
     }
   };
 
@@ -161,7 +186,7 @@ export const NewsProvider = ({ children }) => {
         }
     } else {
         setArticles(prevArticles => prevArticles.map(article => {
-        if (article.id === parseInt(articleId) || article.id === articleId) {
+        if (String(article.id) === String(articleId)) {
             const updates = article.liveUpdates ? [newUpdate, ...article.liveUpdates] : [newUpdate];
             return { ...article, liveUpdates: updates };
         }
@@ -172,9 +197,9 @@ export const NewsProvider = ({ children }) => {
 
   const deleteLiveUpdate = async (articleId, updateId) => {
     if (isAppwriteConfigured) {
-        const article = articles.find(a => a.id === articleId);
+        const article = articles.find(a => String(a.id) === String(articleId));
         if (article) {
-            const newUpdates = article.liveUpdates.filter(u => u.id !== updateId);
+            const newUpdates = article.liveUpdates.filter(u => String(u.id) !== String(updateId));
             try {
                 await appwriteService.updateLiveUpdates(articleId, newUpdates);
             } catch (error) {
@@ -183,10 +208,10 @@ export const NewsProvider = ({ children }) => {
         }
     } else {
         setArticles(prevArticles => prevArticles.map(article => {
-        if (article.id === parseInt(articleId) || article.id === articleId) {
+        if (String(article.id) === String(articleId)) {
             return { 
             ...article, 
-            liveUpdates: article.liveUpdates.filter(u => u.id !== updateId) 
+            liveUpdates: article.liveUpdates.filter(u => String(u.id) !== String(updateId)) 
             };
         }
         return article;
@@ -203,7 +228,7 @@ export const NewsProvider = ({ children }) => {
   };
 
   const getArticleById = (id) => {
-    return articles.find(a => a.id === id || a.id === parseInt(id));
+    return articles.find(a => String(a.id) === String(id));
   };
 
   return (

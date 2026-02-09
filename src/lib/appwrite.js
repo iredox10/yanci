@@ -4,9 +4,10 @@ export const PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID;
 export const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 export const COLLECTION_ID_ARTICLES = import.meta.env.VITE_APPWRITE_COLLECTION_ID_ARTICLES;
 export const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET_ID;
+export const ENDPOINT = import.meta.env.VITE_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
 
 const client = new Client()
-    .setEndpoint('https://cloud.appwrite.io/v1') // Replace with your endpoint if self-hosted
+    .setEndpoint(ENDPOINT)
     .setProject(PROJECT_ID);
 
 export const databases = new Databases(client);
@@ -69,9 +70,6 @@ export const appwriteService = {
         }
     },
     
-    // Live Update Helper: In a real app, this might update a separate collection.
-    // For now, we'll stringify/parse the liveUpdates JSON attribute if stored as string,
-    // or just push to the array if Appwrite supports array updates nicely (it replaces the whole array).
     updateLiveUpdates: async (articleId, updates) => {
          try {
             return await databases.updateDocument(
@@ -79,7 +77,7 @@ export const appwriteService = {
                 COLLECTION_ID_ARTICLES,
                 articleId,
                 {
-                    liveUpdates: updates.map(u => JSON.stringify(u)) // Appwrite array of strings often easier for complex objects
+                    liveUpdates: updates.map(u => JSON.stringify(u))
                 }
             );
         } catch (error) {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { GUARDIAN_DATA } from '../../data/guardianData';
 import { appwriteService, PROJECT_ID } from '../../lib/appwrite';
-import { FaDatabase, FaCloudArrowUp, FaCheck } from 'react-icons/fa6';
+import { FaDatabase, FaCloudArrowUp, FaCheck, FaTriangleExclamation, FaSpinner } from 'react-icons/fa6';
 
 const AdminSettings = () => {
   const [seeding, setSeeding] = useState(false);
@@ -26,7 +26,7 @@ const AdminSettings = () => {
 
       const validAttributes = [
         'headline', 'kicker', 'trail', 'body', 'image', 'videoUrl', 'keyFigures', 
-        'pillar', 'section', 'type', 'author', 'isLive', 'liveUpdates'
+        'pillar', 'section', 'type', 'author', 'isLive', 'liveUpdates', 'series'
       ];
 
       for (const article of allArticles) {
@@ -53,50 +53,55 @@ const AdminSettings = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 space-y-8">
+    <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">System Settings</h2>
-          <p className="text-gray-500">Manage your application configuration.</p>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">System Settings</h2>
+          <p className="text-sm text-gray-500">Manage application configuration and data.</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 md:p-8">
+          <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
             <FaDatabase className="text-[#0f3036]" /> Database Connection
           </h3>
           
-          <div className="space-y-4">
-            <div className={`p-4 rounded-md border ${isAppwriteConfigured ? 'bg-green-50 border-green-200 text-green-800' : 'bg-yellow-50 border-yellow-200 text-yellow-800'}`}>
-              <p className="font-bold flex items-center gap-2">
-                {isAppwriteConfigured ? <><FaCheck /> Appwrite Connected</> : 'Appwrite Not Configured'}
+          <div className="space-y-6">
+            <div className={`p-5 rounded-2xl border ${isAppwriteConfigured ? 'bg-green-50 border-green-100 text-green-800' : 'bg-yellow-50 border-yellow-100 text-yellow-800'}`}>
+              <p className="font-black text-xs uppercase tracking-widest flex items-center gap-2 mb-2">
+                {isAppwriteConfigured ? <><FaCheck /> Appwrite Connected</> : <><FaTriangleExclamation /> Appwrite Not Configured</>}
               </p>
-              <p className="text-sm mt-1">
+              <p className="text-sm leading-relaxed">
                 {isAppwriteConfigured 
-                  ? `Connected to project: ${PROJECT_ID}` 
-                  : 'Add your VITE_APPWRITE_* variables to .env to enable cloud storage.'}
+                  ? `Your application is successfully connected to project: ${PROJECT_ID}` 
+                  : 'Add your VITE_APPWRITE_* variables to .env to enable cloud storage and real-time updates.'}
               </p>
             </div>
 
             {isAppwriteConfigured && (
-              <div className="border-t border-gray-100 pt-4">
-                <h4 className="font-bold text-sm text-gray-700 mb-2">Data Management</h4>
-                <p className="text-sm text-gray-500 mb-4">
-                  If your database is empty, you can seed it with the initial demo data (Headlines, Sport, etc.).
+              <div className="pt-6 border-t border-gray-100">
+                <h4 className="font-bold text-base text-gray-800 mb-2">Data Seeding</h4>
+                <p className="text-sm text-gray-500 mb-6">
+                  Populate your database with the initial demo content if it's currently empty.
                 </p>
                 
                 <button 
                   onClick={handleSeed} 
                   disabled={seeding}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-bold text-white transition-colors ${seeding ? 'bg-gray-400 cursor-wait' : 'bg-[#0f3036] hover:bg-[#1a454c]'}`}
+                  className={`w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg ${seeding ? 'bg-gray-200 text-gray-400 cursor-wait shadow-none' : 'bg-[#0f3036] text-white hover:bg-[#1a454c] shadow-[#0f3036]/20'}`}
                 >
-                  {seeding ? 'Seeding...' : <><FaCloudArrowUp /> Seed Database</>}
+                  {seeding ? <FaSpinner className="animate-spin" /> : <FaCloudArrowUp />}
+                  {seeding ? 'Uploading Data...' : 'Seed Database'}
                 </button>
 
                 {status === 'success' && (
-                  <p className="text-green-600 text-sm font-bold mt-2">Successfully uploaded initial data!</p>
+                  <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg text-xs font-bold flex items-center gap-2">
+                    <FaCheck /> Successfully uploaded initial data!
+                  </div>
                 )}
                 {status === 'error' && (
-                  <p className="text-red-600 text-sm font-bold mt-2">Failed to seed data. Check console for details.</p>
+                  <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-xs font-bold flex items-center gap-2">
+                    <FaTriangleExclamation /> Failed to seed data. Check console.
+                  </div>
                 )}
               </div>
             )}
