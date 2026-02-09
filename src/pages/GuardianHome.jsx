@@ -1,9 +1,9 @@
-import { 
-  FaArrowUpRightFromSquare, 
-  FaTowerBroadcast, 
-  FaWandMagicSparkles, 
-  FaArrowTrendUp, 
-  FaPlay, 
+import {
+  FaArrowUpRightFromSquare,
+  FaTowerBroadcast,
+  FaWandMagicSparkles,
+  FaArrowTrendUp,
+  FaPlay,
   FaCalendar,
   FaFire,
   FaBookmark,
@@ -12,7 +12,18 @@ import {
   FaClock,
   FaEye,
   FaNewspaper,
-  FaEnvelope
+  FaEnvelope,
+  FaTrophy,
+  FaMedal,
+  FaStar,
+  FaFutbol,
+  FaBasketball,
+  FaVolleyball,
+  FaPersonRunning,
+  FaUsers,
+  FaChartLine,
+  FaTv,
+  FaCircle,
 } from 'react-icons/fa6';
 import { useState, useEffect, useRef } from 'react';
 import GuardianFooter from '../components/guardian/GuardianFooter';
@@ -443,136 +454,387 @@ const GuardianHome = () => {
           </div>
         </section>
 
-        {/* Sport Section - Dynamic with Live Score */}
-        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-            <div className="flex items-center justify-between mb-12">
+        {/* Sport Section - Enhanced Modern Design */}
+        <section className="py-20 bg-gradient-to-b from-[#0f3036] via-[#1a454c] to-[#0f3036] relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c59d5f' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }} />
+          </div>
+
+          {/* Floating Decorations */}
+          <div className="absolute top-20 left-10 w-32 h-32 bg-[#2c7a7b]/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-48 h-48 bg-[#c59d5f]/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
+          <div className="max-w-[1400px] mx-auto px-4 md:px-6 relative z-10">
+            {/* Section Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#2c7a7b] to-[#319795] rounded-xl flex items-center justify-center shadow-lg">
-                  <FaFire className="w-6 h-6 text-white" />
+                <div className="w-14 h-14 bg-gradient-to-br from-[#c59d5f] to-[#d4a85f] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#c59d5f]/30">
+                  <FaTrophy className="w-7 h-7 text-[#0f3036]" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#2c7a7b]">Wasanni</span>
-                  <h2 className="text-3xl font-serif font-black text-[#1c1917]">Sakamako da Labarai</h2>
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#c59d5f]">Wasanni</span>
+                  <h2 className="text-3xl md:text-4xl font-serif font-black text-white">Sakamako da Labarai</h2>
                 </div>
               </div>
-              <div className="hidden md:flex gap-3">
-                <button className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-bold hover:bg-[#2c7a7b] hover:text-white hover:border-transparent transition-all">
-                  Kwallon Kafa
-                </button>
-                <button className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-bold hover:bg-[#2c7a7b] hover:text-white hover:border-transparent transition-all">
-                  NBA
-                </button>
-                <button className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-bold hover:bg-[#2c7a7b] hover:text-white hover:border-transparent transition-all">
-                  Tennis
-                </button>
+
+              {/* Sports Category Tabs */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 'football', icon: FaFutbol, label: 'Kwallon Kafa', active: true },
+                  { id: 'basketball', icon: FaBasketball, label: 'Basketball', active: false },
+                  { id: 'athletics', icon: FaPersonRunning, label: 'Gudun', active: false },
+                  { id: 'tabletennis', icon: FaStar, label: 'Tennis', active: false },
+                ].map((sport) => {
+                  const Icon = sport.icon;
+                  return (
+                    <button
+                      key={sport.id}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                        sport.active
+                          ? 'bg-[#c59d5f] text-[#0f3036] shadow-lg shadow-[#c59d5f]/30'
+                          : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="hidden sm:inline">{sport.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             <div className="grid gap-8 lg:grid-cols-12">
-              {/* Live Score Card - Modern Design */}
-              <div className="lg:col-span-5">
-                <div className="bg-gradient-to-br from-[#0f3036] to-[#1a454c] text-white rounded-2xl p-8 relative overflow-hidden shadow-2xl">
-                  {/* Animated background glow */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#c59d5f]/10 rounded-full blur-3xl animate-pulse" />
-                  
-                  <div className="relative z-10">
-                    <div className="flex justify-between items-center mb-8">
-                      <span className="px-4 py-1.5 bg-red-500 text-white text-xs font-bold uppercase tracking-widest rounded-full animate-pulse flex items-center gap-2">
-                        <span className="w-2 h-2 bg-white rounded-full animate-ping" />
-                        Kai Tsaye
+              {/* Left Column - Live Matches & Standings */}
+              <div className="lg:col-span-4 space-y-6">
+                {/* Live Match Card */}
+                <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
+                  <div className="bg-gradient-to-r from-[#0f3036] to-[#1a454c] p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                       </span>
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Premier League</span>
+                      <span className="text-white text-xs font-bold uppercase tracking-widest">Kai Tsaye</span>
                     </div>
+                    <span className="text-[#c59d5f] text-xs font-bold">Premier League</span>
+                  </div>
 
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm">
-                        <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-[#0f3036] font-black text-2xl shadow-lg">
-                            Y
-                          </div>
-                          <div>
-                            <span className="text-xl font-serif font-bold block">Yanci Stars</span>
-                            <span className="text-xs text-gray-400">Gida</span>
-                          </div>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-16 h-16 bg-gradient-to-br from-[#0f3036] to-[#1a454c] rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg">
+                          YS
                         </div>
-                        <span className="text-5xl font-black text-[#c59d5f]">3</span>
+                        <span className="font-bold text-sm text-[#1c1917]">Yanci Stars</span>
                       </div>
 
-                      <div className="flex items-center justify-center">
-                        <div className="text-center">
-                          <p className="text-4xl font-black text-white/30 font-mono">VS</p>
-                          <p className="text-sm text-gray-400 mt-1">90:00 +2</p>
+                      <div className="text-center">
+                        <div className="flex items-center gap-3 text-3xl font-black">
+                          <span className="text-[#0f3036]">3</span>
+                          <span className="text-gray-300">:</span>
+                          <span className="text-gray-400">2</span>
+                        </div>
+                        <div className="mt-2 px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold">
+                          90+2'
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm opacity-70">
-                        <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center text-white font-black text-2xl">
-                            C
-                          </div>
-                          <div>
-                            <span className="text-xl font-serif font-bold block text-gray-300">City Royals</span>
-                            <span className="text-xs text-gray-500">Baƙo</span>
-                          </div>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg">
+                          CR
                         </div>
-                        <span className="text-5xl font-black text-gray-500">2</span>
+                        <span className="font-bold text-sm text-gray-500">City Royals</span>
                       </div>
                     </div>
 
-                    <div className="mt-8 pt-6 border-t border-white/10 flex justify-between items-center">
-                      <div className="flex gap-4">
-                        <div className="text-center">
-                          <p className="text-xs text-gray-400 uppercase tracking-wider">Kwallaye</p>
-                          <p className="text-lg font-bold">Ahmed (2)</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-xs text-gray-400 uppercase tracking-wider">Katin Ruwa</p>
-                          <p className="text-lg font-bold text-yellow-400">2</p>
-                        </div>
+                    {/* Match Timeline */}
+                    <div className="space-y-3 pt-4 border-t border-gray-100">
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="w-8 text-gray-400 font-mono">88'</span>
+                        <FaCircle className="w-2 h-2 text-[#c59d5f]" />
+                        <span className="flex-1 text-gray-600">Ahmed - Yanci Stars</span>
+                        <span className="font-bold text-[#0f3036]">3-2</span>
                       </div>
-                      <button className="px-6 py-3 bg-[#c59d5f] text-[#0f3036] font-bold text-sm uppercase tracking-wider rounded-lg hover:bg-white transition-all shadow-lg flex items-center gap-2">
-                        <FaPlay className="w-4 h-4" /> Kalli Yanzu
-                      </button>
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="w-8 text-gray-400 font-mono">72'</span>
+                        <FaCircle className="w-2 h-2 text-gray-400" />
+                        <span className="flex-1 text-gray-600">Johnson - City Royals</span>
+                        <span className="font-bold">2-2</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="w-8 text-gray-400 font-mono">45'</span>
+                        <FaCircle className="w-2 h-2 text-[#c59d5f]" />
+                        <span className="flex-1 text-gray-600">Musa - Yanci Stars</span>
+                        <span className="font-bold text-[#0f3036]">2-1</span>
+                      </div>
                     </div>
+
+                    <button className="w-full mt-6 py-3 bg-gradient-to-r from-[#0f3036] to-[#1a454c] text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                      <FaTv className="w-4 h-4" /> Kallon Kai Tsaye
+                    </button>
                   </div>
                 </div>
 
-                {/* Upcoming Matches */}
-                <div className="mt-6 space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Wasannin da ke nan gaba</h4>
-                  {[
-                    { home: 'Super Eagles', away: 'Black Stars', time: '18:00', date: 'Yau' },
-                    { home: 'Kano Pillars', away: 'Enyimba', time: '16:30', date: 'Gobe' },
-                  ].map((match, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:border-[#2c7a7b]/30 hover:shadow-md transition-all cursor-pointer group">
-                      <div className="flex items-center gap-4">
-                        <div className="text-center">
-                          <p className="text-sm font-bold text-[#0f3036]">{match.time}</p>
-                          <p className="text-xs text-gray-400">{match.date}</p>
-                        </div>
-                        <div className="h-8 w-px bg-gray-200" />
-                        <div>
-                          <p className="text-sm font-bold">{match.home} <span className="text-gray-400">vs</span> {match.away}</p>
-                          <p className="text-xs text-gray-400">NPFL</p>
-                        </div>
-                      </div>
-                      <FaChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#2c7a7b] transition-colors" />
+                {/* League Standings */}
+                <div className="bg-white/95 backdrop-blur rounded-2xl overflow-hidden shadow-xl">
+                  <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FaChartLine className="w-5 h-5 text-[#0f3036]" />
+                      <span className="font-bold text-sm">Tsarin Gasar NPFL</span>
                     </div>
-                  ))}
+                    <span className="text-xs text-gray-400">2024/25</span>
+                  </div>
+                  <div className="p-2">
+                    {[
+                      { pos: 1, team: 'Yanci Stars', p: 24, gd: '+35', pts: 58 },
+                      { pos: 2, team: 'Enyimba', p: 24, gd: '+28', pts: 52 },
+                      { pos: 3, team: 'Rangers', p: 24, gd: '+22', pts: 49 },
+                      { pos: 4, team: 'Kano Pillars', p: 24, gd: '+18', pts: 46 },
+                      { pos: 5, team: 'Shooting Stars', p: 24, gd: '+12', pts: 42 },
+                    ].map((team) => (
+                      <div
+                        key={team.pos}
+                        className={`flex items-center gap-3 p-2.5 rounded-lg text-sm ${
+                          team.pos === 1
+                            ? 'bg-gradient-to-r from-[#c59d5f]/20 to-transparent border-l-4 border-[#c59d5f]'
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                          team.pos <= 3 ? 'bg-[#0f3036] text-white' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {team.pos}
+                        </span>
+                        <span className="flex-1 font-bold text-[#1c1917]">{team.team}</span>
+                        <span className="text-gray-400 text-xs w-8 text-center">{team.p}</span>
+                        <span className="text-gray-400 text-xs w-10 text-center">{team.gd}</span>
+                        <span className="font-bold text-[#0f3036] w-8 text-center">{team.pts}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="w-full py-3 text-xs font-bold uppercase tracking-wider text-[#0f3036] hover:text-[#c59d5f] transition-colors border-t border-gray-100">
+                    Duba cikakken tebur
+                  </button>
                 </div>
               </div>
 
-              {/* Sport News Grid */}
-              <div className="lg:col-span-7">
-                <div className="grid gap-6 sm:grid-cols-2">
-                  {sportArticles.map((item, index) => (
-                    <div key={item.id} className={index === 0 ? 'sm:col-span-2' : ''}>
-                      <NewsCard data={item} featured={index === 0} />
+              {/* Center Column - Upcoming Matches */}
+              <div className="lg:col-span-4">
+                <div className="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl h-full">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                      <FaCalendar className="w-5 h-5 text-[#2c7a7b]" />
+                      <span className="font-bold text-lg">Wasannin Wannan Mako</span>
                     </div>
-                  ))}
+                    <span className="text-xs px-3 py-1 bg-[#2c7a7b]/10 text-[#2c7a7b] rounded-full font-bold">5 Wasanni</span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {[
+                      { league: 'NPFL', home: 'Yanci Stars', away: 'Enyimba', date: 'Yau', time: '16:00', stadium: 'Ahmadu Bello', odds: { home: 1.85, draw: 3.20, away: 4.50 } },
+                      { league: 'Premier League', home: 'Super Eagles', away: 'Black Stars', date: 'Gobe', time: '20:00', stadium: 'Moshood Abiola', odds: { home: 1.45, draw: 4.00, away: 6.50 } },
+                      { league: 'CAF CL', home: 'Rangers', away: 'Al Ahly', date: 'Alhamis', time: '18:00', stadium: 'Awka Stadium', odds: { home: 2.10, draw: 3.10, away: 3.40 } },
+                      { league: 'NPFL', home: 'Kano Pillars', away: 'Shooting Stars', date: 'Juma\'a', time: '15:30', stadium: 'Sani Abacha', odds: { home: 1.95, draw: 3.15, away: 3.80 } },
+                    ].map((match, idx) => (
+                      <div
+                        key={idx}
+                        className="group p-4 rounded-xl border border-gray-100 hover:border-[#2c7a7b]/30 hover:shadow-lg transition-all cursor-pointer bg-white"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-[#2c7a7b] bg-[#2c7a7b]/10 px-2 py-1 rounded-full">
+                            {match.league}
+                          </span>
+                          <div className="flex items-center gap-1 text-xs text-gray-400">
+                            <FaClock className="w-3 h-3" />
+                            {match.date}, {match.time}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex-1 text-center">
+                            <div className="w-12 h-12 mx-auto bg-gradient-to-br from-[#0f3036] to-[#1a454c] rounded-xl flex items-center justify-center text-white font-bold mb-1 group-hover:scale-110 transition-transform">
+                              {match.home.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <span className="text-xs font-bold text-[#1c1917]">{match.home}</span>
+                          </div>
+
+                          <div className="px-4">
+                            <span className="text-lg font-black text-gray-300">VS</span>
+                          </div>
+
+                          <div className="flex-1 text-center">
+                            <div className="w-12 h-12 mx-auto bg-gray-100 rounded-xl flex items-center justify-center text-gray-600 font-bold mb-1 group-hover:scale-110 transition-transform">
+                              {match.away.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <span className="text-xs font-bold text-gray-600">{match.away}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-center mb-3">
+                          <span className="text-[10px] text-gray-400">{match.stadium}</span>
+                        </div>
+
+                        {/* Odds */}
+                        <div className="flex gap-2">
+                          <button className="flex-1 py-2 bg-gray-50 rounded-lg text-xs font-bold hover:bg-[#2c7a7b] hover:text-white transition-colors">
+                            1 <span className="text-[10px] opacity-70 ml-1">{match.odds.home}</span>
+                          </button>
+                          <button className="flex-1 py-2 bg-gray-50 rounded-lg text-xs font-bold hover:bg-[#2c7a7b] hover:text-white transition-colors">
+                            X <span className="text-[10px] opacity-70 ml-1">{match.odds.draw}</span>
+                          </button>
+                          <button className="flex-1 py-2 bg-gray-50 rounded-lg text-xs font-bold hover:bg-[#2c7a7b] hover:text-white transition-colors">
+                            2 <span className="text-[10px] opacity-70 ml-1">{match.odds.away}</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button className="w-full mt-6 py-3 border-2 border-[#0f3036] text-[#0f3036] rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-[#0f3036] hover:text-white transition-all flex items-center justify-center gap-2">
+                    <FaCalendar className="w-4 h-4" /> Duba Jadawalin Duka
+                  </button>
                 </div>
               </div>
+
+              {/* Right Column - Sports News */}
+              <div className="lg:col-span-4">
+                <div className="space-y-6">
+                  {/* Player of the Week Card */}
+                  <div className="bg-gradient-to-br from-[#c59d5f] to-[#d4a85f] rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-10 -mb-10" />
+
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-4">
+                        <FaStar className="w-5 h-5" />
+                        <span className="text-xs font-bold uppercase tracking-widest">Dan Wasan Makon</span>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-3xl font-bold border-2 border-white/30">
+                          AM
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-2xl font-bold">Ahmed Musa</h3>
+                          <p className="text-white/80 text-sm">Yanci Stars</p>
+                          <div className="flex items-center gap-3 mt-2">
+                            <div className="text-center">
+                              <p className="text-xl font-black">5</p>
+                              <p className="text-[10px] uppercase tracking-wider opacity-70">Kwallaye</p>
+                            </div>
+                            <div className="w-px h-8 bg-white/30" />
+                            <div className="text-center">
+                              <p className="text-xl font-black">3</p>
+                              <p className="text-[10px] uppercase tracking-wider opacity-70">Taimakawa</p>
+                            </div>
+                            <div className="w-px h-8 bg-white/30" />
+                            <div className="text-center">
+                              <p className="text-xl font-black">9.2</p>
+                              <p className="text-[10px] uppercase tracking-wider opacity-70">Maki</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Latest Sports News */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                        <FaNewspaper className="w-5 h-5 text-[#c59d5f]" />
+                        Sabbin Labarai
+                      </h3>
+                      <a href="/wasanni" className="text-xs text-[#c59d5f] hover:underline flex items-center gap-1">
+                        Duba duka <FaChevronRight className="w-3 h-3" />
+                      </a>
+                    </div>
+
+                    <div className="space-y-4">
+                      {sportArticles.slice(0, 3).map((article, idx) => (
+                        <Link
+                          key={article.id}
+                          to={`/article/${article.id}`}
+                          className="group flex gap-4 p-4 bg-white/95 backdrop-blur rounded-xl hover:bg-white transition-all cursor-pointer"
+                        >
+                          <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0">
+                            <img
+                              src={article.image}
+                              alt={article.headline}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#2c7a7b] mb-1 block">
+                              {article.kicker}
+                            </span>
+                            <h4 className="font-serif font-bold text-[#1c1917] leading-snug group-hover:text-[#0f3036] transition-colors line-clamp-2 text-sm">
+                              {article.headline}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-400">
+                              <FaClock className="w-3 h-3" />
+                              <span>2h ago</span>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quick Stats */}
+                  <div className="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/10">
+                    <h4 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
+                      <FaClock className="w-4 h-4 text-[#c59d5f]" />
+                      Saurin Labarai
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-white/5 rounded-xl">
+                        <p className="text-2xl font-black text-[#c59d5f]">12</p>
+                        <p className="text-[10px] text-white/60 uppercase tracking-wider">Kwallaye a yau</p>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-xl">
+                        <p className="text-2xl font-black text-white">8</p>
+                        <p className="text-[10px] text-white/60 uppercase tracking-wider">Wasannin da suka gama</p>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-xl">
+                        <p className="text-2xl font-black text-white">5</p>
+                        <p className="text-[10px] text-white/60 uppercase tracking-wider">Wasannin gobe</p>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-xl">
+                        <p className="text-2xl font-black text-[#c59d5f]">3</p>
+                        <p className="text-[10px] text-white/60 uppercase tracking-wider">Kai tsaye</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Sports Categories Grid */}
+            <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { icon: FaFutbol, title: 'NPFL', subtitle: 'Nigerian Premier League', color: 'from-green-500 to-emerald-600' },
+                { icon: FaUsers, title: 'Super Eagles', subtitle: 'Kungiyar Kasa', color: 'from-[#0f3036] to-[#1a454c]' },
+                { icon: FaBasketball, title: 'NBA', subtitle: 'Basketball USA', color: 'from-orange-500 to-red-500' },
+                { icon: FaMedal, title: 'Gasar Olympics', subtitle: '2024 Paris', color: 'from-blue-500 to-indigo-600' },
+              ].map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={idx}
+                    className="group p-6 bg-white/5 backdrop-blur rounded-2xl border border-white/10 hover:bg-white/10 transition-all text-left"
+                  >
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h4 className="font-bold text-white mb-1">{item.title}</h4>
+                    <p className="text-xs text-white/60">{item.subtitle}</p>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>
