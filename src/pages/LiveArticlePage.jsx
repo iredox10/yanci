@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaClock, FaShareNodes, FaBookmark, FaFacebook, FaTwitter, FaLinkedin, FaPrint, FaTowerBroadcast, FaRotate, FaLocationDot, FaArrowDown, FaTriangleExclamation, FaCirclePlay, FaFilter } from 'react-icons/fa6';
+import { FaClock, FaShareNodes, FaBookmark, FaFacebook, FaTwitter, FaLinkedin, FaPrint, FaTowerBroadcast, FaRotate, FaLocationDot, FaArrowDown, FaTriangleExclamation, FaCirclePlay, FaFilter, FaThumbtack } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import { useNews } from '../context/NewsContext';
@@ -7,68 +8,75 @@ import { useNews } from '../context/NewsContext';
 const LiveArticlePage = () => {
   const { id } = useParams();
   const { getArticleById } = useNews();
-  
+
   // Try to find the article by ID, or fallback to the known live article (ID 3) if not found or if ID is missing
   const article = getArticleById(id) || getArticleById(3);
 
+  // Load Twitter widget script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "https://platform.twitter.com/widgets.js";
+    script.async = true;
+    script.charset = "utf-8";
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const EmbedRenderer = ({ content }) => {
+    if (!content) return null;
+
+    // Simple parser: split by newlines, check for exact URL matches
+    const lines = content.split('\n');
+
+    return (
+      <>
+        {lines.map((line, idx) => {
+          const trimmed = line.trim();
+
+          // YouTube
+          const ytMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+          if (ytMatch) {
+            return (
+              <div key={idx} className="my-4 aspect-video rounded-lg overflow-hidden shadow-sm">
+                <iframe
+                  src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            );
+          }
+
+          // Twitter/X
+          const twMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/([\w_]+)\/status\/(\d+)/);
+          if (twMatch) {
+            return (
+              <div key={idx} className="my-4 flex justify-center">
+                <blockquote className="twitter-tweet" data-dnt="true" data-theme="light">
+                  <a href={`https://twitter.com/${twMatch[1]}/status/${twMatch[2]}`}></a>
+                </blockquote>
+              </div>
+            );
+          }
+
+          // Regular Text
+          return <p key={idx} className="mb-2 whitespace-pre-wrap">{line}</p>;
+        })}
+      </>
+    );
+  };
+
+
   if (!article) return <div>Loading...</div>;
 
-  const keyEvents = [
-    { time: "10:45", title: "Ministan Sufuri ya isa tashar Idu", id: "event-1" },
-    { time: "09:55", title: "Shugaban NRC ya yi jawabi", id: "event-4" },
-  ];
-
-  const timeline = [
-    {
-      id: "event-1",
-      time: "10:45 AM",
-      relativeTime: "Yanzu",
-      title: "Ministan Sufuri ya isa tashar Idu",
-      content: "Ministan Sufuri ya isa tashar jirgin kasa ta Idu domin kaddamar da gwajin farko. Ya samu tarba daga manyan jami'an hukumar jiragen kasa ta Najeriya (NRC). An shimfida jajayen darduma domin tarbar sa, yayin da jami'an tsaro ke kula da komai.",
-      image: "https://images.unsplash.com/photo-1517093157656-b9ecc94e484d?w=800&auto=format&fit=crop",
-      author: "Ibrahim Sani",
-      role: "Wakili na Musamman",
-      avatar: "IS",
-      isKey: true,
-      type: "standard"
-    },
-    {
-      id: "event-2",
-      time: "10:30 AM",
-      relativeTime: "Minti 15 da suka wuce",
-      title: "Fasinjoji sun fara shiga jirgi",
-      content: "Fasinjojin farko da aka gayyata domin gwajin sun fara shiga jirgin. Ana gudanar da binciken tsaro mai tsauri kafin shiga. Wani fasinja, Malam Audu, ya ce: 'Wannan abin a yaba ne kwarai da gaske.'",
-      author: "Amina Yusuf",
-      role: "Editan Labarai",
-      avatar: "AY",
-      isKey: false,
-      type: "quote"
-    },
-    {
-      id: "event-3",
-      time: "10:15 AM",
-      relativeTime: "Minti 30 da suka wuce",
-      title: "Jami'an tsaro sun mamaye tashar",
-      content: "Jami'an tsaro na hadin gwiwa sun mamaye tashar jirgin kasa ta Idu da Rigasa domin tabbatar da tsaro yayin gwajin. An ga motocin sojoji da na 'yan sanda a harabar tashar.",
-      author: "Ibrahim Sani",
-      role: "Wakili na Musamman",
-      avatar: "IS",
-      isKey: false,
-      type: "standard"
-    },
-    {
-      id: "event-4",
-      time: "09:55 AM",
-      relativeTime: "Awa 1 da ta wuce",
-      title: "Shugaban NRC ya yi jawabi",
-      content: "Shugaban Hukumar Jiragen Kasa ta Najeriya (NRC) ya yi jawabi ga manema labarai, inda ya bayyana cewa wannan sabon jirgi zai rage lokacin tafiya da kashi 40%. Ya kuma kara da cewa an sanya na'urorin tsaro na zamani a cikin jirgin.",
-      author: "Amina Yusuf",
-      role: "Editan Labarai",
-      avatar: "AY",
-      isKey: true,
-      type: "standard"
-    }
-  ];
+  const sortedUpdates = (article.liveUpdates || []).sort((a, b) => new Date(b.timestamp || b.id) - new Date(a.timestamp || a.id));
+  const timeline = sortedUpdates;
+  const keyEvents = sortedUpdates.filter(u => u.isKeyEvent);
+  const pinnedPost = sortedUpdates.find(u => u.isPinned);
 
   return (
     <div className="bg-[#f4f1ea] min-h-screen font-sans text-[#1c1917] selection:bg-[#c59d5f] selection:text-[#0f3036]">
@@ -94,12 +102,12 @@ const LiveArticlePage = () => {
       </div>
 
       <main className="max-w-[1200px] mx-auto px-4 md:px-6 py-8">
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* Main Content Column */}
           <div className="lg:col-span-8">
-            
+
             {/* Article Header */}
             <header className="mb-8">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#8a2c2c] mb-3">
@@ -113,7 +121,7 @@ const LiveArticlePage = () => {
               <p className="text-xl font-serif text-gray-600 leading-relaxed border-l-4 border-[#c59d5f] pl-4 mb-6">
                 Muna kawo muku labarai kai tsaye daga tashar Idu yayin da ake kaddamar da sabon tsarin jirgin kasa mai sauri wanda zai hada Abuja da Kaduna.
               </p>
-              
+
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 border-y border-gray-200 py-3">
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
@@ -127,28 +135,49 @@ const LiveArticlePage = () => {
               </div>
             </header>
 
-            {/* Pinned Summary */}
-            <div className="bg-[#fbf8f3] border-l-4 border-[#8a2c2c] p-6 shadow-sm mb-10 relative rounded-r-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="bg-[#8a2c2c] text-white p-1.5 rounded-full">
-                  <FaTriangleExclamation className="w-4 h-4" />
-                </span>
-                <h3 className="font-bold text-[#8a2c2c] uppercase tracking-widest text-sm">Muhimman Abubuwa</h3>
+            {/* Pinned Post */}
+            {pinnedPost && (
+              <div className="bg-white border-4 border-[#0f3036] p-6 shadow-md mb-8 relative">
+                <div className="absolute top-0 right-0 bg-[#0f3036] text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                  <FaThumbtack className="w-3 h-3 rotate-45" /> Pinned
+                </div>
+                <div className="flex items-center gap-2 mb-3 mt-2">
+                  <span className="text-red-600 font-bold text-xs">{pinnedPost.time}</span>
+                  <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">{pinnedPost.author}</span>
+                </div>
+                {pinnedPost.title && <h2 className="text-2xl font-serif font-black text-[#0f3036] mb-3 leading-tight">{pinnedPost.title}</h2>}
+                <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed font-serif">
+                  <p className="whitespace-pre-wrap">{pinnedPost.content}</p>
+                </div>
               </div>
-              <ul className="space-y-4">
-                {keyEvents.map((event) => (
-                  <li key={event.id} className="flex items-start gap-4 group cursor-pointer hover:bg-white p-3 rounded-sm transition-all border border-transparent hover:border-gray-200 hover:shadow-sm">
-                    <span className="font-mono font-bold text-[#0f3036] text-sm whitespace-nowrap pt-1">{event.time}</span>
-                    <div className="flex-1">
-                      <span className="text-[#1c1917] font-serif font-bold text-lg leading-tight group-hover:text-[#8a2c2c] transition-colors block mb-1">{event.title}</span>
-                      <span className="text-xs text-gray-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Je zuwa labarin <FaArrowDown className="w-3 h-3" />
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            )}
+
+            {/* Key Events Summary */}
+            {keyEvents.length > 0 && (
+              <div className="bg-[#fbf8f3] border-l-4 border-[#8a2c2c] p-6 shadow-sm mb-10 relative rounded-r-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="bg-[#8a2c2c] text-white p-1.5 rounded-full">
+                    <FaTriangleExclamation className="w-4 h-4" />
+                  </span>
+                  <h3 className="font-bold text-[#8a2c2c] uppercase tracking-widest text-sm">Muhimman Abubuwa</h3>
+                </div>
+                <ul className="space-y-4">
+                  {keyEvents.map((event) => (
+                    <li key={event.id} className="flex items-start gap-4 group cursor-pointer hover:bg-white p-3 rounded-sm transition-all border border-transparent hover:border-gray-200 hover:shadow-sm">
+                      <span className="font-mono font-bold text-[#0f3036] text-sm whitespace-nowrap pt-1">{event.time}</span>
+                      <div className="flex-1">
+                        <a href={`#${event.id}`} className="text-[#1c1917] font-serif font-bold text-lg leading-tight group-hover:text-[#8a2c2c] transition-colors block mb-1">
+                          {event.title || 'Update'}
+                        </a>
+                        <span className="text-xs text-gray-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Je zuwa labarin <FaArrowDown className="w-3 h-3" />
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Live Feed Controls */}
             <div className="sticky top-[60px] z-30 bg-[#f4f1ea]/95 backdrop-blur-sm py-4 mb-8 border-b border-gray-200 flex items-center justify-between">
@@ -159,7 +188,7 @@ const LiveArticlePage = () => {
                 </span>
                 <h2 className="font-black text-xl text-[#0f3036]">Labarai Kai Tsaye</h2>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 rounded-full text-xs font-bold text-gray-600 hover:border-[#0f3036] hover:text-[#0f3036] transition-colors">
                   <FaFilter className="w-3 h-3" /> Zaba
@@ -173,44 +202,52 @@ const LiveArticlePage = () => {
             {/* Timeline */}
             <div className="space-y-0 relative border-l-2 border-gray-200 ml-4 md:ml-6">
               {timeline.map((event) => (
-                <article key={event.id} id={event.id} className={`relative pl-8 md:pl-12 pb-12 last:pb-0 group ${event.isKey ? 'is-key-event' : ''}`}>
+                <article key={event.id} id={event.id} className={`relative pl-8 md:pl-12 pb-12 last:pb-0 group ${event.isKeyEvent ? 'is-key-event ' : ''}`}>
                   {/* Timeline Dot */}
-                  <div className={`absolute left-[-9px] top-0 w-4 h-4 rounded-full border-2 border-[#f4f1ea] ${event.isKey ? 'bg-[#8a2c2c] w-5 h-5 left-[-11px]' : 'bg-gray-400'} group-hover:scale-125 transition-transform z-10`}></div>
-                  
+                  <div className={`absolute left-[-9px] top-0 w-4 h-4 rounded-full border-2 border-[#f4f1ea] ${event.isKeyEvent ? 'bg-[#8a2c2c] w-5 h-5 left-[-11px]' : event.isSummary ? 'bg-blue-600' : 'bg-gray-400'} group-hover:scale-125 transition-transform z-10`}></div>
+
                   {/* Time Stamp */}
                   <div className="flex items-center gap-3 mb-3">
-                    <time className={`font-bold text-sm ${event.isKey ? 'text-[#8a2c2c]' : 'text-gray-500'}`}>{event.time}</time>
-                    <span className="text-xs text-gray-400 font-medium px-2 py-0.5 bg-gray-100 rounded-full">{event.relativeTime}</span>
-                    {event.isKey && <span className="text-[10px] font-bold uppercase tracking-widest text-[#c59d5f] border border-[#c59d5f] px-2 py-0.5 rounded-sm">Muhimmi</span>}
+                    <time className={`font-bold text-sm ${event.isKeyEvent ? 'text-[#8a2c2c]' : event.isSummary ? 'text-blue-800' : 'text-gray-500'}`}>{event.time}</time>
+                    <span className="text-xs text-gray-400 font-medium px-2 py-0.5 bg-gray-100 rounded-full">
+                      {/* Calculate relative time if needed, or just hide */}
+                    </span>
+                    {event.isKeyEvent && <span className="text-[10px] font-bold uppercase tracking-widest text-[#c59d5f] border border-[#c59d5f] px-2 py-0.5 rounded-sm">Muhimmi</span>}
+                    {event.isSummary && <span className="text-[10px] font-bold uppercase tracking-widest text-blue-800 border-blue-800 bg-blue-100 px-2 py-0.5 rounded-sm">Summary</span>}
+                    {event.isPinned && <span className="text-[10px] font-bold uppercase tracking-widest text-[#0f3036] border border-[#0f3036] px-2 py-0.5 rounded-sm flex items-center gap-1"><FaThumbtack className="w-2 h-2" /> Pinned</span>}
                   </div>
 
                   {/* Content Card */}
-                  <div className={`bg-white p-6 rounded-sm shadow-sm border ${event.isKey ? 'border-t-4 border-t-[#8a2c2c] border-x-gray-100 border-b-gray-100' : 'border-gray-100'} hover:shadow-md transition-shadow`}>
-                    
+                  <div className={`p-6 rounded-sm shadow-sm border transition-shadow hover:shadow-md 
+                    ${event.isKeyEvent ? 'bg-white border-t-4 border-t-[#8a2c2c] border-x-gray-100 border-b-gray-100' :
+                      event.isSummary ? 'bg-blue-50 border-blue-100' :
+                        'bg-white border-gray-100'}`}>
+
                     {/* Author Info */}
                     <div className="flex items-center gap-2 mb-4 border-b border-gray-50 pb-3">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${event.author === 'Ibrahim Sani' ? 'bg-[#0f3036]' : 'bg-[#c59d5f]'}`}>
-                        {event.avatar}
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white bg-[#0f3036]`}>
+                        {event.author ? event.author.charAt(0) : 'E'}
                       </div>
-                      <span className="text-xs font-bold text-gray-700">{event.author}</span>
-                      <span className="text-[10px] text-gray-400 uppercase tracking-wider">{event.role}</span>
+                      <span className="text-xs font-bold text-gray-700">{event.author || 'Editor'}</span>
                     </div>
 
-                    <h3 className="font-serif font-bold text-xl md:text-2xl text-[#1c1917] mb-3 leading-tight">
-                      {event.title}
-                    </h3>
+                    {event.title && (
+                      <h3 className="font-serif font-bold text-xl md:text-2xl text-[#1c1917] mb-3 leading-tight">
+                        {event.title}
+                      </h3>
+                    )}
 
                     {event.image && (
                       <figure className="mb-4">
                         <img src={event.image} alt={event.title} className="w-full h-auto rounded-sm" />
                         <figcaption className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                          <FaLocationDot className="w-3 h-3" /> Tashar Idu, Abuja
+                          <FaLocationDot className="w-3 h-3" /> Live Update
                         </figcaption>
                       </figure>
                     )}
 
                     <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed font-body">
-                      <p>{event.content}</p>
+                      <EmbedRenderer content={event.content} />
                     </div>
 
                     {/* Social Actions */}
@@ -236,12 +273,12 @@ const LiveArticlePage = () => {
               Loda Karin Labarai
             </button>
 
-          </div>
+          </div >
 
           {/* Sidebar Column */}
-          <div className="lg:col-span-4">
+          < div className="lg:col-span-4" >
             <div className="sticky top-24 space-y-8">
-            
+
               {/* Live Video Placeholder */}
               {article.videoUrl ? (
                 <div className="bg-[#1c1917] text-white rounded-sm overflow-hidden shadow-lg">
@@ -252,11 +289,11 @@ const LiveArticlePage = () => {
                     <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                   </div>
                   <div className="aspect-video bg-black relative">
-                    <iframe 
-                      src={article.videoUrl} 
-                      className="w-full h-full" 
-                      frameBorder="0" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    <iframe
+                      src={article.videoUrl}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     ></iframe>
                   </div>

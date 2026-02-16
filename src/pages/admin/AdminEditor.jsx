@@ -3,12 +3,12 @@ import { useNews } from '../../context/NewsContext';
 import { useAuth } from '../../context/AuthContext';
 import { appwriteService } from '../../lib/appwrite';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  FaFloppyDisk, 
-  FaArrowLeft, 
-  FaCloudArrowUp, 
-  FaSpinner, 
-  FaEye, 
+import {
+  FaFloppyDisk,
+  FaArrowLeft,
+  FaCloudArrowUp,
+  FaSpinner,
+  FaEye,
   FaTowerBroadcast,
   FaClock,
   FaCheck,
@@ -159,7 +159,7 @@ const AdminEditor = () => {
     const range = quill.getSelection(true);
     let placeholder = '';
 
-    switch(type) {
+    switch (type) {
       case 'map':
         const mapUrl = prompt('Enter Google Maps Embed URL:');
         if (mapUrl) placeholder = `<div class="yanci-atom-map" data-url="${mapUrl}">[MAP COMPONENT]</div>`;
@@ -169,6 +169,32 @@ const AdminEditor = () => {
         break;
       case 'highlight':
         placeholder = `<div class="yanci-atom-highlight" style="background:#fbf8f3; border-left:4px solid #c59d5f; padding:1.5rem; margin:2rem 0;"><strong>MUHIMMIN ABIN LURA:</strong><br/>Shigar da muhimman bayanai a nan...</div>`;
+        break;
+      case 'review':
+        const reviewTitle = prompt('Review Item Name:');
+        const rating = prompt('Rating (1-5):', '5');
+        if (reviewTitle) {
+          placeholder = `<div class="yanci-atom-review" data-title="${reviewTitle}" data-rating="${rating}">[REVIEW: ${reviewTitle} - ${rating}/5]</div>`;
+        }
+        break;
+      case 'profile':
+        const name = prompt('Name:');
+        const role = prompt('Role/Title:');
+        const image = prompt('Image URL (optional):');
+        const desc = prompt('Description:');
+        if (name) {
+          const safeDesc = desc ? desc.replace(/"/g, '&quot;') : '';
+          placeholder = `<div class="yanci-atom-profile" data-name="${name}" data-role="${role || ''}" data-image="${image || ''}" data-desc="${safeDesc}">[PROFILE: ${name}]</div>`;
+        }
+        break;
+      case 'image':
+        const imgUrl = prompt('Image URL:');
+        const caption = prompt('Caption:');
+        const credit = prompt('Credit:');
+        if (imgUrl) {
+          const safeCaption = caption ? caption.replace(/"/g, '&quot;') : '';
+          placeholder = `<div class="yanci-atom-image" data-src="${imgUrl}" data-caption="${safeCaption}" data-credit="${credit || ''}">[IMAGE: ${caption || 'Untitled'}]</div>`;
+        }
         break;
       default:
         break;
@@ -211,7 +237,7 @@ const AdminEditor = () => {
             <div className="flex items-center gap-2 text-[10px] whitespace-nowrap">
               {lastSaved ? (
                 <span className="text-green-600 flex items-center gap-1">
-                  <FaCheck className="w-2 h-2" /> {lastSaved.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  <FaCheck className="w-2 h-2" /> {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               ) : (
                 <span className="text-gray-400">Not saved</span>
@@ -239,11 +265,10 @@ const AdminEditor = () => {
           <button
             onClick={handleSave}
             disabled={uploading || !isDirty}
-            className={`p-2 sm:px-6 sm:py-2 rounded-full sm:rounded-md text-xs font-bold flex items-center gap-2 transition-all ${
-              isDirty 
-                ? 'bg-[#0f3036] text-white hover:bg-[#1a454c] shadow-md' 
+            className={`p-2 sm:px-6 sm:py-2 rounded-full sm:rounded-md text-xs font-bold flex items-center gap-2 transition-all ${isDirty
+                ? 'bg-[#0f3036] text-white hover:bg-[#1a454c] shadow-md'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
+              }`}
           >
             {uploading ? <FaSpinner className="animate-spin" /> : <FaFloppyDisk />}
             <span className="hidden sm:inline">Save</span>
@@ -334,19 +359,19 @@ const AdminEditor = () => {
               {showComponentMenu && (
                 <div className="absolute bottom-full mb-4 right-0 sm:left-1/2 sm:-translate-x-1/2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 min-w-[200px] animate-fade-in-up">
                   <p className="text-[10px] font-bold uppercase text-gray-400 px-4 py-2">Add Component</p>
-                  <button 
+                  <button
                     onClick={() => insertComponent('map')}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-sm transition-colors text-left"
                   >
                     <FaMapLocationDot className="text-blue-500" /> Map
                   </button>
-                  <button 
+                  <button
                     onClick={() => insertComponent('quote')}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-sm transition-colors text-left"
                   >
                     <FaQuoteLeft className="text-accent" /> Pull Quote
                   </button>
-                  <button 
+                  <button
                     onClick={() => insertComponent('highlight')}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-sm transition-colors text-left"
                   >
@@ -354,11 +379,10 @@ const AdminEditor = () => {
                   </button>
                 </div>
               )}
-              <button 
+              <button
                 onClick={() => setShowComponentMenu(!showComponentMenu)}
-                className={`w-12 h-12 md:w-14 md:h-14 rounded-full shadow-2xl flex items-center justify-center transition-all ${
-                  showComponentMenu ? 'bg-[#c70000] rotate-45 text-white' : 'bg-[#0f3036] text-white hover:scale-110'
-                }`}
+                className={`w-12 h-12 md:w-14 md:h-14 rounded-full shadow-2xl flex items-center justify-center transition-all ${showComponentMenu ? 'bg-[#c70000] rotate-45 text-white' : 'bg-[#0f3036] text-white hover:scale-110'
+                  }`}
               >
                 <FaPlus className="text-lg md:text-xl" />
               </button>
@@ -385,7 +409,7 @@ const AdminEditor = () => {
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
                 Metadata
               </h3>
-              
+
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-gray-600">Pillar</label>
                 <select
@@ -461,8 +485,8 @@ const AdminEditor = () => {
                         <FaCloudArrowUp />
                         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
                       </label>
-                      <button 
-                        onClick={() => setFormData({...formData, image: ''})}
+                      <button
+                        onClick={() => setFormData({ ...formData, image: '' })}
                         className="p-2 bg-white text-red-600 rounded-full hover:bg-red-50"
                       >
                         <FaTrash />
