@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaClock, FaShareNodes, FaBookmark, FaFacebook, FaTwitter, FaLinkedin, FaPrint, FaTowerBroadcast, FaRotate, FaLocationDot, FaArrowDown, FaTriangleExclamation, FaCirclePlay, FaFilter, FaThumbtack } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
@@ -11,6 +11,21 @@ const LiveArticlePage = () => {
 
   // Try to find the article by ID, or fallback to the known live article (ID 3) if not found or if ID is missing
   const article = getArticleById(id) || getArticleById(3);
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
+
+  // Auto-refresh logic (mainly for non-realtime fallback or to ensure freshness)
+  useEffect(() => {
+    let interval;
+    if (isAutoRefreshing) {
+      interval = setInterval(() => {
+        // In a real app with polling, we'd fetch here. 
+        // With Appwrite realtime, this might just be a visual indicator or a safety poll.
+        // For now, we'll just log (or if we had a re-fetch function, call it).
+        console.log('Auto-refreshing live details...');
+      }, 30000);
+    }
+    return () => clearInterval(interval);
+  }, [isAutoRefreshing]);
 
   // Load Twitter widget script
   useEffect(() => {
@@ -93,8 +108,12 @@ const LiveArticlePage = () => {
             <span className="font-bold uppercase tracking-widest text-xs md:text-sm">Kai Tsaye: Gwajin Jirgin Kasa</span>
           </div>
           <div className="flex items-center gap-4 text-xs font-medium">
-            <button className="hidden md:flex items-center gap-1 hover:text-gray-200 transition-colors">
-              <FaRotate className="w-3 h-3" /> Sabuntawa ta atomatik
+            <button
+              onClick={() => setIsAutoRefreshing(!isAutoRefreshing)}
+              className={`hidden md:flex items-center gap-1 transition-colors ${isAutoRefreshing ? 'text-[#c59d5f] animate-pulse' : 'text-gray-300 hover:text-white'}`}
+            >
+              <FaRotate className={`w-3 h-3 ${isAutoRefreshing ? 'animate-spin' : ''}`} />
+              {isAutoRefreshing ? 'Sabuntawa tana kunne' : 'Kunna sabuntawa'}
             </button>
             <span className="bg-white/20 px-2 py-1 rounded text-[10px] font-bold">Sabuwar wallafa: Yanzu</span>
           </div>
@@ -366,21 +385,23 @@ const LiveArticlePage = () => {
                 </div>
               )}
 
-              {/* Map Placeholder */}
-              <div className="bg-[#fbf8f3] border border-[#c59d5f]/20 p-6 rounded-sm">
-                <h3 className="font-bold text-[#c59d5f] uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
-                  <FaLocationDot className="w-4 h-4" /> Taswira
-                </h3>
-                <div className="aspect-square bg-[#e5e0d8] rounded-sm relative overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
-                  <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-50 mix-blend-multiply" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-4 h-4 bg-[#8a2c2c] rounded-full border-2 border-white shadow-lg animate-bounce"></div>
-                  </div>
-                  <div className="absolute bottom-2 left-2 bg-white/90 px-2 py-1 text-[10px] font-bold rounded-sm shadow-sm">
-                    Abuja - Kaduna Rail Line
+              {/* Dynamic Map Section */}
+              {article.mapEmbedUrl && (
+                <div className="bg-[#fbf8f3] border border-[#c59d5f]/20 p-6 rounded-sm">
+                  <h3 className="font-bold text-[#c59d5f] uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
+                    <FaLocationDot className="w-4 h-4" /> Taswira
+                  </h3>
+                  <div className="aspect-square bg-[#e5e0d8] rounded-sm relative overflow-hidden">
+                    <iframe
+                      src={article.mapEmbedUrl}
+                      className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-700"
+                      allowFullScreen=""
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

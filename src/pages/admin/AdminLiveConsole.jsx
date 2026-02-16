@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useNews } from '../../context/NewsContext';
 import { useAuth } from '../../context/AuthContext';
-import { FaArrowLeft, FaPaperPlane, FaImage, FaBold, FaItalic, FaTrash, FaStar, FaChevronRight, FaThumbtack } from 'react-icons/fa6';
+import { FaArrowLeft, FaPaperPlane, FaImage, FaBold, FaItalic, FaTrash, FaStar, FaChevronRight, FaThumbtack, FaGear, FaXmark, FaCirclePlay, FaLocationDot } from 'react-icons/fa6';
 
 const AdminLiveConsole = () => {
   const { id } = useParams();
@@ -25,7 +25,29 @@ const AdminLiveConsole = () => {
     }
   }, [article, navigate]);
 
+  const [showSettings, setShowSettings] = useState(false);
+  const [settingsData, setSettingsData] = useState({
+    videoUrl: '',
+    keyFigures: ''
+  });
+
+  // Initialize settings when article loads
+  useEffect(() => {
+    if (article) {
+      setSettingsData({
+        videoUrl: article.videoUrl || '',
+        keyFigures: article.keyFigures || '',
+        mapEmbedUrl: article.mapEmbedUrl || ''
+      });
+    }
+  }, [article]);
+
   if (!article) return null;
+
+  const handleSaveSettings = async () => {
+    await updateArticle(article.id, settingsData);
+    setShowSettings(false);
+  };
 
   const handlePost = () => {
     if (!updateText.trim()) return;
@@ -88,25 +110,88 @@ const AdminLiveConsole = () => {
             <h2 className="text-lg md:text-xl font-black text-[#0f3036] line-clamp-1 leading-tight uppercase tracking-tight">{article.headline}</h2>
           </div>
         </div>
-        <div className="flex gap-2">
-          {article.isLive && (
-            <button
-              onClick={handleEndCoverage}
-              className="flex-1 sm:flex-none px-4 py-2 bg-white border border-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-50 text-xs transition-all uppercase tracking-wider"
-            >
-              End Live
-            </button>
-          )}
-          <a
-            href={`/article/${article.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 sm:flex-none px-4 py-2 bg-[#0f3036] text-white font-bold rounded-lg hover:bg-[#1a4a52] text-xs transition-all uppercase tracking-wider text-center"
+        <button
+          onClick={() => setShowSettings(true)}
+          className="flex-1 sm:flex-none px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 text-xs transition-all uppercase tracking-wider flex items-center justify-center gap-2"
+        >
+          <FaGear /> Settings
+        </button>
+        {article.isLive && (
+          <button
+            onClick={handleEndCoverage}
+            className="flex-1 sm:flex-none px-4 py-2 bg-white border border-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-50 text-xs transition-all uppercase tracking-wider"
           >
-            View Site
-          </a>
-        </div>
+            End Live
+          </button>
+        )}
+        <a
+          href={`/article/${article.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 sm:flex-none px-4 py-2 bg-[#0f3036] text-white font-bold rounded-lg hover:bg-[#1a4a52] text-xs transition-all uppercase tracking-wider text-center"
+        >
+          View Site
+        </a>
       </div>
+
+
+      {/* Settings Modal */}
+      {
+        showSettings && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h3 className="font-bold text-lg text-[#0f3036] uppercase tracking-widest">Live Configuration</h3>
+                <button onClick={() => setShowSettings(false)} className="text-gray-400 hover:text-red-500">
+                  <FaXmark className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6 space-y-6">
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest block">Live Video URL (YouTube)</label>
+                  <div className="relative">
+                    <FaCirclePlay className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      value={settingsData.videoUrl}
+                      onChange={(e) => setSettingsData({ ...settingsData, videoUrl: e.target.value })}
+                      placeholder="https://youtube.com/..."
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#c59d5f] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest block">Key Figures (Stakeholders)</label>
+                  <textarea
+                    value={settingsData.keyFigures}
+                    onChange={(e) => setSettingsData({ ...settingsData, keyFigures: e.target.value })}
+                    placeholder="Name - Role (One per line)"
+                    rows="5"
+                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#c59d5f] outline-none leading-relaxed"
+                  />
+                </div>
+
+              </div>
+              <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="px-6 py-2 text-gray-500 font-bold text-xs uppercase tracking-widest hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveSettings}
+                  className="px-6 py-2 bg-[#0f3036] text-white font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-[#1a4a52] transition-colors shadow-lg"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
 
       {/* Mobile Tab Switcher */}
       <div className="flex lg:hidden bg-gray-100 p-1 rounded-xl mb-4 shrink-0">
@@ -254,7 +339,7 @@ const AdminLiveConsole = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -1,11 +1,11 @@
 import { useParams, Link } from 'react-router-dom';
-import { 
-  FaClock, 
-  FaShareNodes, 
-  FaBookmark, 
-  FaFacebook, 
-  FaTwitter, 
-  FaLinkedin, 
+import {
+  FaClock,
+  FaShareNodes,
+  FaBookmark,
+  FaFacebook,
+  FaTwitter,
+  FaLinkedin,
   FaPrint,
   FaChevronLeft,
   FaChevronRight,
@@ -37,6 +37,9 @@ import MapAtom from '../components/guardian/atoms/MapAtom';
 import HighlightAtom from '../components/guardian/atoms/HighlightAtom';
 import SupportBanner from '../components/guardian/atoms/SupportBanner';
 import SeriesHeader from '../components/guardian/atoms/SeriesHeader';
+import ReviewAtom from '../components/guardian/atoms/ReviewAtom';
+import ProfileAtom from '../components/guardian/atoms/ProfileAtom';
+import ImageAtom from '../components/guardian/atoms/ImageAtom';
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -107,7 +110,43 @@ const ArticlePage = () => {
           </HighlightAtom>
         );
       }
-      
+
+      if (part.includes('yanci-atom-review')) {
+        const titleMatch = part.match(/data-title="([^"]*)"/);
+        const ratingMatch = part.match(/data-rating="([^"]*)"/);
+        return <ReviewAtom key={index} title={titleMatch?.[1]} rating={ratingMatch?.[1]} />;
+      }
+
+      if (part.includes('yanci-atom-profile')) {
+        const nameMatch = part.match(/data-name="([^"]*)"/);
+        const roleMatch = part.match(/data-role="([^"]*)"/);
+        const imageMatch = part.match(/data-image="([^"]*)"/);
+        const descMatch = part.match(/data-desc="([^"]*)"/);
+        return (
+          <ProfileAtom
+            key={index}
+            name={nameMatch?.[1]}
+            role={roleMatch?.[1]}
+            image={imageMatch?.[1]}
+            description={descMatch?.[1]}
+          />
+        );
+      }
+
+      if (part.includes('yanci-atom-image')) {
+        const srcMatch = part.match(/data-src="([^"]*)"/);
+        const captionMatch = part.match(/data-caption="([^"]*)"/);
+        const creditMatch = part.match(/data-credit="([^"]*)"/);
+        return (
+          <ImageAtom
+            key={index}
+            src={srcMatch?.[1]}
+            caption={captionMatch?.[1]}
+            credit={creditMatch?.[1]}
+          />
+        );
+      }
+
       return <div key={index} dangerouslySetInnerHTML={{ __html: part }} />;
     });
   };
@@ -131,7 +170,7 @@ const ArticlePage = () => {
 
       {/* Reading Progress Bar */}
       <div className="fixed top-[48px] left-0 w-full h-1 bg-gray-200 z-50">
-        <div 
+        <div
           className="h-full transition-all duration-150"
           style={{ width: `${readingProgress}%`, backgroundColor: pillarColor }}
         />
@@ -139,12 +178,12 @@ const ArticlePage = () => {
 
       <main className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 md:py-12">
         <div className="grid lg:grid-cols-4 gap-12">
-          
+
           {/* LEFT 1/4 - METADATA & STATS */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-[#0f3036] transition-colors mb-8 group"
               >
                 <FaChevronLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
@@ -195,7 +234,7 @@ const ArticlePage = () => {
                     <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#25D366] hover:border-[#25D366] transition-all">
                       <FaWhatsapp className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => setIsBookmarked(!isBookmarked)}
                       className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${isBookmarked ? 'bg-[#c59d5f] border-[#c59d5f] text-white' : 'text-gray-400 border-gray-200 hover:text-[#c59d5f] hover:border-[#c59d5f]'}`}
                     >
@@ -210,23 +249,23 @@ const ArticlePage = () => {
           {/* RIGHT 3/4 - CONTENT & DYNAMIC SIDEBAR */}
           <div className="lg:col-span-3">
             <div className="grid lg:grid-cols-3 gap-12">
-              
+
               {/* MAIN CONTENT AREA */}
               <div className="lg:col-span-2">
                 <SeriesHeader title={article.series} />
-                
+
                 <header className="mb-10">
-                  <span 
+                  <span
                     className="inline-block px-3 py-1 mb-6 text-[10px] font-bold uppercase tracking-[0.2em] text-white rounded-sm shadow-sm"
                     style={{ backgroundColor: pillarColor }}
                   >
                     {article.kicker || article.pillar}
                   </span>
-                  
+
                   <h1 className="text-4xl md:text-6xl font-serif font-black leading-[1.1] text-[#0f3036] mb-8">
                     {article.headline}
                   </h1>
-                  
+
                   <p className="text-2xl font-serif text-gray-600 leading-relaxed border-l-4 pl-8 py-2 italic" style={{ borderColor: pillarColor }}>
                     {article.trail || "Takaitaccen bayani game da labarin zai kasance a nan domin baiwa mai karatu haske game da abin da ya faru."}
                   </p>
@@ -235,9 +274,9 @@ const ArticlePage = () => {
                 {article.image && (
                   <figure className="mb-12 group">
                     <div className="aspect-video w-full overflow-hidden rounded-sm shadow-sm">
-                      <img 
-                        src={article.image} 
-                        alt={article.headline} 
+                      <img
+                        src={article.image}
+                        alt={article.headline}
                         className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                       />
                     </div>
@@ -332,8 +371,8 @@ const ArticlePage = () => {
                   <h3 className="font-serif text-2xl font-black text-[#0f3036] mb-4 leading-tight text-center">Yanci Newsletter</h3>
                   <p className="text-sm text-gray-500 mb-8 text-center leading-relaxed">Ku kasance da rahotannin gaskiya kowane safiya.</p>
                   <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       placeholder="Adireshin imel..."
                       className="w-full bg-white border border-gray-200 p-4 text-sm outline-none focus:border-[#c59d5f] transition-all"
                     />
