@@ -69,9 +69,9 @@ export const appwriteService = {
             return false;
         }
     },
-    
+
     updateLiveUpdates: async (articleId, updates) => {
-         try {
+        try {
             return await databases.updateDocument(
                 DATABASE_ID,
                 COLLECTION_ID_ARTICLES,
@@ -101,7 +101,8 @@ export const appwriteService = {
 
     getFilePreview: (fileId) => {
         try {
-            return storage.getFileView(BUCKET_ID, fileId).href;
+            const result = storage.getFileView(BUCKET_ID, fileId);
+            return result.href ? result.href : result;
         } catch (error) {
             console.error("AppwriteService :: getFilePreview :: error", error);
             return null;

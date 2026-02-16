@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useNews } from '../../context/NewsContext';
 import { useAuth } from '../../context/AuthContext';
-import { FaArrowLeft, FaPaperPlane, FaImage, FaBold, FaItalic, FaTrash, FaStar, FaChevronRight, FaThumbtack, FaGear, FaXmark, FaCirclePlay, FaLocationDot } from 'react-icons/fa6';
+import { appwriteService } from '../../lib/appwrite';
+import getCroppedImg from '../../lib/cropUtils';
+import Cropper from 'react-easy-crop';
+import { FaArrowLeft, FaPaperPlane, FaImage, FaBold, FaItalic, FaTrash, FaStar, FaChevronRight, FaThumbtack, FaGear, FaXmark, FaCirclePlay, FaLocationDot, FaSpinner, FaCheck } from 'react-icons/fa6';
 
 const AdminLiveConsole = () => {
   const { id } = useParams();
@@ -15,7 +18,17 @@ const AdminLiveConsole = () => {
   const [isKeyEvent, setIsKeyEvent] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [isSummary, setIsSummary] = useState(false);
+  const [image, setImage] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('editor'); // 'editor' or 'feed' for mobile
+  const fileInputRef = useRef(null);
+
+  // Cropper State
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [croppingImage, setCroppingImage] = useState(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   const article = getArticleById(id);
 
@@ -49,6 +62,48 @@ const AdminLiveConsole = () => {
     setShowSettings(false);
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Show local preview immediately for cropping
+    const localPreviewUrl = URL.createObjectURL(file);
+    setCroppingImage(localPreviewUrl);
+    setShowCropper(true);
+
+    // Reset file input so same file can be selected again if needed
+    e.target.value = null;
+  };
+
+  const onCropComplete = (croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const handleCropConfirm = async () => {
+    try {
+      setUploading(true);
+      const croppedImageBlob = await getCroppedImg(croppingImage, croppedAreaPixels);
+      const file = new File([croppedImageBlob], "upload.jpg", { type: "image/jpeg" });
+
+      const response = await appwriteService.uploadFile(file);
+      const fileUrl = appwriteService.getFilePreview(response.$id);
+
+      if (fileUrl) {
+        setImage(fileUrl);
+      } else {
+        alert('Upload successful but failed to get image URL.');
+      }
+
+      setShowCropper(false);
+      setCroppingImage(null);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to crop/upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handlePost = () => {
     if (!updateText.trim()) return;
 
@@ -56,6 +111,7 @@ const AdminLiveConsole = () => {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       title: updateTitle,
       content: updateText,
+      image: image,
       isKeyEvent: isKeyEvent,
       isPinned: isPinned,
       isSummary: isSummary,
@@ -65,6 +121,7 @@ const AdminLiveConsole = () => {
     addLiveUpdate(article.id, newUpdate);
     setUpdateText('');
     setUpdateTitle('');
+    setImage('');
     setIsKeyEvent(false);
     setIsPinned(false);
     setIsSummary(false);
@@ -193,6 +250,64 @@ const AdminLiveConsole = () => {
         )
       }
 
+      {/* Image Cropper Modal */}
+      {showCropper && (
+        <div className="fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col h-[80vh]">
+            <div className="p-4 border-b border-gray-100 flex justify-between items-center shrink-0">
+              <h3 className="font-bold text-lg text-[#0f3036] uppercase tracking-widest">Crop Image</h3>
+              <button onClick={() => setShowCropper(false)} className="text-gray-400 hover:text-red-500">
+                <FaXmark className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 relative bg-gray-900">
+              <Cropper
+                image={croppingImage}
+                crop={crop}
+                zoom={zoom}
+                aspect={16 / 9}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+              />
+            </div>
+
+            <div className="p-6 border-t border-gray-100 bg-gray-50 flex flex-col gap-4 shrink-0">
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-bold text-gray-500 uppercase">Zoom</span>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-labelledby="Zoom"
+                  onChange={(e) => setZoom(e.target.value)}
+                  className="w-full accent-[#0f3036]"
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowCropper(false)}
+                  className="px-6 py-2 text-gray-500 font-bold text-xs uppercase tracking-widest hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCropConfirm}
+                  disabled={uploading}
+                  className="px-6 py-2 bg-[#0f3036] text-white font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-[#1a4a52] transition-colors shadow-lg flex items-center gap-2"
+                >
+                  {uploading ? <FaSpinner className="animate-spin" /> : <FaCheck />}
+                  Confirm & Upload
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Tab Switcher */}
       <div className="flex lg:hidden bg-gray-100 p-1 rounded-xl mb-4 shrink-0">
         <button
@@ -230,11 +345,35 @@ const AdminLiveConsole = () => {
               <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"><FaBold className="w-4 h-4" /></button>
               <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"><FaItalic className="w-4 h-4" /></button>
               <div className="w-px h-4 bg-gray-200 mx-1"></div>
-              <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors flex items-center gap-2">
-                <FaImage className="w-4 h-4" />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className={`p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors flex items-center gap-2 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {uploading ? <FaSpinner className="w-4 h-4 animate-spin" /> : <FaImage className="w-4 h-4" />}
                 <span className="text-[10px] font-bold uppercase hidden sm:inline">Add Media</span>
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
             </div>
+
+            {image && (
+              <div className="relative mb-4 group rounded-lg overflow-hidden border border-gray-100 w-fit">
+                <img src={image} alt="Preview" className="h-32 w-auto object-cover" />
+                <button
+                  onClick={() => setImage('')}
+                  className="absolute top-1 right-1 bg-white/90 text-red-600 p-1.5 rounded-full hover:bg-white shadow-sm"
+                  title="Remove image"
+                >
+                  <FaTrash className="w-3 h-3" />
+                </button>
+              </div>
+            )}
 
             <textarea
               className="flex-1 w-full resize-none outline-none text-base md:text-lg placeholder:text-gray-200 text-gray-800 leading-relaxed font-serif"
