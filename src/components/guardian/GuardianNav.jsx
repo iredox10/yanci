@@ -1,15 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaChevronDown, FaBars, FaMagnifyingGlass, FaUser, FaXmark, FaGlobe } from 'react-icons/fa6';
 
 const GuardianNav = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const searchInputRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 100);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Focus input when search panel opens
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchOpen]);
+
+  // Close search on route change
+  useEffect(() => {
+    setIsSearchOpen(false);
+    setSearchInput('');
+  }, [location.pathname]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = searchInput.trim();
+    if (q) {
+      navigate(`/search?q=${encodeURIComponent(q)}`);
+      setIsSearchOpen(false);
+      setSearchInput('');
+    }
+  };
 
   const currentDate = new Date().toLocaleDateString('ha-NG', {
     weekday: 'long',
@@ -62,7 +91,11 @@ const GuardianNav = () => {
               </button>
 
               <div className="flex items-center gap-2 border-l border-white/10 pl-6">
-                <button className="p-2 hover:bg-white/10 rounded-full transition-colors text-yanci-accent">
+                <button
+                  onClick={() => setIsSearchOpen(true)}
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors text-yanci-accent"
+                  aria-label="Nema"
+                >
                   <FaMagnifyingGlass className="w-6 h-6" />
                 </button>
                 <button
@@ -185,6 +218,35 @@ const GuardianNav = () => {
           </div>
         </div>
       </div>
+      {/* Search Overlay */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-start justify-center pt-24 px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
+            <form onSubmit={handleSearchSubmit} className="flex items-center px-5 py-4 gap-3">
+              <FaMagnifyingGlass className="text-gray-400 flex-shrink-0" size={20} />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Nemi labarai..."
+                className="flex-1 text-lg text-gray-900 outline-none placeholder-gray-400"
+              />
+              <button
+                type="button"
+                onClick={() => { setIsSearchOpen(false); setSearchInput(''); }}
+                className="p-1 text-gray-400 hover:text-gray-700 transition-colors"
+              >
+                <FaXmark size={20} />
+              </button>
+            </form>
+            <div className="px-5 pb-4 border-t border-gray-100">
+              <p className="text-xs text-gray-400 mt-3">Danna Enter don nema</p>
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 };

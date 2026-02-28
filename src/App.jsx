@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { NewsProvider } from './context/NewsContext';
 import GuardianHome from './pages/GuardianHome';
 import ArticlePage from './pages/ArticlePage';
 import LiveArticlePage from './pages/LiveArticlePage';
+import SearchPage from './pages/SearchPage';
 
 import SiyasaPage from './pages/SiyasaPage';
 import LabaraiPage from './pages/LabaraiPage';
@@ -30,6 +32,7 @@ import AudioPlayer from './components/guardian/AudioPlayer';
 
 function App() {
   return (
+    <HelmetProvider>
     <AuthProvider>
       <NewsProvider>
         <AudioProvider>
@@ -37,17 +40,19 @@ function App() {
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<GuardianHome />} />
+              <Route path="/search" element={<SearchPage />} />
               <Route path="/siyasa" element={<SiyasaPage />} />
               <Route path="/labarai" element={<LabaraiPage />} />
               <Route path="/kasuwanci" element={<KasuwanciPage />} />
               <Route path="/wasanni" element={<WasanniPage />} />
               <Route path="/fasaha" element={<FasahaPage />} />
               <Route path="/raayi" element={<RaayiPage />} />
-                          <Route path="/aladu" element={<AladuPage />} />
-                          <Route path="/bidiyo" element={<BidiyoPage />} />
-                          <Route path="/article/:id" element={<ArticlePage />} />
-              
-                          {/* Admin Routes */}              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/aladu" element={<AladuPage />} />
+              <Route path="/bidiyo" element={<BidiyoPage />} />
+              <Route path="/article/:id" element={<ArticlePage />} />
+
+              {/* Admin Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="articles" element={<AdminArticles />} />
@@ -66,6 +71,7 @@ function App() {
         </AudioProvider>
       </NewsProvider>
     </AuthProvider>
+    </HelmetProvider>
   );
 }
 

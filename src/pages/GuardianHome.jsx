@@ -35,6 +35,8 @@ import { PILLARS } from '../data/guardianData';
 import { useNews } from '../context/NewsContext';
 import { useAudio } from '../context/AudioContext';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
+import { useViewTracker } from '../hooks/useViewTracker';
 
 const highlightPanels = [
   {
@@ -105,12 +107,14 @@ const useCountUp = (end, duration = 2000) => {
 const GuardianHome = () => {
   const { articles, ticker } = useNews();
   const { playTrack } = useAudio();
+  const { getMostRead } = useViewTracker();
   const [activeTab, setActiveTab] = useState('latest');
   const [isVisible, setIsVisible] = useState({});
 
   const headlines = articles.filter(a => a.section === 'headlines');
   const heroStory = headlines.find((headline) => headline.type === 'hero') ?? headlines[0];
   const supportingHeadlines = headlines.filter((headline) => headline.id !== heroStory?.id);
+  const popularArticles = getMostRead(articles, 5);
 
   const opinionArticles = articles.filter(a => a.section === 'opinion');
   const sportArticles = articles.filter(a => a.section === 'sport');
@@ -145,6 +149,7 @@ const GuardianHome = () => {
 
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917] selection:bg-[#c59d5f] selection:text-white overflow-x-hidden">
+      <SEO />
       <GuardianNav />
 
       <main className="relative">
@@ -221,7 +226,7 @@ const GuardianHome = () => {
 
                     <div className="p-4">
                       <div className="space-y-0">
-                        {supportingHeadlines.slice(0, 5).map((item, index) => (
+                        {(activeTab === 'popular' ? popularArticles : supportingHeadlines).slice(0, 5).map((item, index) => (
                           <Link 
                             to={`/article/${item.id}`} 
                             key={item.id} 

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:media="http://search.yahoo.com/mrss/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+>
+  <channel>
+    <title>Yanci — Wasanni</title>
+    <link>https://yanci.ng/wasanni</link>
+    <description>Labarai na wasanni da kwallon kafa daga Yanci.</description>
+    <language>ha</language>
+    <lastBuildDate>Sat, 28 Feb 2026 14:16:51 GMT</lastBuildDate>
+    <atom:link href="https://yanci.ng/rss/wasanni" rel="self" type="application/rss+xml" />
+    <item>
+      <title>An sanar da sabbin sunaye cikin jerin Super Eagles kafin wasan sada zumunci</title>
+      <link>https://yanci.ng/article/5</link>
+      <guid isPermaLink="true">https://yanci.ng/article/5</guid>
+      <description>AFCON 2025</description>
+      <author>Yanci</author>
+      <pubDate>Sat, 28 Feb 2026 14:16:51 GMT</pubDate>
+      <enclosure url="https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=1200&amp;auto=format&amp;fit=crop" type="image/jpeg" length="0" />
+    </item>
+    <item>
+      <title>Ndidi ya kafa sabon rikodi na kwace kwallon 18 a wasa guda</title>
+      <link>https://yanci.ng/article/6</link>
+      <guid isPermaLink="true">https://yanci.ng/article/6</guid>
+      <description>Gasara</description>
+      <author>Yanci</author>
+      <pubDate>Sat, 28 Feb 2026 14:16:51 GMT</pubDate>
+      <enclosure url="https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1200&amp;auto=format&amp;fit=crop" type="image/jpeg" length="0" />
+    </item>
+  </channel>
+</rss>

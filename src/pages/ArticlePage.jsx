@@ -18,6 +18,10 @@ import GuardianFooter from '../components/guardian/GuardianFooter';
 import { useNews } from '../context/NewsContext';
 import { PILLARS } from '../data/guardianData';
 import LiveArticlePage from './LiveArticlePage';
+import SEO from '../components/SEO';
+import AdSlot from '../components/AdSlot';
+import { useViewTracker } from '../hooks/useViewTracker';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 // Import Atoms
 import MapAtom from '../components/guardian/atoms/MapAtom';
@@ -32,6 +36,8 @@ const ArticlePage = () => {
   const [readingProgress, setReadingProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const articleRef = useRef(null);
+  const { trackView } = useViewTracker();
+  const { trackArticleView } = useAnalytics();
 
   // Fallback to first article if not found
   const article = useMemo(() => getArticleById(id) || articles[0], [id, getArticleById, articles]);
@@ -69,6 +75,14 @@ const ArticlePage = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Track this article view once on mount
+  useEffect(() => {
+    if (article?.id) {
+      trackView(article.id);
+      trackArticleView(article);
+    }
+  }, [article?.id, trackView, trackArticleView]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -136,6 +150,19 @@ const ArticlePage = () => {
 
   return (
     <div className="bg-white min-h-screen font-serif text-[#121212] selection:bg-[#cc0000] selection:text-white" ref={articleRef}>
+      <SEO
+        title={article.metaTitle || article.headline}
+        description={article.metaDescription || article.trail}
+        image={article.image}
+        url={article.slug ? `/${article.slug}` : `/article/${article.id}`}
+        type="article"
+        article={{
+          publishedTime: article.$createdAt || new Date().toISOString(),
+          modifiedTime: article.$updatedAt,
+          author: article.author,
+          section: article.section,
+        }}
+      />
       <GuardianNav />
 
       {/* Reading Progress Indicator */}
@@ -244,6 +271,9 @@ const ArticlePage = () => {
             </div>
           </div>
 
+          {/* Inline Ad Unit */}
+          <AdSlot variant="inline" />
+
         </article>
 
         {/* RELATED SECTION - MOVED TO BOTTOM */}
@@ -278,6 +308,11 @@ const ArticlePage = () => {
         </section>
 
       </main>
+
+      {/* Banner Ad above footer */}
+      <div className="max-w-[780px] mx-auto px-5 md:px-0 pb-8">
+        <AdSlot variant="banner" />
+      </div>
 
       <GuardianFooter />
 

@@ -18,7 +18,10 @@ import {
   FaCircleInfo,
   FaLayerGroup,
   FaPlus,
-  FaGear
+  FaGear,
+  FaCalendarCheck,
+  FaLink,
+  FaMagnifyingGlass
 } from 'react-icons/fa6';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
@@ -50,7 +53,14 @@ const AdminEditor = () => {
     section: 'headlines',
     type: 'standard',
     author: user?.name || '',
-    isLive: false
+    isLive: false,
+    // #15a — scheduling
+    status: 'published',
+    publishAt: '',
+    // #15b — SEO
+    slug: '',
+    metaTitle: '',
+    metaDescription: '',
   });
 
   const saveTimeoutRef = useRef(null);
@@ -85,7 +95,12 @@ const AdminEditor = () => {
         if (!ignore) {
           setFormData({
             ...article,
-            series: article.series || ''
+            series: article.series || '',
+            status: article.status || 'published',
+            publishAt: article.publishAt || '',
+            slug: article.slug || '',
+            metaTitle: article.metaTitle || '',
+            metaDescription: article.metaDescription || '',
           });
         }
       } else {
@@ -471,6 +486,139 @@ const AdminEditor = () => {
                   </span>
                 </label>
               </div>
+            </section>
+
+            {/* Publishing Status & Scheduling — #15a */}
+            <section className="space-y-4 pt-8 border-t border-gray-100">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                <FaCalendarCheck className="text-gray-300" /> Buga / Jadawali
+              </h3>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-600">Matsayi</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="w-full text-sm p-2.5 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#c59d5f] outline-none"
+                >
+                  <option value="published">An Buga</option>
+                  <option value="draft">Daftari</option>
+                  <option value="scheduled">Jadawalin Buga</option>
+                  <option value="review">Duba Kafin Buga</option>
+                </select>
+              </div>
+
+              {formData.status === 'scheduled' && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-600">Lokacin Buga</label>
+                  <div className="relative">
+                    <FaClock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                    <input
+                      type="datetime-local"
+                      name="publishAt"
+                      value={formData.publishAt}
+                      onChange={handleChange}
+                      className="w-full text-sm pl-8 p-2.5 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#c59d5f] outline-none"
+                    />
+                  </div>
+                  {formData.publishAt && (
+                    <p className="text-[10px] text-gray-400">
+                      Za a buga: {new Date(formData.publishAt).toLocaleString('ha', { dateStyle: 'medium', timeStyle: 'short' })}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {formData.status === 'scheduled' && !formData.publishAt && (
+                <p className="text-[10px] text-amber-600 font-bold">
+                  Zaɓi lokacin buga domin ajiye jadawalin.
+                </p>
+              )}
+            </section>
+
+            {/* SEO Fields — #15b */}
+            <section className="space-y-4 pt-8 border-t border-gray-100">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                <FaMagnifyingGlass className="text-gray-300" /> SEO
+              </h3>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-600">Slug (URL)</label>
+                <div className="relative">
+                  <FaLink className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                  <input
+                    type="text"
+                    name="slug"
+                    value={formData.slug}
+                    onChange={handleChange}
+                    className="w-full text-sm pl-8 p-2.5 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#c59d5f] outline-none"
+                    placeholder="labari-slug-nan"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const auto = formData.headline
+                      .toLowerCase()
+                      .replace(/[^a-z0-9\s-]/g, '')
+                      .trim()
+                      .replace(/\s+/g, '-')
+                      .slice(0, 80);
+                    setFormData(prev => ({ ...prev, slug: auto }));
+                    setIsDirty(true);
+                  }}
+                  className="text-[10px] text-[#c59d5f] hover:underline"
+                >
+                  ↺ Ƙirƙira daga taken labari
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-600">
+                  Meta Title <span className="font-normal text-gray-400">({(formData.metaTitle || formData.headline).length}/60)</span>
+                </label>
+                <input
+                  type="text"
+                  name="metaTitle"
+                  value={formData.metaTitle}
+                  onChange={handleChange}
+                  maxLength={60}
+                  className="w-full text-sm p-2.5 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#c59d5f] outline-none"
+                  placeholder={formData.headline || 'SEO taken labari...'}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-600">
+                  Meta Description <span className="font-normal text-gray-400">({(formData.metaDescription || formData.trail).length}/160)</span>
+                </label>
+                <textarea
+                  name="metaDescription"
+                  value={formData.metaDescription}
+                  onChange={handleChange}
+                  maxLength={160}
+                  rows={3}
+                  className="w-full text-sm p-2.5 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-[#c59d5f] outline-none resize-none"
+                  placeholder={formData.trail || 'Taƙaitaccen bayani ga injunan bincike...'}
+                />
+              </div>
+
+              {/* SERP Preview */}
+              {(formData.metaTitle || formData.headline) && (
+                <div className="p-3 bg-white border border-gray-200 rounded-xl space-y-0.5">
+                  <p className="text-[10px] font-bold uppercase text-gray-400 mb-2">Misalin Google</p>
+                  <p className="text-blue-700 text-xs font-medium line-clamp-1">
+                    {formData.metaTitle || formData.headline} | Yanci
+                  </p>
+                  <p className="text-green-700 text-[10px]">
+                    yanci.ng/article/{formData.slug || formData.id || '...'}
+                  </p>
+                  <p className="text-gray-600 text-[10px] line-clamp-2">
+                    {formData.metaDescription || formData.trail || 'Bayani ba a rubuta ba tukuna.'}
+                  </p>
+                </div>
+              )}
             </section>
 
             {/* Image Section */}

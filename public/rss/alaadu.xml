@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:media="http://search.yahoo.com/mrss/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+>
+  <channel>
+    <title>Yanci — Al'adu</title>
+    <link>https://yanci.ng/alaadu</link>
+    <description>Al'adu, fasaha, da kiɗa daga Yanci.</description>
+    <language>ha</language>
+    <lastBuildDate>Sat, 28 Feb 2026 14:16:51 GMT</lastBuildDate>
+    <atom:link href="https://yanci.ng/rss/alaadu" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Sabon sautin Arewa fusion ya mamaye jerin Spotify Afrika</title>
+      <link>https://yanci.ng/article/9</link>
+      <guid isPermaLink="true">https://yanci.ng/article/9</guid>
+      <description>Kida</description>
+      <author>Yanci</author>
+      <pubDate>Sat, 28 Feb 2026 14:16:51 GMT</pubDate>
+      <enclosure url="https://images.unsplash.com/photo-1464375117522-1311d6a5b81f?w=1200&amp;auto=format&amp;fit=crop" type="image/jpeg" length="0" />
+    </item>
+    <item>
+      <title>Nollywood ta samu gurbin nuna fina-finai biyu a Cannes 2025</title>
+      <link>https://yanci.ng/article/10</link>
+      <guid isPermaLink="true">https://yanci.ng/article/10</guid>
+      <description>Fina-finai</description>
+      <author>Yanci</author>
+      <pubDate>Sat, 28 Feb 2026 14:16:51 GMT</pubDate>
+      <enclosure url="https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&amp;auto=format&amp;fit=crop" type="image/jpeg" length="0" />
+    </item>
+  </channel>
+</rss>

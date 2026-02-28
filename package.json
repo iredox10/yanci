@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/generate-rss.cjs && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -15,6 +15,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-easy-crop": "^5.5.6",
+    "react-helmet-async": "^2.0.5",
     "react-icons": "^5.5.0",
     "react-quill-new": "^3.6.0",
     "react-router-dom": "^7.9.6"

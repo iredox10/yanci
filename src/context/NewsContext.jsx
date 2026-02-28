@@ -108,7 +108,8 @@ export const NewsProvider = ({ children }) => {
         // or add it to this list.
         const allowedAttributes = [
           'headline', 'kicker', 'trail', 'body', 'image', 'videoUrl', 
-          'keyFigures', 'pillar', 'section', 'type', 'author', 'isLive', 'liveUpdates'
+          'keyFigures', 'pillar', 'section', 'type', 'author', 'isLive', 'liveUpdates',
+          'status', 'publishAt', 'slug', 'metaTitle', 'metaDescription'
         ];
 
         const cleanArticle = {};
@@ -137,7 +138,8 @@ export const NewsProvider = ({ children }) => {
         try {
             const allowedAttributes = [
               'headline', 'kicker', 'trail', 'body', 'image', 'videoUrl', 
-              'keyFigures', 'pillar', 'section', 'type', 'author', 'isLive', 'liveUpdates', 'series'
+              'keyFigures', 'pillar', 'section', 'type', 'author', 'isLive', 'liveUpdates', 'series',
+              'status', 'publishAt', 'slug', 'metaTitle', 'metaDescription'
             ];
 
             const cleanData = {};
