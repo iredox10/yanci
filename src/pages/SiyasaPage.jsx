@@ -9,9 +9,9 @@ import { useNews } from '../context/NewsContext';
 const SiyasaPage = () => {
     const { articles } = useNews();
 
-    // Filter for politics/siyasa related articles (mocking the filter for now)
-    // In a real app, we'd filter by category 'politics' or 'siyasa'
-    const politicsArticles = articles.filter(a => a.section === 'headlines' || a.section === 'opinion').slice(0, 10);
+    // Filter for siyasa section articles; fall back to news pillar if no siyasa articles yet
+    const siyasaOnly = articles.filter(a => a.section === 'siyasa');
+    const politicsArticles = (siyasaOnly.length > 0 ? siyasaOnly : articles.filter(a => a.pillar === 'news')).slice(0, 10);
 
     const heroStory = politicsArticles[0];
     const subHeroStories = politicsArticles.slice(1, 3);

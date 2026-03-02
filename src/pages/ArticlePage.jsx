@@ -204,15 +204,19 @@ const ArticlePage = () => {
 
             {/* Simplified Meta Data - Centered Focus */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-6 border-t border-b border-gray-100 mb-10">
-              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center font-bold text-xl text-[#121212]">
-                  {(article.author || "Y")[0]}
+                   {(article.author || "Y")[0]}
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-widest mb-0.5">Written by</span>
-                  <span className="text-base font-sans font-bold text-[#121212] hover:text-[#c70000] cursor-pointer transition-colors" style={{ color: pillarColor }}>
+                  <Link
+                    to={`/author/${encodeURIComponent(article.author || 'Yanci Staff')}`}
+                    className="text-base font-sans font-bold text-[#121212] hover:underline transition-colors"
+                    style={{ color: pillarColor }}
+                  >
                     {article.author || "Yanci Staff"}
-                  </span>
+                  </Link>
                 </div>
               </div>
 
@@ -261,12 +265,19 @@ const ArticlePage = () => {
 
           {/* Article Footer - Tags */}
           <div className="mt-20 pt-10 border-t border-gray-200">
-            <h4 className="text-xs font-bold font-sans uppercase tracking-widest text-gray-400 mb-6">Related Topics</h4>
+            <h4 className="text-xs font-bold font-sans uppercase tracking-widest text-gray-400 mb-6">Taken Labarai</h4>
             <div className="flex flex-wrap gap-3">
-              {['Africa', 'Nigeria', 'Politics', 'Development', 'Economy', 'Security'].map(tag => (
-                <span key={tag} className="bg-gray-50 border border-gray-100 px-4 py-2 rounded-full text-sm font-bold text-gray-700 hover:bg-[#121212] hover:text-white hover:border-[#121212] cursor-pointer transition-all duration-300 font-sans shadow-sm">
-                  {tag}
-                </span>
+              {(article.tags
+                ? article.tags.split(',').map(t => t.trim()).filter(Boolean)
+                : ['Najeriya', 'Arewa', 'Labarai']
+              ).map(tag => (
+                <Link
+                  key={tag}
+                  to={`/tag/${encodeURIComponent(tag)}`}
+                  className="bg-gray-50 border border-gray-100 px-4 py-2 rounded-full text-sm font-bold text-gray-700 hover:bg-[#121212] hover:text-white hover:border-[#121212] cursor-pointer transition-all duration-300 font-sans shadow-sm"
+                >
+                  #{tag}
+                </Link>
               ))}
             </div>
           </div>

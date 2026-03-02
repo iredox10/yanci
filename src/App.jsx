@@ -1,10 +1,18 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { NewsProvider } from './context/NewsContext';
+import { AudioProvider } from './context/AudioContext';
+import { AuthProvider } from './context/AuthContext';
+import AudioPlayer from './components/guardian/AudioPlayer';
 import GuardianHome from './pages/GuardianHome';
 import ArticlePage from './pages/ArticlePage';
 import LiveArticlePage from './pages/LiveArticlePage';
 import SearchPage from './pages/SearchPage';
+import NotFoundPage from './pages/NotFoundPage';
+import SectionPage from './pages/SectionPage';
+import TagPage from './pages/TagPage';
+import AuthorPage from './pages/AuthorPage';
 
 import SiyasaPage from './pages/SiyasaPage';
 import LabaraiPage from './pages/LabaraiPage';
@@ -15,20 +23,16 @@ import RaayiPage from './pages/RaayiPage';
 import AladuPage from './pages/AladuPage';
 import BidiyoPage from './pages/BidiyoPage';
 
-// Admin Imports
-import AdminLayout from './pages/admin/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminArticles from './pages/admin/AdminArticles';
-import AdminEditor from './pages/admin/AdminEditor';
-import AdminSettings from './pages/admin/AdminSettings';
-import AdminStaff from './pages/admin/AdminStaff';
-import AdminLiveManager from './pages/admin/AdminLiveManager';
-import AdminLiveConsole from './pages/admin/AdminLiveConsole';
-import AdminLogin from './pages/admin/AdminLogin';
-
-import { AudioProvider } from './context/AudioContext';
-import { AuthProvider } from './context/AuthContext';
-import AudioPlayer from './components/guardian/AudioPlayer';
+// Admin — lazy loaded so they don't inflate the public bundle
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminArticles = lazy(() => import('./pages/admin/AdminArticles'));
+const AdminEditor = lazy(() => import('./pages/admin/AdminEditor'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
+const AdminStaff = lazy(() => import('./pages/admin/AdminStaff'));
+const AdminLiveManager = lazy(() => import('./pages/admin/AdminLiveManager'));
+const AdminLiveConsole = lazy(() => import('./pages/admin/AdminLiveConsole'));
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 
 function App() {
   return (
@@ -50,10 +54,13 @@ function App() {
               <Route path="/aladu" element={<AladuPage />} />
               <Route path="/bidiyo" element={<BidiyoPage />} />
               <Route path="/article/:id" element={<ArticlePage />} />
+              <Route path="/section/:id" element={<SectionPage />} />
+              <Route path="/tag/:tag" element={<TagPage />} />
+              <Route path="/author/:name" element={<AuthorPage />} />
 
-              {/* Admin Routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<AdminLayout />}>
+              {/* Admin Routes — lazy loaded, wrapped in Suspense */}
+              <Route path="/admin/login" element={<Suspense fallback={<div className="min-h-screen bg-[#0f3036]" />}><AdminLogin /></Suspense>} />
+              <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen bg-[#fafaf9] animate-pulse" />}><AdminLayout /></Suspense>}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="articles" element={<AdminArticles />} />
                 <Route path="create" element={<AdminEditor />} />
@@ -64,7 +71,7 @@ function App() {
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
 
-              <Route path="*" element={<GuardianHome />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
             <AudioPlayer />
           </BrowserRouter>
