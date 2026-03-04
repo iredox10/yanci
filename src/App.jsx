@@ -33,51 +33,55 @@ const AdminStaff = lazy(() => import('./pages/admin/AdminStaff'));
 const AdminLiveManager = lazy(() => import('./pages/admin/AdminLiveManager'));
 const AdminLiveConsole = lazy(() => import('./pages/admin/AdminLiveConsole'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
+const AdminMedia = lazy(() => import('./pages/admin/AdminMedia'));
+const AdminMultimedia = lazy(() => import('./pages/admin/AdminMultimedia'));
 
 function App() {
   return (
     <HelmetProvider>
-    <AuthProvider>
-      <NewsProvider>
-        <AudioProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<GuardianHome />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/siyasa" element={<SiyasaPage />} />
-              <Route path="/labarai" element={<LabaraiPage />} />
-              <Route path="/kasuwanci" element={<KasuwanciPage />} />
-              <Route path="/wasanni" element={<WasanniPage />} />
-              <Route path="/fasaha" element={<FasahaPage />} />
-              <Route path="/raayi" element={<RaayiPage />} />
-              <Route path="/aladu" element={<AladuPage />} />
-              <Route path="/bidiyo" element={<BidiyoPage />} />
-              <Route path="/article/:id" element={<ArticlePage />} />
-              <Route path="/section/:id" element={<SectionPage />} />
-              <Route path="/tag/:tag" element={<TagPage />} />
-              <Route path="/author/:name" element={<AuthorPage />} />
+      <AuthProvider>
+        <NewsProvider>
+          <AudioProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<GuardianHome />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/siyasa" element={<SiyasaPage />} />
+                <Route path="/labarai" element={<LabaraiPage />} />
+                <Route path="/kasuwanci" element={<KasuwanciPage />} />
+                <Route path="/wasanni" element={<WasanniPage />} />
+                <Route path="/fasaha" element={<FasahaPage />} />
+                <Route path="/raayi" element={<RaayiPage />} />
+                <Route path="/aladu" element={<AladuPage />} />
+                <Route path="/bidiyo" element={<BidiyoPage />} />
+                <Route path="/article/:id" element={<ArticlePage />} />
+                <Route path="/section/:id" element={<SectionPage />} />
+                <Route path="/tag/:tag" element={<TagPage />} />
+                <Route path="/author/:name" element={<AuthorPage />} />
 
-              {/* Admin Routes — lazy loaded, wrapped in Suspense */}
-              <Route path="/admin/login" element={<Suspense fallback={<div className="min-h-screen bg-[#0f3036]" />}><AdminLogin /></Suspense>} />
-              <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen bg-[#fafaf9] animate-pulse" />}><AdminLayout /></Suspense>}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="articles" element={<AdminArticles />} />
-                <Route path="create" element={<AdminEditor />} />
-                <Route path="edit/:id" element={<AdminEditor />} />
-                <Route path="staff" element={<AdminStaff />} />
-                <Route path="live" element={<AdminLiveManager />} />
-                <Route path="live/:id" element={<AdminLiveConsole />} />
-                <Route path="settings" element={<AdminSettings />} />
-              </Route>
+                {/* Admin Routes — lazy loaded, wrapped in Suspense */}
+                <Route path="/admin/login" element={<Suspense fallback={<div className="min-h-screen bg-[#0f3036]" />}><AdminLogin /></Suspense>} />
+                <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen bg-[#fafaf9] animate-pulse" />}><AdminLayout /></Suspense>}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="articles" element={<AdminArticles />} />
+                  <Route path="create" element={<AdminEditor />} />
+                  <Route path="edit/:id" element={<AdminEditor />} />
+                  <Route path="media" element={<AdminMedia />} />
+                  <Route path="multimedia" element={<AdminMultimedia />} />
+                  <Route path="staff" element={<AdminStaff />} />
+                  <Route path="live" element={<AdminLiveManager />} />
+                  <Route path="live/:id" element={<AdminLiveConsole />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                </Route>
 
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-            <AudioPlayer />
-          </BrowserRouter>
-        </AudioProvider>
-      </NewsProvider>
-    </AuthProvider>
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+              <AudioPlayer />
+            </BrowserRouter>
+          </AudioProvider>
+        </NewsProvider>
+      </AuthProvider>
     </HelmetProvider>
   );
 }
