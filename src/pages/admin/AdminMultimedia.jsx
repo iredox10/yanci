@@ -1,15 +1,11 @@
 import { useState } from 'react';
-import { useNews } from '../../context/NewsContext';
-import { useAuth } from '../../context/AuthContext';
 import { FaPodcast, FaVideo, FaPlus, FaTrash, FaPen, FaCirclePlay, FaMicrophoneLines, FaSpinner } from 'react-icons/fa6';
 
 const initialDraft = { title: '', url: '', type: 'video', description: '' };
 
 const AdminMultimedia = () => {
-  const { user } = useAuth();
   const [items, setItems] = useState([
-    { id: 1, title: 'Wata Tattaunawa da Gwamna', url: 'https://youtube.com/embed/xyz', type: 'video', description: 'Gwamna ya amsa tambayoyi kan tsaro.' },
-    { id: 2, title: 'Siyasa a Yau: Kashi na 1', url: 'https://audio.com/xyz.mp3', type: 'audio', description: 'Tattaunawa kan zaɓen 2027.' },
+    { id: 2, title: 'Siyasa a Yau: Kashi na 1', url: 'https://audio.com/xyz.mp3', type: 'audio', description: 'Tattaunawa kan zabed 2027.' },
   ]);
   const [draft, setDraft] = useState(initialDraft);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,7 +29,7 @@ const AdminMultimedia = () => {
   };
 
   const handleDelete = (id) => {
-    if(window.confirm('Delete this media item?')) {
+    if (window.confirm('Delete this media item?')) {
       setItems(prev => prev.filter(i => i.id !== id));
     }
   };
@@ -49,8 +45,8 @@ const AdminMultimedia = () => {
           </h2>
           <p className="text-sm text-gray-500 mt-1">Gudanar da shirye-shiryen bidiyo da rediyo/podcast</p>
         </div>
-        
-        <button 
+
+        <button
           onClick={() => { setDraft(initialDraft); setIsModalOpen(true); }}
           className="bg-[#0f3036] text-white px-4 py-2.5 rounded-md flex items-center justify-center gap-2 hover:bg-[#1a454c] transition-colors font-bold text-sm"
         >
@@ -99,20 +95,20 @@ const AdminMultimedia = () => {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
             <h3 className="font-bold text-xl text-gray-900 mb-4">{draft.id ? 'Gyara' : 'Ƙara Sabo'} Media</h3>
-            
+
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500">Take (Title)</label>
-              <input 
-                value={draft.title} onChange={e => setDraft({...draft, title: e.target.value})}
-                className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 outline-none focus:ring-[#c59d5f]" 
+              <input
+                value={draft.title} onChange={e => setDraft({ ...draft, title: e.target.value })}
+                className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 outline-none focus:ring-[#c59d5f]"
               />
             </div>
-            
+
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500">Nau'i (Type)</label>
-              <select 
-                value={draft.type} onChange={e => setDraft({...draft, type: e.target.value})}
-                className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 outline-none focus:ring-[#c59d5f] bg-white" 
+              <select
+                value={draft.type} onChange={e => setDraft({ ...draft, type: e.target.value })}
+                className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 outline-none focus:ring-[#c59d5f] bg-white"
               >
                 <option value="video">Bidiyo (YouTube Embed)</option>
                 <option value="audio">Podcast (Audio File)</option>
@@ -121,30 +117,30 @@ const AdminMultimedia = () => {
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500">URL / Link</label>
-              <input 
-                value={draft.url} onChange={e => setDraft({...draft, url: e.target.value})}
-                placeholder={draft.type==='video' ? "https://youtube.com/embed/..." : "https://...mp3"\}
-                className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 outline-none focus:ring-[#c59d5f]" 
+              <input
+                value={draft.url} onChange={e => setDraft({ ...draft, url: e.target.value })}
+                placeholder={draft.type === 'video' ? "https://youtube.com/embed/..." : "https://...mp3"}
+                className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 outline-none focus:ring-[#c59d5f]"
               />
             </div>
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500">Bayani (Description)</label>
-              <textarea 
-                value={draft.description} onChange={e => setDraft({...draft, description: e.target.value})}
+              <textarea
+                value={draft.description} onChange={e => setDraft({ ...draft, description: e.target.value })}
                 rows="3"
-                className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 outline-none focus:ring-[#c59d5f] resize-none" 
+                className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 outline-none focus:ring-[#c59d5f] resize-none"
               />
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg"
               >
                 Soke
               </button>
-              <button 
+              <button
                 onClick={handleSave} disabled={saving}
                 className="px-6 py-2 text-sm font-bold text-white bg-[#0f3036] hover:bg-[#1a454c] rounded-lg disabled:opacity-50 flex items-center gap-2"
               >

@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { appwriteService, storage, BUCKET_ID } from '../../lib/appwrite';
 import { FaImage, FaTrash, FaCloudArrowUp, FaCopy, FaCheck, FaSpinner, FaMagnifyingGlass } from 'react-icons/fa6';
 
 const AdminMedia = () => {
-  const { user } = useAuth();
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -18,9 +16,8 @@ const AdminMedia = () => {
   const loadFiles = async () => {
     try {
       setLoading(true);
-      const limit = 100; // Load up to 100 recent files
       const response = await storage.listFiles(BUCKET_ID, []);
-      
+
       const fileUrls = response.files.map(file => ({
         id: file.$id,
         name: file.name,
@@ -78,7 +75,7 @@ const AdminMedia = () => {
           <h2 className="text-xl md:text-2xl font-bold text-gray-800">Media Library</h2>
           <p className="text-sm text-gray-500">Gudanar da hotuna da fayiloli</p>
         </div>
-        
+
         <label className="bg-[#0f3036] text-white px-4 py-2.5 rounded-md flex items-center justify-center gap-2 hover:bg-[#1a454c] transition-colors font-bold text-sm cursor-pointer w-full sm:w-auto">
           {uploading ? <FaSpinner className="animate-spin w-4 h-4" /> : <FaCloudArrowUp className="w-4 h-4" />}
           Loda Hoto
@@ -88,7 +85,7 @@ const AdminMedia = () => {
 
       <div className="relative max-w-md">
         <FaMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input 
+        <input
           type="text"
           placeholder="Nemo hoto..."
           value={search}
@@ -113,14 +110,14 @@ const AdminMedia = () => {
               <div className="aspect-square relative bg-gray-100 placeholder-image">
                 <img src={file.url} alt={file.name} className="w-full h-full object-cover" loading="lazy" />
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <button 
+                  <button
                     onClick={() => copyUrl(file.url, file.id)}
                     className="p-2 bg-white text-gray-800 rounded-full hover:bg-gray-100"
                     title="Kwafi URL"
                   >
                     {copiedId === file.id ? <FaCheck className="text-green-600" /> : <FaCopy />}
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDelete(file.id)}
                     className="p-2 bg-white text-red-600 rounded-full hover:bg-red-50"
                     title="Share"
