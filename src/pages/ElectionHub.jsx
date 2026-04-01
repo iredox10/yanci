@@ -10,7 +10,8 @@ import GuardianFooter from '../components/guardian/GuardianFooter';
 import SEO from '../components/SEO';
 import { useNews } from '../context/NewsContext';
 import {
-  ELECTION_INFO, PARTIES, CANDIDATES, RESULTS, FACT_CHECKS, KEY_RACES, VOTER_INFO,
+  ELECTION_INFO, PARTIES, CANDIDATES, FACT_CHECKS, KEY_RACES, VOTER_INFO,
+  STATE_RESULTS, computeNationalTotals,
 } from '../data/electionData';
 
 const VERDICT_COLORS = {
@@ -160,8 +161,7 @@ export default function ElectionHub() {
     [articles]
   );
 
-  const presResults = RESULTS.presidential;
-  const maxPct = Math.max(...presResults.candidates.map((c) => c.percentage));
+  const nationalTotals = computeNationalTotals(CANDIDATES.map(c => c.id));
 
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917]">
@@ -224,10 +224,10 @@ export default function ElectionHub() {
         {/* Key Metrics */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Masu Rajista", value: (ELECTION_INFO.totalRegisteredVoters / 1000000).toFixed(1) + 'M', icon: FaUsers, color: '#0f3460' },
-            { label: 'Cibiyoyin Zaba', value: ELECTION_INFO.totalPollingUnits.toLocaleString(), icon: FaMapLocationDot, color: '#008751' },
-            { label: 'Jihohi + FCT', value: ELECTION_INFO.totalStates + 1, icon: FaBuildingColumns, color: '#ED1C24' },
-            { label: 'Matsakaicin Halarta', value: RESULTS.presidential.turnout + '%', icon: FaPersonBooth, color: '#003DA5' },
+            { label: "Masu Rajista", value: (nationalTotals.registeredVoters / 1000000).toFixed(1) + 'M', icon: FaUsers, color: '#0f3460' },
+            { label: 'Waɗanda suka Kada', value: (nationalTotals.accreditedVoters / 1000000).toFixed(1) + 'M', icon: FaPersonBooth, color: '#008751' },
+            { label: 'Kuri\'u Ingantattu', value: (nationalTotals.validVotes / 1000000).toFixed(1) + 'M', icon: FaCheckToSlot, color: '#ED1C24' },
+            { label: 'Halarta', value: nationalTotals.turnout.toFixed(1) + '%', icon: FaMapLocationDot, color: '#003DA5' },
           ].map((stat) => {
             const Icon = stat.icon;
             return (
@@ -264,33 +264,38 @@ export default function ElectionHub() {
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                    Jihohi {presResults.statesReported} / {presResults.statesTotal} sun ruwaito
+                    Jihohi {STATE_RESULTS.length} / {STATE_RESULTS.length} sun ruwaito
                   </span>
                   <div className="w-full h-2 bg-gray-100 rounded-full mt-2">
                     <div
                       className="h-full bg-green-500 rounded-full transition-all"
-                      style={{ width: `${(presResults.statesReported / presResults.statesTotal) * 100}%` }}
+                      style={{ width: '100%' }}
                     />
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
                     <FaClock className="w-3 h-3" />
-                    An sabawa: {new Date(presResults.lastUpdated).toLocaleString('ha-NG')}
+                    An sabawa: {new Date().toLocaleString('ha-NG')}
                   </div>
                 </div>
               </div>
 
-              {presResults.candidates.map((c) => (
-                <ResultProgressBar
-                  key={c.candidateId}
-                  candidateId={c.candidateId}
-                  votes={c.votes}
-                  percentage={c.percentage}
-                  statesWon={c.statesWon}
-                  maxPercentage={maxPct}
-                />
-              ))}
+              {CANDIDATES.map((c) => {
+                const votes = nationalTotals.candidateVotes[c.id] || 0;
+                const pct = nationalTotals.candidatePercentages[c.id] || 0;
+                const statesWon = nationalTotals.statesWon[c.id] || 0;
+                return (
+                  <ResultProgressBar
+                    key={c.id}
+                    candidateId={c.id}
+                    votes={votes}
+                    percentage={pct}
+                    statesWon={statesWon}
+                    maxPercentage={Math.max(...CANDIDATES.map(x => nationalTotals.candidatePercentages[x.id] || 0))}
+                  />
+                );
+              })}
 
               <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                 <p className="text-xs text-amber-700">
@@ -306,16 +311,24 @@ export default function ElectionHub() {
                 {
                   title: 'Majalisar Dattawa',
                   icon: FaBuildingColumns,
-                  reported: RESULTS.senate.seatsReported,
-                  total: RESULTS.senate.totalSeats,
-                  parties: RESULTS.senate.parties.slice(0, 3),
+                  reported: 72,
+                  total: 109,
+                  parties: [
+                    { partyId: 'apc', seats: 38, leading: 5 },
+                    { partyId: 'pdp', seats: 22, leading: 4 },
+                    { partyId: 'lp', seats: 8, leading: 2 },
+                  ],
                 },
                 {
                   title: 'Gwamnoni',
                   icon: FaGavel,
-                  reported: RESULTS.governor.statesReported,
-                  total: RESULTS.governor.totalStates,
-                  parties: RESULTS.governor.parties.slice(0, 3),
+                  reported: 20,
+                  total: 36,
+                  parties: [
+                    { partyId: 'apc', states: 10, leading: 3 },
+                    { partyId: 'pdp', states: 6, leading: 2 },
+                    { partyId: 'lp', states: 3, leading: 1 },
+                  ],
                 },
               ].map((race) => (
                 <div key={race.title} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">

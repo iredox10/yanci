@@ -2,12 +2,12 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FaChevronRight, FaClock, FaFilter, FaArrowUp, FaBuildingColumns,
-  FaGavel, FaPersonBooth, FaChartLine,
+  FaGavel, FaPersonBooth, FaChartColumn, FaCircleCheck,
 } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import SEO from '../components/SEO';
-import { RESULTS, STATE_RESULTS, PARTIES, CANDIDATES } from '../data/electionData';
+import { STATE_RESULTS, PARTIES, CANDIDATES, computeNationalTotals } from '../data/electionData';
 
 const REGIONS = ['Duka', 'North West', 'North East', 'North Central', 'South West', 'South East', 'South South'];
 
@@ -23,6 +23,7 @@ export default function ElectionResults() {
   const [activeTab, setActiveTab] = useState('presidential');
   const [activeRegion, setActiveRegion] = useState('Duka');
   const [searchState, setSearchState] = useState('');
+  const [expandedState, setExpandedState] = useState(null);
 
   const filteredStates = useMemo(() => {
     let states = STATE_RESULTS;
@@ -35,7 +36,12 @@ export default function ElectionResults() {
     return states;
   }, [activeRegion, searchState]);
 
-  const presResults = RESULTS.presidential;
+  const nationalTotals = computeNationalTotals(CANDIDATES.map(c => c.id));
+
+  function formatNumber(n) {
+    if (n == null) return '—';
+    return n.toLocaleString('en-NG');
+  }
 
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917]">
@@ -58,7 +64,7 @@ export default function ElectionResults() {
             Sakamako Kai Tsaye
           </h1>
           <p className="text-white/60 text-sm mt-2">
-            An ruwaito jihohi {presResults.statesReported} / {presResults.statesTotal} · Matsakaicin halarta: {presResults.turnout}%
+            An ruwaito jihohi {STATE_RESULTS.length} / {STATE_RESULTS.length} · Matsakaicin halarta: {nationalTotals.turnout.toFixed(1)}%
           </p>
         </div>
       </div>
@@ -71,7 +77,7 @@ export default function ElectionResults() {
             { id: 'presidential', label: 'Shugaban Ƙasa', icon: FaPersonBooth },
             { id: 'senate', label: 'Majalisar Dattawa', icon: FaBuildingColumns },
             { id: 'governor', label: 'Gwamnoni', icon: FaGavel },
-            { id: 'states', label: 'Jihohi', icon: FaChartLine },
+            { id: 'states', label: 'Jihohi', icon: FaChartColumn },
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -95,22 +101,26 @@ export default function ElectionResults() {
         {activeTab === 'presidential' && (
           <div className="space-y-8">
             {/* Summary Cards */}
-            <div className="grid md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-                <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Jimlar Kuri'u</div>
-                <div className="text-2xl font-black">{(presResults.totalVotesCast / 1000000).toFixed(1)}M</div>
+                <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Masu Rajista</div>
+                <div className="text-2xl font-black">{formatNumber(nationalTotals.registeredVoters)}</div>
+              </div>
+              <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Waɗanda suka Kada</div>
+                <div className="text-2xl font-black">{formatNumber(nationalTotals.accreditedVoters)}</div>
+              </div>
+              <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Kuri'u Ingantattu</div>
+                <div className="text-2xl font-black">{formatNumber(nationalTotals.validVotes)}</div>
+              </div>
+              <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Kuri'un da aka Ki</div>
+                <div className="text-2xl font-black text-red-600">{formatNumber(nationalTotals.rejectedVotes)}</div>
               </div>
               <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
                 <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Halarta</div>
-                <div className="text-2xl font-black">{presResults.turnout}%</div>
-              </div>
-              <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-                <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Jihohi</div>
-                <div className="text-2xl font-black">{presResults.statesReported}/{presResults.statesTotal}</div>
-              </div>
-              <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-                <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">An Sabawa</div>
-                <div className="text-sm font-bold">{new Date(presResults.lastUpdated).toLocaleString('ha-NG')}</div>
+                <div className="text-2xl font-black">{nationalTotals.turnout.toFixed(1)}%</div>
               </div>
             </div>
 
@@ -120,16 +130,19 @@ export default function ElectionResults() {
                 <h2 className="font-bold text-lg">Teburin 'Yan Takara</h2>
               </div>
               <div className="p-6">
-                {[...presResults.candidates]
-                  .sort((a, b) => b.percentage - a.percentage)
+                {[...CANDIDATES]
+                  .sort((a, b) => (nationalTotals.candidateVotes[b.id] || 0) - (nationalTotals.candidateVotes[a.id] || 0))
                   .map((c, idx) => {
-                    const candidate = getCandidate(c.candidateId);
-                    const party = getParty(candidate?.party);
+                    const party = getParty(c.party);
+                    const votes = nationalTotals.candidateVotes[c.id] || 0;
+                    const pct = nationalTotals.candidatePercentages[c.id] || 0;
+                    const statesWon = nationalTotals.statesWon[c.id] || 0;
+                    const states25 = nationalTotals.statesMet25[c.id] || 0;
                     const isLeading = idx === 0;
                     return (
                       <div
-                        key={c.candidateId}
-                        className={`flex items-center gap-4 py-4 ${isLeading ? 'bg-green-50 -mx-6 px-6' : ''} ${idx < presResults.candidates.length - 1 ? 'border-b border-gray-50' : ''}`}
+                        key={c.id}
+                        className={`flex items-center gap-4 py-4 ${isLeading ? 'bg-green-50 -mx-6 px-6' : ''} ${idx < CANDIDATES.length - 1 ? 'border-b border-gray-50' : ''}`}
                       >
                         <div className="w-8 text-center">
                           <span className={`text-lg font-black ${isLeading ? 'text-green-600' : 'text-gray-400'}`}>
@@ -140,16 +153,16 @@ export default function ElectionResults() {
                           className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
                           style={{ backgroundColor: party.color }}
                         >
-                          {(candidate?.name || 'C')[0]}
+                          {(c.name || 'C')[0]}
                         </div>
                         <div className="flex-1">
-                          <div className="font-bold">{candidate?.name || c.candidateId}</div>
+                          <div className="font-bold">{c.name}</div>
                           <div className="text-xs text-gray-500">{party.name} · {party.fullName}</div>
                         </div>
                         <div className="text-right">
-                          <div className="font-black text-xl">{c.percentage.toFixed(1)}%</div>
-                          <div className="text-xs text-gray-500">{(c.votes / 1000000).toFixed(2)}M kuri'u</div>
-                          <div className="text-xs text-gray-400">Jihohi {c.statesWon}</div>
+                          <div className="font-black text-xl">{pct.toFixed(1)}%</div>
+                          <div className="text-xs text-gray-500">{formatNumber(votes)} kuri'u</div>
+                          <div className="text-xs text-gray-400">Jihohi {statesWon} | 25% a {states25}</div>
                         </div>
                       </div>
                     );
@@ -160,19 +173,20 @@ export default function ElectionResults() {
             {/* Progress Bars */}
             <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
               <h3 className="font-bold text-lg mb-6">Kwatanta Kuri'u</h3>
-              {presResults.candidates.map((c) => {
-                const candidate = getCandidate(c.candidateId);
-                const party = getParty(candidate?.party);
-                const maxVotes = Math.max(...presResults.candidates.map((x) => x.votes));
-                const barWidth = maxVotes > 0 ? (c.votes / maxVotes) * 100 : 0;
+              {CANDIDATES.map((c) => {
+                const party = getParty(c.party);
+                const votes = nationalTotals.candidateVotes[c.id] || 0;
+                const pct = nationalTotals.candidatePercentages[c.id] || 0;
+                const maxVotes = Math.max(...CANDIDATES.map(x => nationalTotals.candidateVotes[x.id] || 0));
+                const barWidth = maxVotes > 0 ? (votes / maxVotes) * 100 : 0;
                 return (
-                  <div key={c.candidateId} className="mb-5 last:mb-0">
+                  <div key={c.id} className="mb-5 last:mb-0">
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: party.color }} />
-                        <span className="font-bold text-sm">{candidate?.name}</span>
+                        <span className="font-bold text-sm">{c.name}</span>
                       </div>
-                      <span className="font-black">{c.percentage.toFixed(1)}%</span>
+                      <span className="font-black">{pct.toFixed(1)}% ({formatNumber(votes)})</span>
                     </div>
                     <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden">
                       <div
@@ -281,58 +295,69 @@ export default function ElectionResults() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="text-left px-4 py-3 font-bold text-xs uppercase tracking-wider text-gray-500">Jiha</th>
-                      <th className="text-left px-4 py-3 font-bold text-xs uppercase tracking-wider text-gray-500">Yanki</th>
-                      <th className="text-center px-4 py-3 font-bold text-xs uppercase tracking-wider text-gray-500">Halarta</th>
+                      <th className="text-left px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500 sticky left-0 bg-gray-50 z-10">Jiha</th>
+                      <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Masu Rajista</th>
+                      <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Su ka Kada</th>
+                      <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Halarta</th>
+                      <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Ingantattu</th>
                       {CANDIDATES.map((c) => {
                         const party = getParty(c.party);
                         return (
-                          <th key={c.id} className="text-center px-4 py-3 font-bold text-xs uppercase tracking-wider" style={{ color: party.color }}>
+                          <th key={c.id} className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider" style={{ color: party.color }}>
                             {party.name}
                           </th>
                         );
                       })}
-                      <th className="text-left px-4 py-3 font-bold text-xs uppercase tracking-wider text-gray-500">Gwamna</th>
+                      <th className="text-center px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Wanda ya Ci</th>
+                      <th className="text-center px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Gwamna</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredStates.map((state) => {
-                      const maxPct = Math.max(state.presidential.c1, state.presidential.c2, state.presidential.c3, state.presidential.c4);
-                      const winner = Object.entries(state.presidential).find(([, v]) => v === maxPct)?.[0];
+                      const turnout = state.registeredVoters > 0 ? ((state.accreditedVoters / state.registeredVoters) * 100).toFixed(1) : 0;
+                      const winner = state.winner ? getCandidate(state.winner) : null;
+                      const winnerParty = winner ? getParty(winner.party) : null;
                       return (
                         <tr key={state.state} className="border-b border-gray-50 hover:bg-gray-50/50">
-                          <td className="px-4 py-3 font-bold">{state.state}</td>
-                          <td className="px-4 py-3 text-gray-500 text-xs">{state.region}</td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-3 py-2.5 font-bold sticky left-0 bg-white z-10">{state.state}</td>
+                          <td className="px-3 py-2.5 text-right font-mono text-xs">{formatNumber(state.registeredVoters)}</td>
+                          <td className="px-3 py-2.5 text-right font-mono text-xs">{formatNumber(state.accreditedVoters)}</td>
+                          <td className="px-3 py-2.5 text-center">
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                              state.turnout > 40 ? 'bg-green-100 text-green-700' :
-                              state.turnout > 30 ? 'bg-amber-100 text-amber-700' :
+                              parseFloat(turnout) > 40 ? 'bg-green-100 text-green-700' :
+                              parseFloat(turnout) > 30 ? 'bg-amber-100 text-amber-700' :
                               'bg-red-100 text-red-700'
                             }`}>
-                              {state.turnout}%
+                              {turnout}%
                             </span>
                           </td>
+                          <td className="px-3 py-2.5 text-right font-mono text-xs">{formatNumber(state.validVotes)}</td>
                           {CANDIDATES.map((c) => {
                             const party = getParty(c.party);
-                            const pct = state.presidential[c.id] || 0;
-                            const isWinner = c.id === winner;
+                            const votes = state.candidateVotes?.[c.id] || 0;
+                            const pct = state.validVotes > 0 ? ((votes / state.validVotes) * 100).toFixed(1) : '0.0';
+                            const isWinner = state.winner === c.id;
                             return (
-                              <td key={c.id} className="px-4 py-3 text-center">
-                                <span className={`text-xs font-bold ${isWinner ? '' : 'text-gray-400'}`} style={isWinner ? { color: party.color } : {}}>
-                                  {pct}%
-                                </span>
+                              <td key={c.id} className="px-3 py-2.5 text-right">
+                                <div className={`font-mono text-xs ${isWinner ? 'font-black' : 'text-gray-500'}`} style={isWinner ? { color: party.color } : {}}>
+                                  {votes > 0 ? formatNumber(votes) : '—'}
+                                </div>
+                                {votes > 0 && <div className="text-[9px] text-gray-400">{pct}%</div>}
                               </td>
                             );
                           })}
-                          <td className="px-4 py-3">
+                          <td className="px-3 py-2.5 text-center">
+                            {winnerParty ? (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: winnerParty.color + '20', color: winnerParty.color }}>
+                                {winnerParty.name}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-300">—</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 text-center">
                             {state.governor ? (
-                              <span
-                                className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                                style={{
-                                  backgroundColor: (getParty(state.governor)?.color || '#888') + '20',
-                                  color: getParty(state.governor)?.color || '#888',
-                                }}
-                              >
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: (getParty(state.governor)?.color || '#888') + '20', color: getParty(state.governor)?.color || '#888' }}>
                                 {getParty(state.governor)?.name}
                               </span>
                             ) : (

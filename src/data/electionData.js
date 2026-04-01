@@ -1,16 +1,14 @@
 /**
- * Election Data Store
+ * Election Data Store — Real INEC-style structure
  *
- * Centralized data for Nigeria 2027 General Election coverage.
- * Designed to be easily swapped with Appwrite collections later.
+ * Based on how INEC actually reports results:
+ * - Registered Voters, Accredited Voters, Valid Votes, Rejected Votes
+ * - Actual vote counts per candidate (not just percentages)
+ * - 25% threshold tracking per state
+ * - States won per candidate
  *
- * Exports:
- *   - ELECTION_INFO: General election metadata
- *   - PARTIES: Political parties with colors and logos
- *   - CANDIDATES: Presidential and other candidates
- *   - RESULTS: Live/partial results data
- *   - FACT_CHECKS: Fact-checked political claims
- *   - KEY_RACES: Races to watch
+ * All data is structured to match INEC Form EC8A (Polling Unit) and
+ * Form EC8B (Ward Collation) reporting standards.
  */
 
 export const ELECTION_INFO = {
@@ -25,6 +23,7 @@ export const ELECTION_INFO = {
   totalFCT: 1,
   electoralBody: 'INEC',
   electoralBodyFull: 'Independent National Electoral Commission',
+  winningThreshold: 'Majority of valid votes + 25% in at least 24 of 37 states/FCT',
 };
 
 export const PARTIES = [
@@ -111,82 +110,111 @@ export const CANDIDATES = [
   },
 ];
 
-export const RESULTS = {
-  presidential: {
-    totalVotesCast: 24780000,
-    turnout: 26.5,
-    lastUpdated: '2027-02-08T14:30:00Z',
-    status: 'counting',
-    statesReported: 28,
-    statesTotal: 37,
-    candidates: [
-      { candidateId: 'c1', votes: 8920000, percentage: 36.0, statesWon: 14 },
-      { candidateId: 'c2', votes: 7434000, percentage: 30.0, statesWon: 11 },
-      { candidateId: 'c3', votes: 5947200, percentage: 24.0, statesWon: 8 },
-      { candidateId: 'c4', votes: 2478000, percentage: 10.0, statesWon: 4 },
-    ],
-  },
-  senate: {
-    totalSeats: 109,
-    seatsReported: 72,
-    parties: [
-      { partyId: 'apc', seats: 38, leading: 5 },
-      { partyId: 'pdp', seats: 22, leading: 4 },
-      { partyId: 'lp', seats: 8, leading: 2 },
-      { partyId: 'nnpp', seats: 3, leading: 1 },
-      { partyId: 'apga', seats: 1, leading: 0 },
-    ],
-  },
-  governor: {
-    totalStates: 36,
-    statesReported: 20,
-    parties: [
-      { partyId: 'apc', states: 10, leading: 3 },
-      { partyId: 'pdp', states: 6, leading: 2 },
-      { partyId: 'lp', states: 3, leading: 1 },
-      { partyId: 'nnpp', states: 1, leading: 0 },
-    ],
-  },
-};
-
+/**
+ * STATE_RESULTS — Full INEC-style data per state/FCT.
+ *
+ * Each state includes:
+ *  - registeredVoters: Total PVC holders in the state
+ *  - accreditedVoters: Voters who passed BVAS/Smart Card Reader
+ *  - validVotes: Legitimate ballots counted
+ *  - rejectedVotes: Spoiled/invalid ballots
+ *  - totalVotesCast: validVotes + rejectedVotes (= accreditedVoters in theory)
+ *  - candidateVotes: { candidateId: actualVoteCount } — raw numbers
+ *  - candidatePercentages: { candidateId: percentageOfValidVotes }
+ *  - winner: candidateId who got most valid votes
+ *  - met25Threshold: [candidateIds] who got >= 25% of valid votes
+ *  - governor: partyId that won governorship (if applicable)
+ *  - senate: { partyId: seatsWon }
+ */
 export const STATE_RESULTS = [
-  { state: 'Lagos', region: 'South West', presidential: { c1: 42, c2: 35, c3: 18, c4: 5 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 34.2 },
-  { state: 'Kano', region: 'North West', presidential: { c1: 38, c2: 28, c3: 25, c4: 9 }, senate: { apc: 1, lp: 1, nnpp: 1 }, governor: 'nnpp', turnout: 22.1 },
-  { state: 'Rivers', region: 'South South', presidential: { c2: 48, c1: 30, c3: 15, c4: 7 }, senate: { pdp: 2, apc: 1 }, governor: 'pdp', turnout: 41.5 },
-  { state: 'Enugu', region: 'South East', presidential: { c2: 55, c3: 25, c1: 15, c4: 5 }, senate: { pdp: 2, lp: 1 }, governor: 'apga', turnout: 38.7 },
-  { state: 'Kaduna', region: 'North West', presidential: { c1: 52, c2: 22, c3: 18, c4: 8 }, senate: { apc: 2, lp: 1 }, governor: 'apc', turnout: 28.3 },
-  { state: 'Abuja (FCT)', region: 'FCT', presidential: { c3: 38, c1: 30, c2: 25, c4: 7 }, senate: { apc: 1 }, governor: null, turnout: 45.2 },
-  { state: 'Oyo', region: 'South West', presidential: { c1: 40, c2: 38, c3: 16, c4: 6 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 31.8 },
-  { state: 'Benue', region: 'North Central', presidential: { c2: 42, c1: 35, c3: 18, c4: 5 }, senate: { pdp: 2, apc: 1 }, governor: 'pdp', turnout: 36.4 },
-  { state: 'Borno', region: 'North East', presidential: { c1: 58, c2: 20, c3: 12, c4: 10 }, senate: { apc: 2, nnpp: 1 }, governor: 'apc', turnout: 18.5 },
-  { state: 'Delta', region: 'South South', presidential: { c2: 45, c1: 32, c3: 17, c4: 6 }, senate: { pdp: 2, apc: 1 }, governor: 'pdp', turnout: 39.1 },
-  { state: 'Katsina', region: 'North West', presidential: { c1: 55, c2: 25, c3: 12, c4: 8 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 24.7 },
-  { state: 'Anambra', region: 'South East', presidential: { c2: 50, c3: 28, c1: 16, c4: 6 }, senate: { pdp: 2, apga: 1 }, governor: 'apga', turnout: 42.3 },
-  { state: 'Bauchi', region: 'North East', presidential: { c4: 40, c1: 35, c2: 18, c3: 7 }, senate: { nnpp: 2, apc: 1 }, governor: 'nnpp', turnout: 26.8 },
-  { state: 'Edo', region: 'South South', presidential: { c2: 44, c1: 34, c3: 16, c4: 6 }, senate: { pdp: 2, apc: 1 }, governor: 'pdp', turnout: 37.5 },
-  { state: 'Niger', region: 'North Central', presidential: { c1: 45, c2: 30, c3: 18, c4: 7 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 25.4 },
-  { state: 'Plateau', region: 'North Central', presidential: { c2: 40, c1: 38, c3: 16, c4: 6 }, senate: { pdp: 1, apc: 1, lp: 1 }, governor: 'pdp', turnout: 33.2 },
-  { state: 'Sokoto', region: 'North West', presidential: { c1: 52, c2: 28, c3: 12, c4: 8 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 21.6 },
-  { state: 'Imo', region: 'South East', presidential: { c2: 48, c3: 30, c1: 16, c4: 6 }, senate: { pdp: 2, lp: 1 }, governor: 'apga', turnout: 40.8 },
-  { state: 'Ogun', region: 'South West', presidential: { c1: 38, c2: 36, c3: 20, c4: 6 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 35.1 },
-  { state: 'Kwara', region: 'North Central', presidential: { c1: 42, c2: 35, c3: 17, c4: 6 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 30.5 },
-  { state: 'Cross River', region: 'South South', presidential: { c2: 46, c1: 32, c3: 16, c4: 6 }, senate: { pdp: 2, apc: 1 }, governor: 'pdp', turnout: 38.9 },
-  { state: 'Abia', region: 'South East', presidential: { c2: 52, c3: 26, c1: 16, c4: 6 }, senate: { pdp: 2, lp: 1 }, governor: 'apga', turnout: 41.2 },
-  { state: 'Zamfara', region: 'North West', presidential: { c1: 58, c2: 22, c3: 10, c4: 10 }, senate: { apc: 2, nnpp: 1 }, governor: 'apc', turnout: 19.8 },
-  { state: 'Adamawa', region: 'North East', presidential: { c1: 45, c2: 32, c3: 16, c4: 7 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 27.3 },
-  { state: 'Akwa Ibom', region: 'South South', presidential: { c2: 50, c1: 28, c3: 16, c4: 6 }, senate: { pdp: 2, apc: 1 }, governor: 'pdp', turnout: 40.5 },
-  { state: 'Jigawa', region: 'North West', presidential: { c1: 55, c2: 25, c3: 10, c4: 10 }, senate: { apc: 2, nnpp: 1 }, governor: 'apc', turnout: 23.1 },
-  { state: 'Kebbi', region: 'North West', presidential: { c1: 50, c2: 28, c3: 12, c4: 10 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 22.5 },
-  { state: 'Nasarawa', region: 'North Central', presidential: { c1: 42, c2: 35, c3: 17, c4: 6 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 29.8 },
-  { state: 'Taraba', region: 'North East', presidential: { c2: 42, c1: 36, c3: 16, c4: 6 }, senate: { pdp: 1, apc: 1, lp: 1 }, governor: 'pdp', turnout: 32.1 },
-  { state: 'Yobe', region: 'North East', presidential: { c1: 60, c2: 20, c3: 10, c4: 10 }, senate: { apc: 2, nnpp: 1 }, governor: 'apc', turnout: 17.2 },
-  { state: 'Ekiti', region: 'South West', presidential: { c1: 40, c2: 38, c3: 16, c4: 6 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 36.7 },
-  { state: 'Osun', region: 'South West', presidential: { c2: 42, c1: 36, c3: 16, c4: 6 }, senate: { pdp: 2, apc: 1 }, governor: 'pdp', turnout: 37.8 },
-  { state: 'Ondo', region: 'South West', presidential: { c1: 38, c2: 40, c3: 16, c4: 6 }, senate: { pdp: 2, apc: 1 }, governor: 'pdp', turnout: 34.5 },
-  { state: 'Ebonyi', region: 'South East', presidential: { c2: 50, c3: 28, c1: 16, c4: 6 }, senate: { pdp: 2, lp: 1 }, governor: 'apga', turnout: 39.6 },
-  { state: 'Kogi', region: 'North Central', presidential: { c1: 44, c2: 34, c3: 16, c4: 6 }, senate: { apc: 2, pdp: 1 }, governor: 'apc', turnout: 31.2 },
-  { state: 'Gombe', region: 'North East', presidential: { c1: 48, c2: 28, c3: 16, c4: 8 }, senate: { apc: 2, nnpp: 1 }, governor: 'apc', turnout: 25.9 },
+  { state: 'Abia', region: 'South East', registeredVoters: 2315884, accreditedVoters: 952340, validVotes: 920150, rejectedVotes: 32190, totalVotesCast: 952340, candidateVotes: { c1: 147224, c2: 478478, c3: 239239, c4: 55209 }, met25Threshold: ['c2', 'c3'], winner: 'c2', governor: 'apga', senate: { pdp: 2, lp: 1 } },
+  { state: 'Adamawa', region: 'North East', registeredVoters: 2270156, accreditedVoters: 619763, validVotes: 598420, rejectedVotes: 21343, totalVotesCast: 619763, candidateVotes: { c1: 269289, c2: 191494, c3: 95747, c4: 41890 }, met25Threshold: ['c1', 'c2'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Akwa Ibom', region: 'South South', registeredVoters: 2456789, accreditedVoters: 992543, validVotes: 960210, rejectedVotes: 32333, totalVotesCast: 992543, candidateVotes: { c1: 268859, c2: 480105, c3: 153634, c4: 57612 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 2, apc: 1 } },
+  { state: 'Anambra', region: 'South East', registeredVoters: 2678432, accreditedVoters: 1132977, validVotes: 1095650, rejectedVotes: 37327, totalVotesCast: 1132977, candidateVotes: { c1: 175304, c2: 547825, c3: 306782, c4: 65739 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'apga', senate: { pdp: 2, apga: 1 } },
+  { state: 'Bauchi', region: 'North East', registeredVoters: 2834567, accreditedVoters: 759830, validVotes: 732100, rejectedVotes: 27730, totalVotesCast: 759830, candidateVotes: { c1: 256235, c2: 131778, c3: 51247, c4: 292840 }, met25Threshold: ['c1', 'c4'], winner: 'c4', governor: 'nnpp', senate: { nnpp: 2, apc: 1 } },
+  { state: 'Bayelsa', region: 'South South', registeredVoters: 1023456, accreditedVoters: 387890, validVotes: 375120, rejectedVotes: 12770, totalVotesCast: 387890, candidateVotes: { c1: 105034, c2: 187560, c3: 60019, c4: 22507 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 2, apc: 1 } },
+  { state: 'Benue', region: 'North Central', registeredVoters: 2567890, accreditedVoters: 934712, validVotes: 902340, rejectedVotes: 32372, totalVotesCast: 934712, candidateVotes: { c1: 315819, c2: 378983, c3: 162421, c4: 45117 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 2, apc: 1 } },
+  { state: 'Borno', region: 'North East', registeredVoters: 2345678, accreditedVoters: 433950, validVotes: 418200, rejectedVotes: 15750, totalVotesCast: 433950, candidateVotes: { c1: 242556, c2: 83640, c3: 50184, c4: 41820 }, met25Threshold: ['c1', 'c2'], winner: 'c1', governor: 'apc', senate: { apc: 2, nnpp: 1 } },
+  { state: 'Cross River', region: 'South South', registeredVoters: 1789012, accreditedVoters: 695926, validVotes: 672340, rejectedVotes: 23586, totalVotesCast: 695926, candidateVotes: { c1: 215149, c2: 309276, c3: 107574, c4: 40341 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 2, apc: 1 } },
+  { state: 'Delta', region: 'South South', registeredVoters: 2890123, accreditedVoters: 1130038, validVotes: 1091200, rejectedVotes: 38838, totalVotesCast: 1130038, candidateVotes: { c1: 349184, c2: 491040, c3: 185504, c4: 65472 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 2, apc: 1 } },
+  { state: 'Ebonyi', region: 'South East', registeredVoters: 1567890, accreditedVoters: 620896, validVotes: 599420, rejectedVotes: 21476, totalVotesCast: 620896, candidateVotes: { c1: 95907, c2: 299710, c3: 167837, c4: 35966 }, met25Threshold: ['c2', 'c3'], winner: 'c2', governor: 'apga', senate: { pdp: 2, lp: 1 } },
+  { state: 'Edo', region: 'South South', registeredVoters: 2123456, accreditedVoters: 796296, validVotes: 768900, rejectedVotes: 27396, totalVotesCast: 796296, candidateVotes: { c1: 261426, c2: 338316, c3: 123024, c4: 46134 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 2, apc: 1 } },
+  { state: 'Ekiti', region: 'South West', registeredVoters: 1456789, accreditedVoters: 534641, validVotes: 516180, rejectedVotes: 18461, totalVotesCast: 534641, candidateVotes: { c1: 206472, c2: 196149, c3: 82589, c4: 30970 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Enugu', region: 'South East', registeredVoters: 2234567, accreditedVoters: 864787, validVotes: 835120, rejectedVotes: 29667, totalVotesCast: 864787, candidateVotes: { c1: 125268, c2: 459316, c3: 208780, c4: 41756 }, met25Threshold: ['c2', 'c3'], winner: 'c2', governor: 'apga', senate: { pdp: 2, lp: 1 } },
+  { state: 'FCT', region: 'North Central', registeredVoters: 2345678, accreditedVoters: 1060246, validVotes: 1024560, rejectedVotes: 35686, totalVotesCast: 1060246, candidateVotes: { c1: 307368, c2: 256140, c3: 389333, c4: 71719 }, met25Threshold: ['c1', 'c2', 'c3', 'c4'], winner: 'c3', governor: null, senate: { apc: 1 } },
+  { state: 'Gombe', region: 'North East', registeredVoters: 1567890, accreditedVoters: 406084, validVotes: 391200, rejectedVotes: 14884, totalVotesCast: 406084, candidateVotes: { c1: 187776, c2: 109536, c3: 62592, c4: 31296 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c1', governor: 'apc', senate: { apc: 2, nnpp: 1 } },
+  { state: 'Imo', region: 'South East', registeredVoters: 2456789, accreditedVoters: 1002370, validVotes: 968120, rejectedVotes: 34250, totalVotesCast: 1002370, candidateVotes: { c1: 154899, c2: 464698, c3: 290436, c4: 58087 }, met25Threshold: ['c2', 'c3'], winner: 'c2', governor: 'apga', senate: { pdp: 2, lp: 1 } },
+  { state: 'Jigawa', region: 'North West', registeredVoters: 2890123, accreditedVoters: 667618, validVotes: 644500, rejectedVotes: 23118, totalVotesCast: 667618, candidateVotes: { c1: 354475, c2: 161125, c3: 64450, c4: 64450 }, met25Threshold: ['c1', 'c2'], winner: 'c1', governor: 'apc', senate: { apc: 2, nnpp: 1 } },
+  { state: 'Kaduna', region: 'North West', registeredVoters: 3456789, accreditedVoters: 978271, validVotes: 944200, rejectedVotes: 34071, totalVotesCast: 978271, candidateVotes: { c1: 490984, c2: 207724, c3: 169956, c4: 75536 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c1', governor: 'apc', senate: { apc: 2, lp: 1 } },
+  { state: 'Kano', region: 'North West', registeredVoters: 5678901, accreditedVoters: 1255037, validVotes: 1210500, rejectedVotes: 44537, totalVotesCast: 1255037, candidateVotes: { c1: 459990, c2: 338940, c3: 302625, c4: 108945 }, met25Threshold: ['c1', 'c2', 'c3', 'c4'], winner: 'c1', governor: 'nnpp', senate: { apc: 1, lp: 1, nnpp: 1 } },
+  { state: 'Katsina', region: 'North West', registeredVoters: 3789012, accreditedVoters: 935886, validVotes: 903200, rejectedVotes: 32686, totalVotesCast: 935886, candidateVotes: { c1: 496760, c2: 225800, c3: 108384, c4: 72256 }, met25Threshold: ['c1', 'c2'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Kebbi', region: 'North West', registeredVoters: 2123456, accreditedVoters: 477778, validVotes: 460800, rejectedVotes: 16978, totalVotesCast: 477778, candidateVotes: { c1: 230400, c2: 129024, c3: 55296, c4: 46080 }, met25Threshold: ['c1', 'c2'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Kogi', region: 'North Central', registeredVoters: 2012345, accreditedVoters: 627852, validVotes: 606120, rejectedVotes: 21732, totalVotesCast: 627852, candidateVotes: { c1: 266693, c2: 206081, c3: 96979, c4: 36367 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Kwara', region: 'North Central', registeredVoters: 1678901, accreditedVoters: 512065, validVotes: 494200, rejectedVotes: 17865, totalVotesCast: 512065, candidateVotes: { c1: 207564, c2: 172970, c3: 84014, c4: 29652 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Lagos', region: 'South West', registeredVoters: 6567890, accreditedVoters: 2246218, validVotes: 2168400, rejectedVotes: 77818, totalVotesCast: 2246218, candidateVotes: { c1: 910728, c2: 758940, c3: 390312, c4: 108420 }, met25Threshold: ['c1', 'c2', 'c3', 'c4'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Nasarawa', region: 'North Central', registeredVoters: 1567890, accreditedVoters: 467231, validVotes: 450900, rejectedVotes: 16331, totalVotesCast: 467231, candidateVotes: { c1: 189378, c2: 157815, c3: 76653, c4: 27054 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Niger', region: 'North Central', registeredVoters: 2567890, accreditedVoters: 652244, validVotes: 629400, rejectedVotes: 22844, totalVotesCast: 652244, candidateVotes: { c1: 283230, c2: 188820, c3: 113292, c4: 44058 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Ogun', region: 'South West', registeredVoters: 2890123, accreditedVoters: 1014433, validVotes: 980100, rejectedVotes: 34333, totalVotesCast: 1014433, candidateVotes: { c1: 372438, c2: 352836, c3: 196020, c4: 58806 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Ondo', region: 'South West', registeredVoters: 2012345, accreditedVoters: 694259, validVotes: 670320, rejectedVotes: 23939, totalVotesCast: 694259, candidateVotes: { c1: 254722, c2: 268128, c3: 107251, c4: 40219 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 2, apc: 1 } },
+  { state: 'Osun', region: 'South West', registeredVoters: 2123456, accreditedVoters: 802666, validVotes: 775200, rejectedVotes: 27466, totalVotesCast: 802666, candidateVotes: { c1: 279072, c2: 325584, c3: 124032, c4: 46512 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 2, apc: 1 } },
+  { state: 'Oyo', region: 'South West', registeredVoters: 3456789, accreditedVoters: 1099259, validVotes: 1061400, rejectedVotes: 37859, totalVotesCast: 1099259, candidateVotes: { c1: 424560, c2: 403332, c3: 169824, c4: 63684 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Plateau', region: 'North Central', registeredVoters: 2012345, accreditedVoters: 668100, validVotes: 644700, rejectedVotes: 23400, totalVotesCast: 668100, candidateVotes: { c1: 244986, c2: 257880, c3: 103152, c4: 38682 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 1, apc: 1, lp: 1 } },
+  { state: 'Rivers', region: 'South South', registeredVoters: 2890123, accreditedVoters: 1199501, validVotes: 1158000, rejectedVotes: 41501, totalVotesCast: 1199501, candidateVotes: { c1: 347400, c2: 555840, c3: 173700, c4: 81060 }, met25Threshold: ['c1', 'c2', 'c3', 'c4'], winner: 'c2', governor: 'pdp', senate: { pdp: 2, apc: 1 } },
+  { state: 'Sokoto', region: 'North West', registeredVoters: 2345678, accreditedVoters: 506666, validVotes: 489200, rejectedVotes: 17466, totalVotesCast: 506666, candidateVotes: { c1: 254384, c2: 136976, c3: 58704, c4: 39136 }, met25Threshold: ['c1', 'c2'], winner: 'c1', governor: 'apc', senate: { apc: 2, pdp: 1 } },
+  { state: 'Taraba', region: 'North East', registeredVoters: 1567890, accreditedVoters: 503293, validVotes: 485700, rejectedVotes: 17593, totalVotesCast: 503293, candidateVotes: { c1: 174852, c2: 203994, c3: 77712, c4: 29142 }, met25Threshold: ['c1', 'c2', 'c3'], winner: 'c2', governor: 'pdp', senate: { pdp: 1, apc: 1, lp: 1 } },
+  { state: 'Yobe', region: 'North East', registeredVoters: 1456789, accreditedVoters: 250568, validVotes: 241800, rejectedVotes: 8768, totalVotesCast: 250568, candidateVotes: { c1: 145080, c2: 48360, c3: 24180, c4: 24180 }, met25Threshold: ['c1', 'c2'], winner: 'c1', governor: 'apc', senate: { apc: 2, nnpp: 1 } },
+  { state: 'Zamfara', region: 'North West', registeredVoters: 2234567, accreditedVoters: 442444, validVotes: 426800, rejectedVotes: 15644, totalVotesCast: 442444, candidateVotes: { c1: 247544, c2: 93896, c3: 42680, c4: 42680 }, met25Threshold: ['c1', 'c2'], winner: 'c1', governor: 'apc', senate: { apc: 2, nnpp: 1 } },
 ];
+
+/**
+ * Compute national totals from state results.
+ */
+export function computeNationalTotals(candidateIds) {
+  const totals = {
+    registeredVoters: 0,
+    accreditedVoters: 0,
+    validVotes: 0,
+    rejectedVotes: 0,
+    totalVotesCast: 0,
+    candidateVotes: {},
+    candidatePercentages: {},
+    statesWon: {},
+    statesMet25: {},
+    turnout: 0,
+  };
+
+  candidateIds.forEach(id => {
+    totals.candidateVotes[id] = 0;
+    totals.statesWon[id] = 0;
+    totals.statesMet25[id] = 0;
+  });
+
+  STATE_RESULTS.forEach(sr => {
+    totals.registeredVoters += sr.registeredVoters;
+    totals.accreditedVoters += sr.accreditedVoters;
+    totals.validVotes += sr.validVotes;
+    totals.rejectedVotes += sr.rejectedVotes;
+    totals.totalVotesCast += sr.totalVotesCast;
+
+    candidateIds.forEach(id => {
+      totals.candidateVotes[id] += sr.candidateVotes[id] || 0;
+      if (sr.winner === id) totals.statesWon[id]++;
+      if (sr.met25Threshold.includes(id)) totals.statesMet25[id]++;
+    });
+  });
+
+  candidateIds.forEach(id => {
+    totals.candidatePercentages[id] = totals.validVotes > 0
+      ? ((totals.candidateVotes[id] / totals.validVotes) * 100)
+      : 0;
+  });
+
+  totals.turnout = totals.registeredVoters > 0
+    ? ((totals.accreditedVoters / totals.registeredVoters) * 100)
+    : 0;
+
+  return totals;
+}
 
 export const FACT_CHECKS = [
   {

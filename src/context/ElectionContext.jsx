@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { appwriteService, COLLECTION_ID_ELECTIONS, COLLECTION_ID_CANDIDATES, COLLECTION_ID_RESULTS, COLLECTION_ID_FACTCHECKS } from '../lib/appwrite';
-import { ELECTION_INFO as SEED_ELECTION, CANDIDATES as SEED_CANDIDATES, RESULTS as SEED_RESULTS, FACT_CHECKS as SEED_FACTCHECKS } from '../data/electionData';
+import { ELECTION_INFO as SEED_ELECTION, CANDIDATES as SEED_CANDIDATES, FACT_CHECKS as SEED_FACTCHECKS } from '../data/electionData';
 
 const ElectionContext = createContext();
 
@@ -64,13 +64,7 @@ export function ElectionProvider({ children }) {
     };
     setElections([defaultElection]);
     setCandidates(SEED_CANDIDATES.map(c => ({ ...c, electionId: 'election-2027' })));
-    setResults([
-      ...SEED_RESULTS.presidential.candidates.map(c => ({
-        ...c,
-        electionId: 'election-2027',
-        type: 'presidential',
-      })),
-    ]);
+    setResults([]);
     setFactChecks(SEED_FACTCHECKS.map(f => ({ ...f, electionId: 'election-2027' })));
     setLocal(STORAGE_KEY_ELECTIONS, [defaultElection]);
     setLocal(STORAGE_KEY_CANDIDATES, SEED_CANDIDATES);
