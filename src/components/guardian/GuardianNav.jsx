@@ -128,16 +128,19 @@ const GuardianNav = () => {
                   { label: 'Ra\'ayi', path: '/raayi' },
                   { label: 'Al\'adu', path: '/aladu' },
                   { label: 'Bidiyo', path: '/bidiyo' }
-                ].map((item, idx) => (
-                  <li key={item.label}>
-                    <a
-                      href={item.path}
-                      className={`block px-3 py-3 hover:text-white hover:bg-[#0f3036] transition-colors border-b-2 border-transparent hover:border-yanci-accent ${idx === 0 ? 'text-white border-yanci-accent bg-[#0f3036]' : ''}`}
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
+                ].map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <li key={item.label}>
+                      <a
+                        href={item.path}
+                        className={`block px-3 py-3 hover:text-white hover:bg-[#0f3036] transition-colors border-b-2 border-transparent hover:border-yanci-accent ${isActive ? 'text-white border-yanci-accent bg-[#0f3036]' : ''}`}
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
               <div className="hidden lg:flex items-center gap-2 text-xs font-bold text-yanci-accent pl-4 border-l border-[#2a5d66]">
                 <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
