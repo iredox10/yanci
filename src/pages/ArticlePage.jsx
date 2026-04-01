@@ -20,6 +20,7 @@ import { PILLARS } from '../data/guardianData';
 import LiveArticlePage from './LiveArticlePage';
 import SEO from '../components/SEO';
 import AdSlot from '../components/AdSlot';
+import CommentsSection from '../components/CommentsSection';
 import { useViewTracker } from '../hooks/useViewTracker';
 import { useAnalytics } from '../hooks/useAnalytics';
 
@@ -82,10 +83,42 @@ const ArticlePage = () => {
       trackView(article.id);
       trackArticleView(article);
     }
-  }, [article?.id, trackView, trackArticleView]);
+  }, [article, trackView, trackArticleView]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+  const shareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const shareTwitter = () => {
+    const text = encodeURIComponent(article?.headline || '');
+    window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${text}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const shareWhatsapp = () => {
+    const text = encodeURIComponent(`${article?.headline || ''} - ${currentUrl}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article?.headline || 'Yanci',
+          text: article?.trail || '',
+          url: currentUrl,
+        });
+      } catch (error) {
+        console.error('Error sharing', error);
+      }
+    } else {
+      alert("Browser baya goyon bayan wannan tsarin raba labari.");
+    }
   };
 
   const renderBody = (bodyHtml) => {
@@ -173,7 +206,7 @@ const ArticlePage = () => {
         />
       </div>
 
-      <main className="pb-32 pt-10 md:pt-16">
+      <main className="pb-32 pt-10 md:pt-16" id="main-content" role="main" aria-label="Babban ciki">
 
         {/* CENTERED COLUMN LAYOUT */}
         <article className="max-w-[780px] mx-auto px-5 md:px-0">
@@ -204,9 +237,9 @@ const ArticlePage = () => {
 
             {/* Simplified Meta Data - Centered Focus */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-6 border-t border-b border-gray-100 mb-10">
-                <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center font-bold text-xl text-[#121212]">
-                   {(article.author || "Y")[0]}
+                  {(article.author || "Y")[0]}
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-widest mb-0.5">Written by</span>
@@ -220,17 +253,34 @@ const ArticlePage = () => {
                 </div>
               </div>
 
+              {/* Last Updated Timestamp */}
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <FaClock className="w-3 h-3" />
+                <span>
+                  {article.$updatedAt
+                    ? `An sabawa: ${new Date(article.$updatedAt).toLocaleDateString('ha-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                    : article.$createdAt
+                    ? `An buga: ${new Date(article.$createdAt).toLocaleDateString('ha-NG', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                    : ''}
+                </span>
+              </div>
+
               <div className="flex items-center gap-3">
                 <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-widest mr-2 hidden sm:block">Share</span>
-                <button className="w-10 h-10 rounded-full border border-gray-100 hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Facebook">
+                <button onClick={shareFacebook} className="w-10 h-10 rounded-full border border-gray-100 hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Facebook">
                   <FaFacebook size={16} />
                 </button>
-                <button className="w-10 h-10 rounded-full border border-gray-100 hover:border-[#1DA1F2] hover:bg-[#1DA1F2] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Twitter">
+                <button onClick={shareTwitter} className="w-10 h-10 rounded-full border border-gray-100 hover:border-[#1DA1F2] hover:bg-[#1DA1F2] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Twitter">
                   <FaTwitter size={16} />
                 </button>
-                <button className="w-10 h-10 rounded-full border border-gray-100 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Whatsapp">
+                <button onClick={shareWhatsapp} className="w-10 h-10 rounded-full border border-gray-100 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Whatsapp">
                   <FaWhatsapp size={16} />
                 </button>
+                {typeof navigator !== 'undefined' && navigator.share && (
+                  <button onClick={handleNativeShare} className="w-10 h-10 border border-gray-100 hover:border-[#121212] hover:bg-[#121212] hover:text-white rounded-full flex items-center justify-center text-gray-400 transition-all duration-300" title="Share via Device">
+                    <FaShareNodes size={16} />
+                  </button>
+                )}
               </div>
             </div>
           </header>
@@ -284,6 +334,9 @@ const ArticlePage = () => {
 
           {/* Inline Ad Unit */}
           <AdSlot variant="inline" />
+
+          {/* Comments Section */}
+          <CommentsSection articleId={article.id} />
 
         </article>
 

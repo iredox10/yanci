@@ -37,6 +37,8 @@ import { useAudio } from '../context/AudioContext';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useViewTracker } from '../hooks/useViewTracker';
+import NotificationPrompt from '../components/NotificationPrompt';
+import { useNewsletter } from '../hooks/useNewsletter';
 
 const highlightPanels = [
   {
@@ -108,8 +110,22 @@ const GuardianHome = () => {
   const { articles, ticker } = useNews();
   const { playTrack } = useAudio();
   const { getMostRead } = useViewTracker();
+  const { subscribe: subscribeNewsletter, count: newsletterCount } = useNewsletter();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState('latest');
   const [isVisible, setIsVisible] = useState({});
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    const success = await subscribeNewsletter(newsletterEmail.trim());
+    if (success) {
+      setNewsletterSubmitted(true);
+      setNewsletterEmail('');
+      setTimeout(() => setNewsletterSubmitted(false), 5000);
+    }
+  };
 
   const headlines = articles.filter(a => a.section === 'headlines');
   const heroStory = headlines.find((headline) => headline.type === 'hero') ?? headlines[0];
@@ -152,7 +168,7 @@ const GuardianHome = () => {
       <SEO />
       <GuardianNav />
 
-      <main className="relative">
+      <main className="relative" id="main-content" role="main" aria-label="Babban ciki">
         {/* Breaking News Ticker - Modern Glassmorphism */}
         {ticker?.length > 0 && (
           <section className="sticky top-[48px] z-30 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
@@ -993,19 +1009,28 @@ const GuardianHome = () => {
                 Samu labarai masu inganci, ra'ayoyi masu zurfi, da rahotanni na musamman kai tsaye a cikin akwatin saƙonku.
               </p>
               
-              <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
                 <input 
                   type="email" 
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="Adireshin imel..."
+                  required
                   className="flex-1 px-6 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c59d5f]/50 focus:border-[#c59d5f] transition-all"
                 />
-                <button className="px-8 py-4 bg-[#c59d5f] text-[#0f3036] font-bold uppercase tracking-wider rounded-xl hover:bg-white transition-all shadow-lg whitespace-nowrap">
+                <button type="submit" className="px-8 py-4 bg-[#c59d5f] text-[#0f3036] font-bold uppercase tracking-wider rounded-xl hover:bg-white transition-all shadow-lg whitespace-nowrap">
                   Yi Rajista
                 </button>
               </form>
               
+              {newsletterSubmitted && (
+                <p className="text-sm text-green-400 mt-3 font-medium">
+                  Nagode! An yi rajistar adireshin imel ɗinka cikin nasara.
+                </p>
+              )}
+              
               <p className="text-xs text-gray-500 mt-4">
-                Masu karatu 50,000+ sun riga sun yi rajista. Kana iya soke rajista a kowane lokaci.
+                Masu karatu {newsletterCount > 0 ? newsletterCount.toLocaleString() : '50,000+'} sun riga sun yi rajista. Kana iya soke rajista a kowane lokaci.
               </p>
             </div>
           </div>
@@ -1013,6 +1038,7 @@ const GuardianHome = () => {
       </main>
 
       <GuardianFooter />
+      <NotificationPrompt />
     </div>
   );
 };

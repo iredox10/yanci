@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/generate-rss.cjs && vite build",
+    "build": "node scripts/generate-rss.cjs && node scripts/generate-sitemap.cjs && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

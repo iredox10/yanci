@@ -5,13 +5,85 @@ import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import { useNews } from '../context/NewsContext';
 
+const EmbedRenderer = ({ content }) => {
+  if (!content) return null;
+
+  // Simple parser: split by newlines, check for exact URL matches
+  const lines = content.split('\n');
+
+  return (
+    <>
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+
+        // YouTube
+        const ytMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+        if (ytMatch) {
+          return (
+            <div key={idx} className="my-4 aspect-video rounded-lg overflow-hidden shadow-sm">
+              <iframe
+                src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+                className="w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          );
+        }
+
+        // Twitter/X
+        const twMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/([\w_]+)\/status\/(\d+)/);
+        if (twMatch) {
+          return (
+            <div key={idx} className="my-4 flex justify-center">
+              <blockquote className="twitter-tweet" data-dnt="true" data-theme="light">
+                <a href={`https://twitter.com/${twMatch[1]}/status/${twMatch[2]}`}></a>
+              </blockquote>
+            </div>
+          );
+        }
+
+        // Regular Text
+        return <p key={idx} className="mb-2 whitespace-pre-wrap">{line}</p>;
+      })}
+    </>
+  );
+};
+
 const LiveArticlePage = () => {
   const { id } = useParams();
   const { getArticleById } = useNews();
 
-  // Try to find the article by ID, or fallback to the known live article (ID 3) if not found or if ID is missing
   const article = getArticleById(id) || getArticleById(3);
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
+
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+  const shareFacebook = (specificUrl = currentUrl) => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(specificUrl)}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const shareTwitter = (text = '', specificUrl = currentUrl) => {
+    const encodedText = encodeURIComponent(text || article?.headline || '');
+    window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(specificUrl)}&text=${encodedText}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleNativeShare = async (title = '', text = '', specificUrl = currentUrl) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title || article?.headline || 'Yanci Live',
+          text: text,
+          url: specificUrl,
+        });
+      } catch (error) {
+        console.error('Error sharing', error);
+      }
+    } else {
+      alert("Browser baya goyon bayan wannan tsarin raba labari.");
+    }
+  };
 
   // Auto-refresh logic (mainly for non-realtime fallback or to ensure freshness)
   useEffect(() => {
@@ -38,52 +110,6 @@ const LiveArticlePage = () => {
       document.body.removeChild(script);
     };
   }, []);
-
-  const EmbedRenderer = ({ content }) => {
-    if (!content) return null;
-
-    // Simple parser: split by newlines, check for exact URL matches
-    const lines = content.split('\n');
-
-    return (
-      <>
-        {lines.map((line, idx) => {
-          const trimmed = line.trim();
-
-          // YouTube
-          const ytMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
-          if (ytMatch) {
-            return (
-              <div key={idx} className="my-4 aspect-video rounded-lg overflow-hidden shadow-sm">
-                <iframe
-                  src={`https://www.youtube.com/embed/${ytMatch[1]}`}
-                  className="w-full h-full"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            );
-          }
-
-          // Twitter/X
-          const twMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/([\w_]+)\/status\/(\d+)/);
-          if (twMatch) {
-            return (
-              <div key={idx} className="my-4 flex justify-center">
-                <blockquote className="twitter-tweet" data-dnt="true" data-theme="light">
-                  <a href={`https://twitter.com/${twMatch[1]}/status/${twMatch[2]}`}></a>
-                </blockquote>
-              </div>
-            );
-          }
-
-          // Regular Text
-          return <p key={idx} className="mb-2 whitespace-pre-wrap">{line}</p>;
-        })}
-      </>
-    );
-  };
 
 
   if (!article) return <div>Ana Lodawa...</div>;
@@ -149,7 +175,7 @@ const LiveArticlePage = () => {
               <FaRotate className={`w-3 h-3 ${isAutoRefreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">{isAutoRefreshing ? 'Sake Sabuntawa: Kunne' : 'A Kashe'}</span>
             </button>
-            <button className="p-2 text-gray-400 hover:text-[#121212] transition-colors">
+            <button onClick={() => handleNativeShare()} className="p-2 text-gray-400 hover:text-[#121212] transition-colors">
               <FaShareNodes className="w-4 h-4" />
             </button>
           </div>
@@ -193,8 +219,8 @@ const LiveArticlePage = () => {
                       Daga {pinnedPost.author || 'Edita'}
                     </span>
                     <div className="flex gap-3">
-                      <button className="text-gray-400 hover:text-[#1877F2]"><FaFacebook /></button>
-                      <button className="text-gray-400 hover:text-[#1DA1F2]"><FaTwitter /></button>
+                      <button onClick={() => shareFacebook(`${currentUrl}#${pinnedPost.id}`)} className="text-gray-400 hover:text-[#1877F2]"><FaFacebook /></button>
+                      <button onClick={() => shareTwitter(pinnedPost.title, `${currentUrl}#${pinnedPost.id}`)} className="text-gray-400 hover:text-[#1DA1F2]"><FaTwitter /></button>
                     </div>
                   </div>
                 </div>
@@ -273,7 +299,7 @@ const LiveArticlePage = () => {
                         {event.author || 'Edita'}
                       </span>
                       <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="text-gray-400 hover:text-[#121212] text-xs font-bold flex items-center gap-1"><FaShareNodes /> Raba</button>
+                        <button onClick={() => handleNativeShare(event.title, '', `${currentUrl}#${event.id}`)} className="text-gray-400 hover:text-[#121212] text-xs font-bold flex items-center gap-1"><FaShareNodes /> Raba</button>
                       </div>
                     </footer>
                   </div>
