@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { NewsProvider } from './context/NewsContext';
 import { AudioProvider } from './context/AudioContext';
 import { AuthProvider } from './context/AuthContext';
+import { ElectionProvider } from './context/ElectionContext';
 import AudioPlayer from './components/guardian/AudioPlayer';
 import GuardianHome from './pages/GuardianHome';
 import ArticlePage from './pages/ArticlePage';
@@ -40,6 +41,10 @@ const AdminLiveConsole = lazy(() => import('./pages/admin/AdminLiveConsole'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 const AdminMedia = lazy(() => import('./pages/admin/AdminMedia'));
 const AdminMultimedia = lazy(() => import('./pages/admin/AdminMultimedia'));
+const AdminElections = lazy(() => import('./pages/admin/AdminElections'));
+const AdminElectionResults = lazy(() => import('./pages/admin/AdminElectionResults'));
+const AdminCandidates = lazy(() => import('./pages/admin/AdminCandidates'));
+const AdminFactChecks = lazy(() => import('./pages/admin/AdminFactChecks'));
 
 function App() {
   return (
@@ -47,7 +52,8 @@ function App() {
       <AuthProvider>
         <NewsProvider>
           <AudioProvider>
-            <BrowserRouter>
+            <ElectionProvider>
+              <BrowserRouter>
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<GuardianHome />} />
@@ -85,12 +91,17 @@ function App() {
                   <Route path="live" element={<AdminLiveManager />} />
                   <Route path="live/:id" element={<AdminLiveConsole />} />
                   <Route path="settings" element={<AdminSettings />} />
+                  <Route path="elections" element={<AdminElections />} />
+                  <Route path="elections/:id/results" element={<AdminElectionResults />} />
+                  <Route path="elections/:id/candidates" element={<AdminCandidates />} />
+                  <Route path="elections/:id/factchecks" element={<AdminFactChecks />} />
                 </Route>
 
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
               <AudioPlayer />
-            </BrowserRouter>
+              </BrowserRouter>
+            </ElectionProvider>
           </AudioProvider>
         </NewsProvider>
       </AuthProvider>

@@ -13,7 +13,8 @@ import {
   FaBars,
   FaXmark,
   FaImage,
-  FaPhotoFilm
+  FaPhotoFilm,
+  FaCheckToSlot,
 } from 'react-icons/fa6';
 
 const AdminLayout = () => {
@@ -97,6 +98,13 @@ const AdminLayout = () => {
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/live') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
             <FaTowerBroadcast className="w-5 h-5" /> Live Coverage
+          </Link>
+
+          <Link
+            to="/admin/elections"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${location.pathname.startsWith('/admin/elections') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaCheckToSlot className="w-5 h-5" /> Elections
           </Link>
 
           <Link
