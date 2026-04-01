@@ -29,7 +29,7 @@ const SiyasaPage = () => {
                         Siyasa<span className="text-[#ffbac8]">.</span>
                     </h1>
                     <div className="flex flex-wrap gap-6 text-sm font-bold border-t border-[#a33f3f] pt-4">
-                        <a href="#" className="hover:text-[#ffbac8] transition-colors">Zabe 2027</a>
+                        <Link to="/zabe" className="hover:text-[#ffbac8] transition-colors">Zabe 2027</Link>
                         <a href="#" className="hover:text-[#ffbac8] transition-colors">Majalisa</a>
                         <a href="#" className="hover:text-[#ffbac8] transition-colors">Fadar Shugaban Kasa</a>
                         <a href="#" className="hover:text-[#ffbac8] transition-colors">Siyasar Jihohi</a>

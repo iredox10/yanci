@@ -22,6 +22,11 @@ import FasahaPage from './pages/FasahaPage';
 import RaayiPage from './pages/RaayiPage';
 import AladuPage from './pages/AladuPage';
 import BidiyoPage from './pages/BidiyoPage';
+import ElectionHub from './pages/ElectionHub';
+import ElectionResults from './pages/ElectionResults';
+import CandidateProfiles from './pages/CandidateProfiles';
+import FactCheckPage from './pages/FactCheckPage';
+import VoterEducation from './pages/VoterEducation';
 
 // Admin — lazy loaded so they don't inflate the public bundle
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -59,6 +64,13 @@ function App() {
                 <Route path="/section/:id" element={<SectionPage />} />
                 <Route path="/tag/:tag" element={<TagPage />} />
                 <Route path="/author/:name" element={<AuthorPage />} />
+
+                {/* Election Routes */}
+                <Route path="/zabe" element={<ElectionHub />} />
+                <Route path="/zabe/sakamako" element={<ElectionResults />} />
+                <Route path="/zabe/yan-takara" element={<CandidateProfiles />} />
+                <Route path="/zabe/gaskiya" element={<FactCheckPage />} />
+                <Route path="/zabe/ilimi" element={<VoterEducation />} />
 
                 {/* Admin Routes — lazy loaded, wrapped in Suspense */}
                 <Route path="/admin/login" element={<Suspense fallback={<div className="min-h-screen bg-[#0f3036]" />}><AdminLogin /></Suspense>} />

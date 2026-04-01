@@ -127,9 +127,12 @@ const GuardianNav = () => {
                   { label: 'Fasaha', path: '/fasaha' },
                   { label: 'Ra\'ayi', path: '/raayi' },
                   { label: 'Al\'adu', path: '/aladu' },
-                  { label: 'Bidiyo', path: '/bidiyo' }
+                  { label: 'Bidiyo', path: '/bidiyo' },
+                  { label: 'Zabe', path: '/zabe' }
                 ].map((item) => {
-                  const isActive = location.pathname === item.path;
+                  const isActive = item.path === '/zabe'
+                    ? location.pathname.startsWith('/zabe')
+                    : location.pathname === item.path;
                   return (
                     <li key={item.label}>
                       <a
