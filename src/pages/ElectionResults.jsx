@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  FaChevronRight, FaClock, FaFilter, FaArrowUp, FaBuildingColumns,
-  FaGavel, FaPersonBooth, FaChartColumn, FaCircleCheck,
+  FaChevronRight, FaClock, FaFilter, FaBuildingColumns,
+  FaGavel, FaPersonBooth, FaChartColumn, FaCircleCheck, FaCircleXmark,
 } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
@@ -17,6 +17,11 @@ function getParty(id) {
 
 function getCandidate(id) {
   return CANDIDATES.find((c) => c.id === id);
+}
+
+function formatNumber(n) {
+  if (n == null) return '—';
+  return n.toLocaleString('en-NG');
 }
 
 export default function ElectionResults() {
@@ -37,11 +42,6 @@ export default function ElectionResults() {
   }, [activeRegion, searchState]);
 
   const nationalTotals = computeNationalTotals(CANDIDATES.map(c => c.id));
-
-  function formatNumber(n) {
-    if (n == null) return '—';
-    return n.toLocaleString('en-NG');
-  }
 
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917]">
@@ -207,10 +207,16 @@ export default function ElectionResults() {
             <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-bold text-lg">Majalisar Dattawa — Kujeru 109</h2>
-                <span className="text-sm text-gray-500">{RESULTS.senate.seatsReported}/109 sun ruwaito</span>
+                <span className="text-sm text-gray-500">72/109 sun ruwaito</span>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {RESULTS.senate.parties.map((p) => {
+                {[
+                  { partyId: 'apc', seats: 38, leading: 5 },
+                  { partyId: 'pdp', seats: 22, leading: 4 },
+                  { partyId: 'lp', seats: 8, leading: 2 },
+                  { partyId: 'nnpp', seats: 3, leading: 1 },
+                  { partyId: 'apga', seats: 1, leading: 0 },
+                ].map((p) => {
                   const party = getParty(p.partyId);
                   return (
                     <div key={p.partyId} className="text-center p-4 rounded-lg" style={{ backgroundColor: party.color + '10' }}>
@@ -236,10 +242,15 @@ export default function ElectionResults() {
             <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-bold text-lg">Gwamnoni — Jihohi 36</h2>
-                <span className="text-sm text-gray-500">{RESULTS.governor.statesReported}/36 sun ruwaito</span>
+                <span className="text-sm text-gray-500">20/36 sun ruwaito</span>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {RESULTS.governor.parties.map((p) => {
+                {[
+                  { partyId: 'apc', states: 10, leading: 3 },
+                  { partyId: 'pdp', states: 6, leading: 2 },
+                  { partyId: 'lp', states: 3, leading: 1 },
+                  { partyId: 'nnpp', states: 1, leading: 0 },
+                ].map((p) => {
                   const party = getParty(p.partyId);
                   return (
                     <div key={p.partyId} className="text-center p-4 rounded-lg" style={{ backgroundColor: party.color + '10' }}>
@@ -292,10 +303,10 @@ export default function ElectionResults() {
             {/* State Results Table */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
+                <table className="w-full text-sm" style={{ minWidth: '1100px' }}>
+                  <thead className="sticky top-0 bg-gray-50 z-10">
                     <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="text-left px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500 sticky left-0 bg-gray-50 z-10">Jiha</th>
+                      <th className="text-left px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500 sticky left-0 bg-gray-50 z-20">Jiha</th>
                       <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Masu Rajista</th>
                       <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Su ka Kada</th>
                       <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Halarta</th>
@@ -317,9 +328,17 @@ export default function ElectionResults() {
                       const turnout = state.registeredVoters > 0 ? ((state.accreditedVoters / state.registeredVoters) * 100).toFixed(1) : 0;
                       const winner = state.winner ? getCandidate(state.winner) : null;
                       const winnerParty = winner ? getParty(winner.party) : null;
+                      const isExpanded = expandedState === state.state;
                       return (
                         <tr key={state.state} className="border-b border-gray-50 hover:bg-gray-50/50">
-                          <td className="px-3 py-2.5 font-bold sticky left-0 bg-white z-10">{state.state}</td>
+                          <td className="px-3 py-2.5 font-bold sticky left-0 bg-white z-10">
+                            <button
+                              onClick={() => setExpandedState(isExpanded ? null : state.state)}
+                              className="flex items-center gap-1 hover:text-[#0f3460] transition-colors"
+                            >
+                              {isExpanded ? '▾' : '▸'} {state.state}
+                            </button>
+                          </td>
                           <td className="px-3 py-2.5 text-right font-mono text-xs">{formatNumber(state.registeredVoters)}</td>
                           <td className="px-3 py-2.5 text-right font-mono text-xs">{formatNumber(state.accreditedVoters)}</td>
                           <td className="px-3 py-2.5 text-center">
@@ -371,6 +390,88 @@ export default function ElectionResults() {
                 </table>
               </div>
             </div>
+
+            {/* Expanded State Detail */}
+            {expandedState && (() => {
+              const sd = STATE_RESULTS.find(s => s.state === expandedState);
+              if (!sd) return null;
+              const turnout = sd.registeredVoters > 0 ? ((sd.accreditedVoters / sd.registeredVoters) * 100).toFixed(1) : 0;
+              return (
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-lg">{sd.state} — Cikakkun Bayanai</h3>
+                    <button onClick={() => setExpandedState(null)} className="text-gray-400 hover:text-gray-600">
+                      <FaCircleXmark className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Masu Rajista</div>
+                      <div className="text-lg font-black">{formatNumber(sd.registeredVoters)}</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Waɗanda suka Kada</div>
+                      <div className="text-lg font-black">{formatNumber(sd.accreditedVoters)}</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Halarta</div>
+                      <div className="text-lg font-black">{turnout}%</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Ingantattu</div>
+                      <div className="text-lg font-black">{formatNumber(sd.validVotes)}</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">An Ki</div>
+                      <div className="text-lg font-black text-red-600">{formatNumber(sd.rejectedVotes)}</div>
+                    </div>
+                  </div>
+
+                  {/* Candidate breakdown */}
+                  <div className="space-y-3">
+                    {CANDIDATES.map(c => {
+                      const party = getParty(c.party);
+                      const votes = sd.candidateVotes?.[c.id] || 0;
+                      const pct = sd.validVotes > 0 ? ((votes / sd.validVotes) * 100).toFixed(1) : '0.0';
+                      const isWinner = sd.winner === c.id;
+                      const met25 = sd.validVotes > 0 && (votes / sd.validVotes) >= 0.25;
+                      const barWidth = sd.validVotes > 0 ? (votes / sd.validVotes) * 100 : 0;
+
+                      return (
+                        <div key={c.id} className={`p-3 rounded-lg ${isWinner ? 'bg-green-50 border border-green-200' : 'bg-gray-50'}`}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: party.color }} />
+                              <span className="font-bold text-sm">{c.name}</span>
+                              {isWinner && <FaCircleCheck className="text-green-600 w-4 h-4" />}
+                              {met25 && <span className="text-[10px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded">≥25%</span>}
+                            </div>
+                            <div className="text-right">
+                              <span className="font-black" style={{ color: party.color }}>{formatNumber(votes)}</span>
+                              <span className="text-xs text-gray-500 ml-2">({pct}%)</span>
+                            </div>
+                          </div>
+                          <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all"
+                              style={{ width: `${barWidth}%`, backgroundColor: party.color }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* 25% threshold check */}
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-xs text-amber-700">
+                      <strong>Ƙa'idar 25%:</strong> {sd.met25Threshold?.length || 0} 'yan takara sun wuce 25% a {sd.state}.
+                      {sd.met25Threshold?.length >= 1 ? ' An cika sharadi a wannan jiha.' : ' Babu wanda ya cika sharadi.'}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FaChevronRight, FaUsers, FaLocationDot, FaGraduationCap,
@@ -14,8 +14,6 @@ function getParty(id) {
 }
 
 export default function CandidateProfiles() {
-  const [selectedCandidate, setSelectedCandidate] = useState(null);
-
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917]">
       <SEO
@@ -103,7 +101,7 @@ export default function CandidateProfiles() {
                         <FaBullhorn className="w-3 h-3" /> Manufofi
                       </h4>
                       <ul className="space-y-1.5">
-                        {candidate.platform.map((item, i) => (
+                        {(typeof candidate.platform === 'string' ? candidate.platform.split('\n').filter(Boolean) : candidate.platform || []).map((item, i) => (
                           <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
                             <FaCheck className="w-3 h-3 mt-0.5 shrink-0" style={{ color: party.color }} />
                             {item}

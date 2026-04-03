@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FaChevronRight, FaUsers, FaMapLocationDot, FaCheckToSlot,
-  FaChartLine, FaClock, FaShieldHalved, FaBullhorn, FaArrowUpRightFromSquare,
-  FaFire, FaPersonBooth, FaBuildingColumns, FaGavel,
+  FaChartColumn, FaClock, FaShieldHalved, FaBullhorn, FaArrowUpRightFromSquare,
+  FaFire, FaPersonBooth, FaBuildingColumns, FaGavel, FaCircleCheck,
 } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
@@ -27,6 +27,11 @@ function getParty(id) {
 
 function getCandidate(id) {
   return CANDIDATES.find((c) => c.id === id);
+}
+
+function formatNumber(n) {
+  if (n == null) return '—';
+  return n.toLocaleString('en-NG');
 }
 
 function CountdownTimer() {
@@ -81,40 +86,34 @@ function CountdownTimer() {
   );
 }
 
-function ResultProgressBar({ candidateId, votes, percentage, statesWon, maxPercentage }) {
+function ResultProgressBar({ candidateId, votes, percentage, statesWon, states25, maxPercentage }) {
   const candidate = getCandidate(candidateId);
   const party = getParty(candidate?.party);
   const barWidth = maxPercentage > 0 ? (percentage / maxPercentage) * 100 : 0;
+  const isLeading = percentage === maxPercentage && maxPercentage > 0;
 
   return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-1.5">
+    <div className={`mb-5 p-4 rounded-lg ${isLeading ? 'bg-green-50 border border-green-200' : ''}`}>
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: party.color }}
-          />
-          <span className="font-bold text-sm text-gray-900">{candidate?.name || candidateId}</span>
-          <span
-            className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: party.color + '20', color: party.color }}
-          >
+          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: party.color }} />
+          <span className="font-bold text-gray-900">{candidate?.name || candidateId}</span>
+          {isLeading && <FaCircleCheck className="text-green-600 w-4 h-4" />}
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: party.color + '20', color: party.color }}>
             {party.name}
           </span>
         </div>
         <div className="text-right">
-          <span className="font-black text-lg">{percentage.toFixed(1)}%</span>
-          <span className="text-xs text-gray-500 ml-2">({(votes / 1000000).toFixed(1)}M)</span>
+          <span className="font-black text-xl" style={{ color: party.color }}>{percentage.toFixed(1)}%</span>
+          <div className="text-xs text-gray-500">{formatNumber(votes)} kuri'u</div>
         </div>
       </div>
-      <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-1000 ease-out"
-          style={{ width: `${barWidth}%`, backgroundColor: party.color }}
-        />
+      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${barWidth}%`, backgroundColor: party.color }} />
       </div>
-      <div className="text-xs text-gray-500 mt-1">
-        Jihohi {statesWon} / 37
+      <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+        <span>Jihohi {statesWon} won</span>
+        <span>25% a {states25} jihohi</span>
       </div>
     </div>
   );
@@ -136,22 +135,18 @@ function FactCheckCard({ factCheck }) {
         "{factCheck.claim}"
       </blockquote>
       <div className="flex items-center gap-2 mb-2">
-        <div
-          className="w-2 h-2 rounded-full"
-          style={{ backgroundColor: party.color }}
-        />
+        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: party.color }} />
         <span className="text-xs font-bold text-gray-600">{factCheck.claimant}</span>
         <span className="text-[10px] font-bold text-gray-400">({party.name})</span>
       </div>
-      <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
-        {factCheck.analysis}
-      </p>
+      <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{factCheck.analysis}</p>
     </div>
   );
 }
 
 export default function ElectionHub() {
   const { articles } = useNews();
+
   const electionArticles = useMemo(
     () => articles.filter((a) =>
       a.section === 'siyasa' ||
@@ -162,6 +157,20 @@ export default function ElectionHub() {
   );
 
   const nationalTotals = computeNationalTotals(CANDIDATES.map(c => c.id));
+
+  // Top 6 battleground states (closest margins)
+  const battlegroundStates = useMemo(() => {
+    return STATE_RESULTS
+      .map(s => {
+        const votes = Object.values(s.candidateVotes || {});
+        if (votes.length < 2) return { ...s, margin: 999 };
+        const sorted = [...votes].sort((a, b) => b - a);
+        const margin = ((sorted[0] - sorted[1]) / s.validVotes) * 100;
+        return { ...s, margin };
+      })
+      .sort((a, b) => a.margin - b.margin)
+      .slice(0, 6);
+  }, []);
 
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917]">
@@ -198,7 +207,7 @@ export default function ElectionHub() {
           {/* Nav Pills */}
           <div className="flex flex-wrap gap-3 mt-10 justify-center">
             {[
-              { label: 'Sakamako', path: '/zabe/sakamako', icon: FaChartLine },
+              { label: 'Sakamako', path: '/zabe/sakamako', icon: FaChartColumn },
               { label: "'Yan Takara", path: '/zabe/yan-takara', icon: FaUsers },
               { label: 'Gaskiya', path: '/zabe/gaskiya', icon: FaShieldHalved },
               { label: "Ilimin ɗan Zaba", path: '/zabe/ilimi', icon: FaCheckToSlot },
@@ -221,27 +230,28 @@ export default function ElectionHub() {
 
       <main className="max-w-[1400px] mx-auto px-4 md:px-6 py-12 space-y-16">
 
-        {/* Key Metrics */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: "Masu Rajista", value: (nationalTotals.registeredVoters / 1000000).toFixed(1) + 'M', icon: FaUsers, color: '#0f3460' },
-            { label: 'Waɗanda suka Kada', value: (nationalTotals.accreditedVoters / 1000000).toFixed(1) + 'M', icon: FaPersonBooth, color: '#008751' },
-            { label: 'Kuri\'u Ingantattu', value: (nationalTotals.validVotes / 1000000).toFixed(1) + 'M', icon: FaCheckToSlot, color: '#ED1C24' },
-            { label: 'Halarta', value: nationalTotals.turnout.toFixed(1) + '%', icon: FaMapLocationDot, color: '#003DA5' },
-          ].map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div key={stat.label} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: stat.color + '15' }}>
-                    <Icon className="w-5 h-5" style={{ color: stat.color }} />
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500">{stat.label}</span>
-                </div>
-                <div className="text-2xl md:text-3xl font-black">{stat.value}</div>
-              </div>
-            );
-          })}
+        {/* Key Metrics — INEC Style */}
+        <section className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Masu Rajista</div>
+            <div className="text-2xl font-black">{formatNumber(nationalTotals.registeredVoters)}</div>
+          </div>
+          <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Waɗanda suka Kada</div>
+            <div className="text-2xl font-black">{formatNumber(nationalTotals.accreditedVoters)}</div>
+          </div>
+          <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Kuri'u Ingantattu</div>
+            <div className="text-2xl font-black">{formatNumber(nationalTotals.validVotes)}</div>
+          </div>
+          <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Kuri'un da aka Ki</div>
+            <div className="text-2xl font-black text-red-600">{formatNumber(nationalTotals.rejectedVotes)}</div>
+          </div>
+          <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Halarta</div>
+            <div className="text-2xl font-black">{nationalTotals.turnout.toFixed(1)}%</div>
+          </div>
         </section>
 
         {/* Live Results Summary */}
@@ -251,10 +261,7 @@ export default function ElectionHub() {
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
               <h2 className="text-2xl font-serif font-black">Sakamako Kai Tsaye — Shugaban Ƙasa</h2>
             </div>
-            <Link
-              to="/zabe/sakamako"
-              className="text-sm font-bold text-[#0f3460] hover:underline flex items-center gap-1"
-            >
+            <Link to="/zabe/sakamako" className="text-sm font-bold text-[#0f3460] hover:underline flex items-center gap-1">
               Cikakken Sakamako <FaArrowUpRightFromSquare className="w-3 h-3" />
             </Link>
           </div>
@@ -267,10 +274,7 @@ export default function ElectionHub() {
                     Jihohi {STATE_RESULTS.length} / {STATE_RESULTS.length} sun ruwaito
                   </span>
                   <div className="w-full h-2 bg-gray-100 rounded-full mt-2">
-                    <div
-                      className="h-full bg-green-500 rounded-full transition-all"
-                      style={{ width: '100%' }}
-                    />
+                    <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: '100%' }} />
                   </div>
                 </div>
                 <div className="text-right">
@@ -285,6 +289,7 @@ export default function ElectionHub() {
                 const votes = nationalTotals.candidateVotes[c.id] || 0;
                 const pct = nationalTotals.candidatePercentages[c.id] || 0;
                 const statesWon = nationalTotals.statesWon[c.id] || 0;
+                const states25 = nationalTotals.statesMet25[c.id] || 0;
                 return (
                   <ResultProgressBar
                     key={c.id}
@@ -292,6 +297,7 @@ export default function ElectionHub() {
                     votes={votes}
                     percentage={pct}
                     statesWon={statesWon}
+                    states25={states25}
                     maxPercentage={Math.max(...CANDIDATES.map(x => nationalTotals.candidatePercentages[x.id] || 0))}
                   />
                 );
@@ -304,62 +310,132 @@ export default function ElectionHub() {
               </div>
             </div>
 
-            {/* Sidebar: Key Races */}
-            <div className="lg:col-span-4 space-y-4">
-              <h3 className="font-bold text-sm uppercase tracking-wider text-gray-500 mb-4">Sauran Gasar</h3>
-              {[
-                {
-                  title: 'Majalisar Dattawa',
-                  icon: FaBuildingColumns,
-                  reported: 72,
-                  total: 109,
-                  parties: [
-                    { partyId: 'apc', seats: 38, leading: 5 },
-                    { partyId: 'pdp', seats: 22, leading: 4 },
-                    { partyId: 'lp', seats: 8, leading: 2 },
-                  ],
-                },
-                {
-                  title: 'Gwamnoni',
-                  icon: FaGavel,
-                  reported: 20,
-                  total: 36,
-                  parties: [
-                    { partyId: 'apc', states: 10, leading: 3 },
-                    { partyId: 'pdp', states: 6, leading: 2 },
-                    { partyId: 'lp', states: 3, leading: 1 },
-                  ],
-                },
-              ].map((race) => (
-                <div key={race.title} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <race.icon className="w-4 h-4 text-gray-400" />
-                      <span className="font-bold text-sm">{race.title}</span>
-                    </div>
-                    <span className="text-xs text-gray-500">{race.reported}/{race.total}</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-100 rounded-full mb-4">
-                    <div
-                      className="h-full bg-blue-500 rounded-full"
-                      style={{ width: `${(race.reported / race.total) * 100}%` }}
-                    />
-                  </div>
-                  {race.parties.map((p) => {
-                    const party = getParty(p.partyId);
-                    return (
-                      <div key={p.partyId} className="flex items-center justify-between text-xs mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: party.color }} />
-                          <span className="font-bold">{party.name}</span>
-                        </div>
-                        <span className="font-bold">{p.seats} won{p.leading > 0 ? ` (+${p.leading} leading)` : ''}</span>
+            {/* Sidebar */}
+            <div className="lg:col-span-4 space-y-6">
+              {/* Other Races */}
+              <div>
+                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-500 mb-4">Sauran Gasar</h3>
+                {[
+                  { title: 'Majalisar Dattawa', icon: FaBuildingColumns, reported: 72, total: 109, parties: [{ partyId: 'apc', seats: 38, leading: 5 }, { partyId: 'pdp', seats: 22, leading: 4 }, { partyId: 'lp', seats: 8, leading: 2 }] },
+                  { title: 'Gwamnoni', icon: FaGavel, reported: 20, total: 36, parties: [{ partyId: 'apc', states: 10, leading: 3 }, { partyId: 'pdp', states: 6, leading: 2 }, { partyId: 'lp', states: 3, leading: 1 }] },
+                ].map((race) => (
+                  <div key={race.title} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <race.icon className="w-4 h-4 text-gray-400" />
+                        <span className="font-bold text-sm">{race.title}</span>
                       </div>
-                    );
-                  })}
+                      <span className="text-xs text-gray-500">{race.reported}/{race.total}</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-100 rounded-full mb-4">
+                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(race.reported / race.total) * 100}%` }} />
+                    </div>
+                    {race.parties.map((p) => {
+                      const party = getParty(p.partyId);
+                      return (
+                        <div key={p.partyId} className="flex items-center justify-between text-xs mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: party.color }} />
+                            <span className="font-bold">{party.name}</span>
+                          </div>
+                          <span className="font-bold">{p.seats} won{p.leading > 0 ? ` (+${p.leading})` : ''}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+
+              {/* Voter Info */}
+              <div className="bg-gradient-to-br from-[#0f3460] to-[#1a1a2e] text-white rounded-xl p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <FaCheckToSlot className="text-[#c59d5f]" />
+                  Ilimin ɗan Zaba
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-white/50 mb-1">Ranar Zabe</div>
+                    <div className="font-bold">{new Date(VOTER_INFO.pollingDay).toLocaleDateString('ha-NG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-white/50 mb-1">Lokacin Zaba</div>
+                    <div className="font-bold">{VOTER_INFO.pollingHours}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-white/50 mb-2">Abubuwan Da Ake Bukata</div>
+                    <ul className="space-y-1.5">
+                      {VOTER_INFO.requirements.map((req, i) => (
+                        <li key={i} className="text-sm text-white/80 flex items-start gap-2">
+                          <span className="text-[#c59d5f] mt-0.5">✓</span>
+                          {req}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              ))}
+                <Link to="/zabe/ilimi" className="mt-6 w-full py-3 bg-[#c59d5f] text-[#0f3460] text-sm font-bold rounded-lg hover:bg-white transition-colors block text-center">
+                  Ƙarin Bayani
+                </Link>
+              </div>
             </div>
+          </div>
+        </section>
+
+        {/* Battleground States */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-serif font-black">Jihohin Da Ake Kallon</h2>
+            <Link to="/zabe/sakamako" className="text-sm font-bold text-[#0f3460] hover:underline flex items-center gap-1">
+              Duka Jihohi <FaChevronRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {battlegroundStates.map((state) => {
+              const sortedCandidates = CANDIDATES
+                .map(c => ({ ...c, votes: state.candidateVotes?.[c.id] || 0 }))
+                .sort((a, b) => b.votes - a.votes);
+              const leader = sortedCandidates[0];
+              const runnerUp = sortedCandidates[1];
+              const margin = state.validVotes > 0 ? (((leader.votes - runnerUp.votes) / state.validVotes) * 100).toFixed(1) : 0;
+              const turnout = state.registeredVoters > 0 ? ((state.accreditedVoters / state.registeredVoters) * 100).toFixed(1) : 0;
+              const leaderParty = getParty(leader.party);
+
+              return (
+                <div key={state.state} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-lg">{state.state}</h3>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                      parseFloat(turnout) > 40 ? 'bg-green-100 text-green-700' :
+                      parseFloat(turnout) > 30 ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {turnout}% halarta
+                    </span>
+                  </div>
+                  <div className="space-y-2 mb-3">
+                    {sortedCandidates.slice(0, 2).map((c, idx) => {
+                      const party = getParty(c.party);
+                      const pct = state.validVotes > 0 ? ((c.votes / state.validVotes) * 100).toFixed(1) : '0.0';
+                      return (
+                        <div key={c.id} className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: party.color }} />
+                            <span className={idx === 0 ? 'font-bold' : 'text-gray-600'}>{c.name}</span>
+                            {idx === 0 && <FaCircleCheck className="text-green-600 w-3 h-3" />}
+                          </div>
+                          <span className="font-mono text-xs">{formatNumber(c.votes)} ({pct}%)</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+                    <span>Bambanci: {margin}%</span>
+                    <span className="font-bold" style={{ color: leaderParty.color }}>{leaderParty.name} yana gaba</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -367,10 +443,7 @@ export default function ElectionHub() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-serif font-black">'Yan Takara — Shugaban Ƙasa</h2>
-            <Link
-              to="/zabe/yan-takara"
-              className="text-sm font-bold text-[#0f3460] hover:underline flex items-center gap-1"
-            >
+            <Link to="/zabe/yan-takara" className="text-sm font-bold text-[#0f3460] hover:underline flex items-center gap-1">
               Duka 'Yan Takara <FaChevronRight className="w-3 h-3" />
             </Link>
           </div>
@@ -378,6 +451,10 @@ export default function ElectionHub() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {CANDIDATES.map((candidate) => {
               const party = getParty(candidate.party);
+              const votes = nationalTotals.candidateVotes[candidate.id] || 0;
+              const pct = nationalTotals.candidatePercentages[candidate.id] || 0;
+              const statesWon = nationalTotals.statesWon[candidate.id] || 0;
+
               return (
                 <Link
                   key={candidate.id}
@@ -385,28 +462,23 @@ export default function ElectionHub() {
                   className="group bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all"
                 >
                   <div className="aspect-[4/3] overflow-hidden relative">
-                    <img
-                      src={candidate.image}
-                      alt={candidate.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div
-                      className="absolute bottom-0 left-0 right-0 h-1"
-                      style={{ backgroundColor: party.color }}
-                    />
+                    <img src={candidate.image} alt={candidate.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1.5" style={{ backgroundColor: party.color }} />
+                    <div className="absolute top-3 right-3 bg-black/60 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur">
+                      {pct.toFixed(1)}%
+                    </div>
                   </div>
                   <div className="p-4">
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: party.color + '20', color: party.color }}
-                    >
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: party.color + '20', color: party.color }}>
                       {party.name}
                     </span>
-                    <h3 className="font-bold text-lg mt-2 group-hover:text-[#0f3460] transition-colors">
-                      {candidate.name}
-                    </h3>
+                    <h3 className="font-bold text-lg mt-2 group-hover:text-[#0f3460] transition-colors">{candidate.name}</h3>
                     <p className="text-xs text-gray-500 mt-1">{candidate.state} · {candidate.age} shekara</p>
                     <p className="text-xs text-gray-400 mt-1">Mataimaki: {candidate.runningMate}</p>
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
+                      <span>{formatNumber(votes)} kuri'u</span>
+                      <span>Jihohi {statesWon}</span>
+                    </div>
                   </div>
                 </Link>
               );
@@ -418,10 +490,7 @@ export default function ElectionHub() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-serif font-black">Binciken Gaskiya</h2>
-            <Link
-              to="/zabe/gaskiya"
-              className="text-sm font-bold text-[#0f3460] hover:underline flex items-center gap-1"
-            >
+            <Link to="/zabe/gaskiya" className="text-sm font-bold text-[#0f3460] hover:underline flex items-center gap-1">
               Duka Gaskiya <FaChevronRight className="w-3 h-3" />
             </Link>
           </div>
@@ -440,20 +509,10 @@ export default function ElectionHub() {
             <div className="lg:col-span-8 space-y-6">
               {electionArticles.length > 0 ? (
                 electionArticles.map((article) => (
-                  <article
-                    key={article.id}
-                    className="flex flex-col sm:flex-row gap-5 bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all group"
-                  >
+                  <article key={article.id} className="flex flex-col sm:flex-row gap-5 bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                     {article.image && (
-                      <Link
-                        to={`/article/${article.id}`}
-                        className="sm:w-48 flex-shrink-0 aspect-[3/2] overflow-hidden rounded-lg"
-                      >
-                        <img
-                          src={article.image}
-                          alt={article.headline}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
+                      <Link to={`/article/${article.id}`} className="sm:w-48 flex-shrink-0 aspect-[3/2] overflow-hidden rounded-lg">
+                        <img src={article.image} alt={article.headline} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       </Link>
                     )}
                     <div className="flex-1">
@@ -463,13 +522,9 @@ export default function ElectionHub() {
                         </span>
                       </div>
                       <Link to={`/article/${article.id}`}>
-                        <h3 className="font-serif font-bold text-xl leading-snug group-hover:text-[#0f3460] transition-colors">
-                          {article.headline}
-                        </h3>
+                        <h3 className="font-serif font-bold text-xl leading-snug group-hover:text-[#0f3460] transition-colors">{article.headline}</h3>
                       </Link>
-                      {article.trail && (
-                        <p className="text-sm text-gray-500 mt-2 line-clamp-2">{article.trail}</p>
-                      )}
+                      {article.trail && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{article.trail}</p>}
                       {article.author && (
                         <div className="text-xs text-gray-400 mt-3">
                           Daga <Link to={`/author/${encodeURIComponent(article.author)}`} className="font-bold text-[#0f3460] hover:underline">{article.author}</Link>
@@ -487,44 +542,9 @@ export default function ElectionHub() {
               )}
             </div>
 
-            {/* Sidebar: Voter Info */}
+            {/* Sidebar: Key Races Info */}
             <div className="lg:col-span-4">
-              <div className="sticky top-24 space-y-6">
-                <div className="bg-gradient-to-br from-[#0f3460] to-[#1a1a2e] text-white rounded-xl p-6">
-                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                    <FaCheckToSlot className="text-[#c59d5f]" />
-                    Ilimin ɗan Zaba
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wider text-white/50 mb-1">Ranar Zabe</div>
-                      <div className="font-bold">{new Date(VOTER_INFO.pollingDay).toLocaleDateString('ha-NG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wider text-white/50 mb-1">Lokacin Zaba</div>
-                      <div className="font-bold">{VOTER_INFO.pollingHours}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wider text-white/50 mb-2">Abubuwan Da Ake Bukata</div>
-                      <ul className="space-y-1.5">
-                        {VOTER_INFO.requirements.map((req, i) => (
-                          <li key={i} className="text-sm text-white/80 flex items-start gap-2">
-                            <span className="text-[#c59d5f] mt-0.5">✓</span>
-                            {req}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                  <Link
-                    to="/zabe/ilimi"
-                    className="mt-6 w-full py-3 bg-[#c59d5f] text-[#0f3460] text-sm font-bold rounded-lg hover:bg-white transition-colors block text-center"
-                  >
-                    Ƙarin Bayani
-                  </Link>
-                </div>
-
-                {/* Key Races Info */}
+              <div className="sticky top-24">
                 <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                   <h3 className="font-bold text-sm uppercase tracking-wider text-gray-500 mb-4">Gasar da Ake Kallon</h3>
                   <div className="space-y-3">

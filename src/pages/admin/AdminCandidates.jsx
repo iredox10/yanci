@@ -199,15 +199,15 @@ export default function AdminCandidates() {
                     <span className="flex items-center gap-1"><FaLocationDot className="w-3 h-3" /> {candidate.state || '—'}</span>
                     <span className="flex items-center gap-1"><FaBriefcase className="w-3 h-3" /> {candidate.previousOffice || '—'}</span>
                   </div>
-                  {candidate.platform?.length > 0 && (
+                  {candidate.platform && (
                     <div className="mt-2">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Manufofi</p>
                       <ul className="space-y-0.5">
-                        {candidate.platform.slice(0, 2).map((item, i) => (
+                        {(typeof candidate.platform === 'string' ? candidate.platform.split('\n').filter(Boolean) : candidate.platform).slice(0, 2).map((item, i) => (
                           <li key={i} className="text-xs text-gray-600 truncate">• {item}</li>
                         ))}
-                        {candidate.platform.length > 2 && (
-                          <li className="text-xs text-gray-400">+{candidate.platform.length - 2} ƙari</li>
+                        {(typeof candidate.platform === 'string' ? candidate.platform.split('\n').filter(Boolean) : candidate.platform).length > 2 && (
+                          <li className="text-xs text-gray-400">+{(typeof candidate.platform === 'string' ? candidate.platform.split('\n').filter(Boolean) : candidate.platform).length - 2} ƙari</li>
                         )}
                       </ul>
                     </div>
