@@ -37,6 +37,7 @@ async function seedAppwrite() {
     electoralBody: SEED_ELECTION.electoralBody,
     description: '',
     image: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=1200',
+    published: true,
   };
 
   const election = await appwriteService.createElection(defaultElection);

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   FaChartPie, FaPlus, FaTrash, FaPen, FaCheckToSlot,
   FaCalendar, FaUsers, FaCircleCheck, FaClock,
+  FaArrowUpRightFromSquare, FaEye, FaEyeSlash,
 } from 'react-icons/fa6';
 import { useElection } from '../../context/ElectionContext';
 
@@ -25,13 +26,14 @@ export default function AdminElections() {
     status: 'upcoming',
     electoralBody: 'INEC',
     description: '',
+    published: true,
   });
 
   const openCreate = () => {
     setEditingId(null);
     setFormData({
       name: '', fullName: '', date: '', type: 'general',
-      status: 'upcoming', electoralBody: 'INEC', description: '',
+      status: 'upcoming', electoralBody: 'INEC', description: '', published: true,
     });
     setShowModal(true);
   };
@@ -46,6 +48,7 @@ export default function AdminElections() {
       status: election.status || 'upcoming',
       electoralBody: election.electoralBody || 'INEC',
       description: election.description || '',
+      published: election.published !== false,
     });
     setShowModal(true);
   };
@@ -134,6 +137,15 @@ export default function AdminElections() {
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full border flex items-center gap-1 ${statusConfig.color}`}>
                         <StatusIcon className="w-3 h-3" /> {statusConfig.label}
                       </span>
+                      {election.published === false ? (
+                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 flex items-center gap-1">
+                          <FaEyeSlash className="w-3 h-3" /> Boye
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700 flex items-center gap-1">
+                          <FaEye className="w-3 h-3" /> Auna
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-500 mb-4">{election.fullName || election.description}</p>
                     <div className="flex flex-wrap gap-6 text-sm text-gray-600">
@@ -152,6 +164,14 @@ export default function AdminElections() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3 mt-5 pt-5 border-t border-gray-100">
+                  <a
+                    href="/zabe"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 rounded-lg text-sm font-bold hover:bg-purple-100 transition-colors"
+                  >
+                    <FaArrowUpRightFromSquare className="w-4 h-4" /> Duba a Shafi
+                  </a>
                   <Link
                     to={`/admin/elections/${election.id}/results`}
                     className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-bold hover:bg-green-100 transition-colors"
@@ -237,6 +257,12 @@ export default function AdminElections() {
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Bayani</label>
                 <textarea name="description" value={formData.description} onChange={handleChange} rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0f3036]/20 focus:border-[#0f3036] resize-none" />
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="published" checked={formData.published} onChange={e => setFormData(prev => ({ ...prev, published: e.target.checked }))} className="w-4 h-4 text-[#0f3036] border-gray-300 rounded focus:ring-[#0f3036]" />
+                  <span className="text-sm font-bold text-gray-700">Auna a shafin jama'a</span>
+                </label>
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-800">Soke</button>

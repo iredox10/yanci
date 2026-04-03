@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import {
   FaChartColumn, FaFloppyDisk, FaArrowLeft,
   FaFilter, FaCircleCheck, FaTriangleExclamation,
-  FaCircleXmark, FaRotate, FaCirclePlus,
+  FaCircleXmark, FaRotate, FaCirclePlus, FaArrowUpRightFromSquare,
+  FaDownload, FaDatabase,
 } from 'react-icons/fa6';
 import { useElection } from '../../context/ElectionContext';
 import { PARTIES, STATE_RESULTS as SEED_STATE_RESULTS, computeNationalTotals, CANDIDATES } from '../../data/electionData';
@@ -137,6 +138,7 @@ export default function AdminElectionResults() {
       rejectedVotes: stateData.rejectedVotes || 0,
       candidateVotes: { ...(stateData.candidateVotes || {}) },
       governor: stateData.governor || '',
+      verified: stateData.verified || false,
     });
   }, []);
 
@@ -190,6 +192,7 @@ export default function AdminElectionResults() {
       met25Threshold: met25,
       winner,
       governor: editForm.governor || null,
+      verified: editForm.verified || false,
     };
 
     const existing = results.find(r => r.state === editingState && r.electionId === election?.id);
@@ -215,6 +218,60 @@ export default function AdminElectionResults() {
     setTimeout(() => setSaveMessage(null), 3000);
   };
 
+  // Export results as CSV
+  const handleExportCSV = () => {
+    const headers = ['State', 'Region', 'Registered Voters', 'Accredited Voters', 'Valid Votes', 'Rejected Votes', 'Turnout %', ...electionCandidates.map(c => c.name), 'Winner', 'Governor'];
+    const rows = stateResults.map(s => {
+      const turnout = s.registeredVoters > 0 ? ((s.accreditedVoters / s.registeredVoters) * 100).toFixed(1) : 0;
+      const winner = getCandidate(s.winner);
+      return [
+        s.state, s.region, s.registeredVoters, s.accreditedVoters, s.validVotes, s.rejectedVotes, turnout,
+        ...electionCandidates.map(c => s.candidateVotes?.[c.id] || 0),
+        winner?.name || '', s.governor || '',
+      ];
+    });
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `election-results-${election.id}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Seed all states from seed data
+  const handleSeedAll = async () => {
+    if (!confirm('Ka tabbata kana son cika dukkan jihohi 37 da bayanan asali? Wannan zai maye gurbin duk canje-canjen da aka yi.')) return;
+    setSaving(true);
+    const promises = SEED_STATE_RESULTS.map(sr => {
+      const existing = results.find(r => r.state === sr.state && r.electionId === election?.id);
+      const data = {
+        electionId: election?.id,
+        state: sr.state,
+        region: sr.region,
+        registeredVoters: sr.registeredVoters,
+        accreditedVoters: sr.accreditedVoters,
+        validVotes: sr.validVotes,
+        rejectedVotes: sr.rejectedVotes,
+        totalVotesCast: sr.totalVotesCast,
+        candidateVotes: sr.candidateVotes,
+        met25Threshold: sr.met25Threshold,
+        winner: sr.winner,
+        governor: sr.governor || null,
+        senate: sr.senate || {},
+      };
+      if (existing) {
+        return updateResult(existing.id, data);
+      }
+      return addResult(data);
+    });
+    await Promise.all(promises);
+    setSaveMessage({ type: 'success', text: `An cika dukkan jihohi ${SEED_STATE_RESULTS.length} da bayanan asali` });
+    setTimeout(() => setSaveMessage(null), 5000);
+    setSaving(false);
+  };
+
   if (!election) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -229,7 +286,7 @@ export default function AdminElectionResults() {
   return (
     <div className="flex-1 flex flex-col min-w-0 overflow-y-auto p-6 md:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-4">
           <Link to="/admin/elections" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <FaArrowLeft className="text-gray-500" />
@@ -243,6 +300,29 @@ export default function AdminElectionResults() {
               Shigar da sakamako kowace jiha — masu rajista, waɗanda suka kada kuri'a, kuri'u ingantattu, da kuri'un 'yan takara.
             </p>
           </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href="/zabe/sakamako"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-100 transition-colors"
+          >
+            <FaArrowUpRightFromSquare className="w-4 h-4" /> Duba
+          </a>
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-200 transition-colors"
+          >
+            <FaDownload className="w-4 h-4" /> Export
+          </button>
+          <button
+            onClick={handleSeedAll}
+            disabled={saving}
+            className="flex items-center gap-2 px-3 py-2 bg-amber-50 text-amber-700 rounded-lg text-sm font-bold hover:bg-amber-100 transition-colors disabled:opacity-50"
+          >
+            <FaDatabase className="w-4 h-4" /> Cika Duka
+          </button>
         </div>
       </div>
 
@@ -389,12 +469,15 @@ export default function AdminElectionResults() {
                 return (
                   <tr key={stateData.state} className="border-b border-gray-50 hover:bg-gray-50/50">
                     <td className="px-3 py-2.5 font-bold sticky left-0 bg-white z-10">
-                      <button
-                        onClick={() => setExpandedState(isExpanded ? null : stateData.state)}
-                        className="flex items-center gap-1 hover:text-[#0f3036] transition-colors"
-                      >
-                        {isExpanded ? '▾' : '▸'} {stateData.state}
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => setExpandedState(isExpanded ? null : stateData.state)}
+                          className="flex items-center gap-1 hover:text-[#0f3036] transition-colors"
+                        >
+                          {isExpanded ? '▾' : '▸'} {stateData.state}
+                        </button>
+                        {stateData.verified && <FaCircleCheck className="w-3.5 h-3.5 text-green-600" title="Tabbatar" />}
+                      </div>
                     </td>
                     <td className="px-3 py-2.5 text-right font-mono text-xs">{formatNumber(stateData.registeredVoters)}</td>
                     <td className="px-3 py-2.5 text-right font-mono text-xs">{formatNumber(stateData.accreditedVoters)}</td>
@@ -638,6 +721,18 @@ export default function AdminElectionResults() {
                   <option value="">— Babu —</option>
                   {PARTIES.map(p => <option key={p.id} value={p.id}>{p.name} — {p.fullName}</option>)}
                 </select>
+              </div>
+
+              {/* Verified Toggle */}
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <label className="flex items-center gap-3 cursor-pointer flex-1">
+                  <input type="checkbox" checked={editForm.verified || false} onChange={e => handleEditChange('verified', e.target.checked)} className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500" />
+                  <div>
+                    <span className="text-sm font-bold text-gray-700">Tabbatar da Sakamako</span>
+                    <p className="text-xs text-gray-500">Alama yana nuna cewa an tabbatar da wannan sakamako daga INEC</p>
+                  </div>
+                </label>
+                {(editForm.verified || false) && <FaCircleCheck className="w-6 h-6 text-green-600" />}
               </div>
 
               {/* Validation */}
