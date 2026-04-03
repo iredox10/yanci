@@ -10,7 +10,8 @@ import {
   FaEnvelope,
   FaPrint,
   FaClock,
-  FaPlay
+  FaPlay,
+  FaTriangleExclamation,
 } from 'react-icons/fa6';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import GuardianNav from '../components/guardian/GuardianNav';
@@ -36,6 +37,7 @@ const ArticlePage = () => {
   const { getArticleById, articles } = useNews();
   const [readingProgress, setReadingProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [sensitiveAccepted, setSensitiveAccepted] = useState(false);
   const articleRef = useRef(null);
   const { trackView } = useViewTracker();
   const { trackArticleView } = useAnalytics();
@@ -198,6 +200,35 @@ const ArticlePage = () => {
       />
       <GuardianNav />
 
+      {/* Sensitive Content Warning */}
+      {article.isSensitive && !sensitiveAccepted && (
+        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-6">
+          <div className="bg-white rounded-xl max-w-md w-full p-8 text-center">
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FaTriangleExclamation className="w-8 h-8 text-amber-600" />
+            </div>
+            <h2 className="font-serif font-black text-2xl mb-3">Abun Ciki Mai Kula</h2>
+            <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+              Wannan labari ya ƙunshi bayanan da zasu iya damun wasu masu karatu. Don Allah ka tabbata kana son ci gaba da karantawa.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSensitiveAccepted(true)}
+                className="flex-1 py-3 bg-[#121212] text-white font-bold rounded-lg hover:bg-[#333] transition-colors"
+              >
+                Na Fahimta, Ci Gaba
+              </button>
+              <Link
+                to="/"
+                className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Komawa Gida
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reading Progress Indicator */}
       <div className="fixed top-0 left-0 w-full h-1.5 z-50 bg-gray-100">
         <div
@@ -250,6 +281,14 @@ const ArticlePage = () => {
                   >
                     {article.author || "Yanci Staff"}
                   </Link>
+                  {article.coAuthor && (
+                    <Link
+                      to={`/author/${encodeURIComponent(article.coAuthor)}`}
+                      className="text-xs font-sans text-gray-500 hover:underline transition-colors mt-0.5"
+                    >
+                      Tare da {article.coAuthor}
+                    </Link>
+                  )}
                 </div>
               </div>
 
@@ -293,6 +332,11 @@ const ArticlePage = () => {
                   src={article.image}
                   alt={article.headline}
                   className="w-full h-auto object-cover block transform transition-transform duration-[1.5s] group-hover:scale-105"
+                  style={{
+                    objectPosition: article.imageFocalX != null && article.imageFocalY != null
+                      ? `${article.imageFocalX}% ${article.imageFocalY}%`
+                      : undefined,
+                  }}
                 />
               </div>
               <figcaption className="mt-3 px-5 md:px-0 text-sm text-gray-500 font-sans flex items-start gap-1.5 leading-tight">

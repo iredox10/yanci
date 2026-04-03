@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { useNews } from '../../context/NewsContext';
 import { useAuth } from '../../context/AuthContext';
+import { useViewTracker } from '../../hooks/useViewTracker';
 import { FaFileLines, FaEye, FaArrowTrendUp, FaUsers } from 'react-icons/fa6';
 
 const StatCard = ({ title, value, icon, color }) => {
@@ -20,8 +22,8 @@ const StatCard = ({ title, value, icon, color }) => {
 const AdminDashboard = () => {
   const { articles } = useNews();
   const { user } = useAuth();
+  const { getMostRead } = useViewTracker();
 
-  // Filter articles based on user category if not super admin
   const relevantArticles = user?.category
     ? articles.filter(a => a.pillar === user.category)
     : articles;
@@ -33,6 +35,16 @@ const AdminDashboard = () => {
     : articles.filter(a => a.pillar === 'news').length;
 
   const thirdCardTitle = user?.category ? `${user.category} Articles` : "News Pillar";
+
+  // Get real most-read articles
+  const mostRead = useMemo(() => {
+    return getMostRead(5);
+  }, [getMostRead]);
+
+  // Calculate total views from most read
+  const totalViews = useMemo(() => {
+    return mostRead.reduce((sum, a) => sum + (a.views || 0), 0);
+  }, [mostRead]);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8">
@@ -60,12 +72,17 @@ const AdminDashboard = () => {
           icon={FaEye}
           color="bg-green-500"
         />
-        {/* Removed static user card and added a simple "Traffic" chart placeholder */}
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 col-span-1 sm:col-span-2 lg:col-span-1 flex flex-col justify-between relative overflow-hidden">
           <div className="z-10">
             <p className="text-xs md:text-sm text-gray-500 font-medium uppercase tracking-wider">Page Views (24h)</p>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">45.2k</h3>
-            <span className="text-green-500 text-xs font-bold">↑ 12% vs jiya</span>
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">
+              {totalViews > 0 ? totalViews.toLocaleString() : '0'}
+            </h3>
+            {totalViews > 0 ? (
+              <span className="text-green-500 text-xs font-bold">↑ Real-time data</span>
+            ) : (
+              <span className="text-gray-400 text-xs font-bold">No views yet</span>
+            )}
           </div>
           <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-green-50 rounded-full blur-2xl z-0"></div>
         </div>
@@ -73,19 +90,19 @@ const AdminDashboard = () => {
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 overflow-hidden">
         <h3 className="font-bold text-base md:text-lg mb-4 text-[#c70000]">Most Read / Trending</h3>
-        <ul className="space-y-3 mb-6">
-          {[
-            { id: 1, title: 'Gobara ta lalata kasuwar Kurmi da ke Kano', views: '12.4k' },
-            { id: 2, title: 'Wasan karshe: Najeriya ta lallasa kowace kasa a wasan motsa jiki', views: '8.1k' },
-            { id: 3, title: 'Hatsari a hanyar Kaduna zuwa Abuja ya yi sanadin mutuwar mutane 5', views: '6.5k' }
-          ].map((item, idx) => (
-            <li key={item.id} className="flex items-center gap-4 group cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
-              <span className="text-2xl font-black text-gray-200 group-hover:text-[#c59d5f] transition-colors">{idx + 1}</span>
-              <span className="flex-1 font-bold text-gray-800 line-clamp-1">{item.title}</span>
-              <span className="text-xs font-bold bg-gray-100 text-gray-500 px-2 py-1 rounded-full">{item.views}</span>
-            </li>
-          ))}
-        </ul>
+        {mostRead.length > 0 ? (
+          <ul className="space-y-3 mb-6">
+            {mostRead.map((item, idx) => (
+              <li key={item.id} className="flex items-center gap-4 group cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                <span className="text-2xl font-black text-gray-200 group-hover:text-[#c59d5f] transition-colors">{idx + 1}</span>
+                <span className="flex-1 font-bold text-gray-800 line-clamp-1">{item.title || item.headline}</span>
+                <span className="text-xs font-bold bg-gray-100 text-gray-500 px-2 py-1 rounded-full">{(item.views || 0).toLocaleString()} views</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-400 text-sm mb-6">Babu bayanan karatu tukuna. Masu karatu ba su karanta labarai tukuna.</p>
+        )}
 
         <h3 className="font-bold text-base md:text-lg mb-4 pt-4 border-t border-gray-100">Recent Articles {user?.category && `(${user.category})`}</h3>
         <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">

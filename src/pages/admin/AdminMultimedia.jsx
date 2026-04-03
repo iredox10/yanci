@@ -1,18 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaPodcast, FaVideo, FaPlus, FaTrash, FaPen, FaCirclePlay, FaMicrophoneLines, FaSpinner } from 'react-icons/fa6';
 
+const STORAGE_KEY = 'yanci_multimedia';
 const initialDraft = { title: '', url: '', type: 'video', description: '' };
 
+const SEED_ITEMS = [
+  { id: 2, title: 'Siyasa a Yau: Kashi na 1', url: 'https://audio.com/xyz.mp3', type: 'audio', description: 'Tattaunawa kan zabed 2027.' },
+];
+
+function getSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function save(items) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch {}
+}
+
 const AdminMultimedia = () => {
-  const [items, setItems] = useState([
-    { id: 2, title: 'Siyasa a Yau: Kashi na 1', url: 'https://audio.com/xyz.mp3', type: 'audio', description: 'Tattaunawa kan zabed 2027.' },
-  ]);
+  const [items, setItems] = useState(() => getSaved() || SEED_ITEMS);
   const [draft, setDraft] = useState(initialDraft);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // In a real app, this would query an Appwrite collection for "multimedia" 
-  // or a specific tag in the articles collection.
+  useEffect(() => { save(items); }, [items]);
 
   const handleSave = () => {
     setSaving(true);

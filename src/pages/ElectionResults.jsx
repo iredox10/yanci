@@ -7,7 +7,8 @@ import {
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import SEO from '../components/SEO';
-import { STATE_RESULTS, PARTIES, CANDIDATES, computeNationalTotals } from '../data/electionData';
+import { useElection } from '../context/ElectionContext';
+import { STATE_RESULTS as SEED_STATE_RESULTS, PARTIES, CANDIDATES, computeNationalTotals } from '../data/electionData';
 
 const REGIONS = ['Duka', 'North West', 'North East', 'North Central', 'South West', 'South East', 'South South'];
 
@@ -16,7 +17,7 @@ function getParty(id) {
 }
 
 function getCandidate(id) {
-  return CANDIDATES.find((c) => c.id === id);
+  return electionCandidates.find((c) => c.id === id) || CANDIDATES.find((c) => c.id === id);
 }
 
 function formatNumber(n) {
@@ -25,13 +26,40 @@ function formatNumber(n) {
 }
 
 export default function ElectionResults() {
+  const { results: ctxResults, candidates: ctxCandidates, elections } = useElection();
   const [activeTab, setActiveTab] = useState('presidential');
   const [activeRegion, setActiveRegion] = useState('Duka');
   const [searchState, setSearchState] = useState('');
   const [expandedState, setExpandedState] = useState(null);
 
+  // Use Appwrite data if available, fallback to seed data
+  const activeElection = elections.find(e => e.status === 'active') || elections[0];
+  const electionCandidates = activeElection
+    ? ctxCandidates.filter(c => c.electionId === activeElection.id || c.position === 'president')
+    : CANDIDATES;
+
+  const stateResults = useMemo(() => {
+    if (ctxResults.length > 0) {
+      return SEED_STATE_RESULTS.map(seed => {
+        const appResult = ctxResults.find(r => r.state === seed.state);
+        if (!appResult) return seed;
+        return {
+          ...seed,
+          ...appResult,
+          candidateVotes: typeof appResult.candidateVotes === 'string'
+            ? JSON.parse(appResult.candidateVotes)
+            : (appResult.candidateVotes || seed.candidateVotes),
+          met25Threshold: typeof appResult.met25Threshold === 'string'
+            ? JSON.parse(appResult.met25Threshold)
+            : (appResult.met25Threshold || seed.met25Threshold),
+        };
+      });
+    }
+    return SEED_STATE_RESULTS;
+  }, [ctxResults]);
+
   const filteredStates = useMemo(() => {
-    let states = STATE_RESULTS;
+    let states = stateResults;
     if (activeRegion !== 'Duka') {
       states = states.filter((s) => s.region === activeRegion);
     }
@@ -39,9 +67,10 @@ export default function ElectionResults() {
       states = states.filter((s) => s.state.toLowerCase().includes(searchState.toLowerCase()));
     }
     return states;
-  }, [activeRegion, searchState]);
+  }, [stateResults, activeRegion, searchState]);
 
-  const nationalTotals = computeNationalTotals(CANDIDATES.map(c => c.id));
+  const candidateIds = electionCandidates.map(c => c.id);
+  const nationalTotals = computeNationalTotals(candidateIds);
 
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917]">
@@ -64,7 +93,7 @@ export default function ElectionResults() {
             Sakamako Kai Tsaye
           </h1>
           <p className="text-white/60 text-sm mt-2">
-            An ruwaito jihohi {STATE_RESULTS.length} / {STATE_RESULTS.length} · Matsakaicin halarta: {nationalTotals.turnout.toFixed(1)}%
+            An ruwaito jihohi {stateResults.length} / {stateResults.length} · Matsakaicin halarta: {nationalTotals.turnout.toFixed(1)}%
           </p>
         </div>
       </div>
@@ -130,7 +159,7 @@ export default function ElectionResults() {
                 <h2 className="font-bold text-lg">Teburin 'Yan Takara</h2>
               </div>
               <div className="p-6">
-                {[...CANDIDATES]
+                {[...electionCandidates]
                   .sort((a, b) => (nationalTotals.candidateVotes[b.id] || 0) - (nationalTotals.candidateVotes[a.id] || 0))
                   .map((c, idx) => {
                     const party = getParty(c.party);
@@ -142,7 +171,7 @@ export default function ElectionResults() {
                     return (
                       <div
                         key={c.id}
-                        className={`flex items-center gap-4 py-4 ${isLeading ? 'bg-green-50 -mx-6 px-6' : ''} ${idx < CANDIDATES.length - 1 ? 'border-b border-gray-50' : ''}`}
+                        className={`flex items-center gap-4 py-4 ${isLeading ? 'bg-green-50 -mx-6 px-6' : ''} ${idx < electionCandidates.length - 1 ? 'border-b border-gray-50' : ''}`}
                       >
                         <div className="w-8 text-center">
                           <span className={`text-lg font-black ${isLeading ? 'text-green-600' : 'text-gray-400'}`}>
@@ -173,11 +202,11 @@ export default function ElectionResults() {
             {/* Progress Bars */}
             <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
               <h3 className="font-bold text-lg mb-6">Kwatanta Kuri'u</h3>
-              {CANDIDATES.map((c) => {
+              {electionCandidates.map((c) => {
                 const party = getParty(c.party);
                 const votes = nationalTotals.candidateVotes[c.id] || 0;
                 const pct = nationalTotals.candidatePercentages[c.id] || 0;
-                const maxVotes = Math.max(...CANDIDATES.map(x => nationalTotals.candidateVotes[x.id] || 0));
+                const maxVotes = Math.max(...electionCandidates.map(x => nationalTotals.candidateVotes[x.id] || 0));
                 const barWidth = maxVotes > 0 ? (votes / maxVotes) * 100 : 0;
                 return (
                   <div key={c.id} className="mb-5 last:mb-0">
@@ -311,7 +340,7 @@ export default function ElectionResults() {
                       <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Su ka Kada</th>
                       <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Halarta</th>
                       <th className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider text-gray-500">Ingantattu</th>
-                      {CANDIDATES.map((c) => {
+                      {electionCandidates.map((c) => {
                         const party = getParty(c.party);
                         return (
                           <th key={c.id} className="text-right px-3 py-3 font-bold text-[10px] uppercase tracking-wider" style={{ color: party.color }}>
@@ -351,7 +380,7 @@ export default function ElectionResults() {
                             </span>
                           </td>
                           <td className="px-3 py-2.5 text-right font-mono text-xs">{formatNumber(state.validVotes)}</td>
-                          {CANDIDATES.map((c) => {
+                          {electionCandidates.map((c) => {
                             const party = getParty(c.party);
                             const votes = state.candidateVotes?.[c.id] || 0;
                             const pct = state.validVotes > 0 ? ((votes / state.validVotes) * 100).toFixed(1) : '0.0';
@@ -393,7 +422,7 @@ export default function ElectionResults() {
 
             {/* Expanded State Detail */}
             {expandedState && (() => {
-              const sd = STATE_RESULTS.find(s => s.state === expandedState);
+              const sd = stateResults.find(s => s.state === expandedState);
               if (!sd) return null;
               const turnout = sd.registeredVoters > 0 ? ((sd.accreditedVoters / sd.registeredVoters) * 100).toFixed(1) : 0;
               return (
@@ -429,7 +458,7 @@ export default function ElectionResults() {
 
                   {/* Candidate breakdown */}
                   <div className="space-y-3">
-                    {CANDIDATES.map(c => {
+                    {electionCandidates.map(c => {
                       const party = getParty(c.party);
                       const votes = sd.candidateVotes?.[c.id] || 0;
                       const pct = sd.validVotes > 0 ? ((votes / sd.validVotes) * 100).toFixed(1) : '0.0';

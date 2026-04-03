@@ -145,10 +145,10 @@ const GuardianNav = () => {
                   );
                 })}
               </ul>
-              <div className="hidden lg:flex items-center gap-2 text-xs font-bold text-yanci-accent pl-4 border-l border-[#2a5d66]">
+              <Link to="/zabe" className="hidden lg:flex items-center gap-2 text-xs font-bold text-yanci-accent pl-4 border-l border-[#2a5d66] hover:text-white transition-colors">
                 <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                 KAI TSAYE
-              </div>
+              </Link>
             </nav>
           </div>
         </div>

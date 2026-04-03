@@ -140,14 +140,13 @@ const LiveArticlePage = () => {
           <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 font-medium">
             <div className="flex items-center gap-2">
               <div className="flex -space-x-2">
-                <div className="w-8 h-8 rounded-full bg-[#121212] text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">IS</div>
-                <div className="w-8 h-8 rounded-full bg-[#ffe500] text-black flex items-center justify-center text-xs font-bold ring-2 ring-white">AY</div>
+                <div className="w-8 h-8 rounded-full bg-[#121212] text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">{(article.author || 'Y')[0]}</div>
               </div>
-              <span><span className="text-[#121212] font-bold underline decoration-[#ffe500] decoration-2 underline-offset-2">Ibrahim Sani</span> da <span className="text-[#121212] font-bold underline decoration-[#ffe500] decoration-2 underline-offset-2">Amina Yusuf</span></span>
+              <span><span className="text-[#121212] font-bold underline decoration-[#ffe500] decoration-2 underline-offset-2">{article.author || 'Yanci Staff'}</span></span>
             </div>
             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
             <span className="flex items-center gap-2">
-              <FaClock className="text-gray-400" /> An fara 09:00 AM
+              <FaClock className="text-gray-400" /> An fara {article.liveStartTime ? new Date(article.liveStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'}
             </span>
           </div>
         </div>

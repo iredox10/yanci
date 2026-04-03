@@ -9,9 +9,10 @@ import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import SEO from '../components/SEO';
 import { useNews } from '../context/NewsContext';
+import { useElection } from '../context/ElectionContext';
 import {
   ELECTION_INFO, PARTIES, CANDIDATES, FACT_CHECKS, KEY_RACES, VOTER_INFO,
-  STATE_RESULTS, computeNationalTotals,
+  STATE_RESULTS as SEED_STATE_RESULTS, computeNationalTotals,
 } from '../data/electionData';
 
 const VERDICT_COLORS = {
@@ -26,7 +27,7 @@ function getParty(id) {
 }
 
 function getCandidate(id) {
-  return CANDIDATES.find((c) => c.id === id);
+  return electionCandidates.find((c) => c.id === id) || CANDIDATES.find((c) => c.id === id);
 }
 
 function formatNumber(n) {
@@ -146,6 +147,37 @@ function FactCheckCard({ factCheck }) {
 
 export default function ElectionHub() {
   const { articles } = useNews();
+  const { elections, candidates: ctxCandidates, results: ctxResults, factChecks: ctxFactChecks } = useElection();
+
+  // Use Appwrite data if available, fallback to seed data
+  const activeElection = elections.find(e => e.status === 'active') || elections[0];
+  const electionCandidates = activeElection
+    ? ctxCandidates.filter(c => c.electionId === activeElection.id || c.position === 'president')
+    : CANDIDATES;
+  const electionFactChecks = activeElection
+    ? ctxFactChecks.filter(fc => fc.electionId === activeElection.id)
+    : FACT_CHECKS;
+
+  // Parse candidateVotes from Appwrite (stored as JSON string)
+  const stateResults = useMemo(() => {
+    if (ctxResults.length > 0) {
+      return SEED_STATE_RESULTS.map(seed => {
+        const appResult = ctxResults.find(r => r.state === seed.state);
+        if (!appResult) return seed;
+        return {
+          ...seed,
+          ...appResult,
+          candidateVotes: typeof appResult.candidateVotes === 'string'
+            ? JSON.parse(appResult.candidateVotes)
+            : (appResult.candidateVotes || seed.candidateVotes),
+          met25Threshold: typeof appResult.met25Threshold === 'string'
+            ? JSON.parse(appResult.met25Threshold)
+            : (appResult.met25Threshold || seed.met25Threshold),
+        };
+      });
+    }
+    return SEED_STATE_RESULTS;
+  }, [ctxResults]);
 
   const electionArticles = useMemo(
     () => articles.filter((a) =>
@@ -156,11 +188,12 @@ export default function ElectionHub() {
     [articles]
   );
 
-  const nationalTotals = computeNationalTotals(CANDIDATES.map(c => c.id));
+  const candidateIds = electionCandidates.map(c => c.id);
+  const nationalTotals = computeNationalTotals(candidateIds);
 
   // Top 6 battleground states (closest margins)
   const battlegroundStates = useMemo(() => {
-    return STATE_RESULTS
+    return stateResults
       .map(s => {
         const votes = Object.values(s.candidateVotes || {});
         if (votes.length < 2) return { ...s, margin: 999 };
@@ -170,7 +203,7 @@ export default function ElectionHub() {
       })
       .sort((a, b) => a.margin - b.margin)
       .slice(0, 6);
-  }, []);
+  }, [stateResults]);
 
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917]">
@@ -271,7 +304,7 @@ export default function ElectionHub() {
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                    Jihohi {STATE_RESULTS.length} / {STATE_RESULTS.length} sun ruwaito
+                    Jihohi {stateResults.length} / {stateResults.length} sun ruwaito
                   </span>
                   <div className="w-full h-2 bg-gray-100 rounded-full mt-2">
                     <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: '100%' }} />
@@ -285,7 +318,7 @@ export default function ElectionHub() {
                 </div>
               </div>
 
-              {CANDIDATES.map((c) => {
+              {electionCandidates.map((c) => {
                 const votes = nationalTotals.candidateVotes[c.id] || 0;
                 const pct = nationalTotals.candidatePercentages[c.id] || 0;
                 const statesWon = nationalTotals.statesWon[c.id] || 0;
@@ -298,7 +331,7 @@ export default function ElectionHub() {
                     percentage={pct}
                     statesWon={statesWon}
                     states25={states25}
-                    maxPercentage={Math.max(...CANDIDATES.map(x => nationalTotals.candidatePercentages[x.id] || 0))}
+                    maxPercentage={Math.max(...electionCandidates.map(x => nationalTotals.candidatePercentages[x.id] || 0))}
                   />
                 );
               })}
@@ -392,7 +425,7 @@ export default function ElectionHub() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {battlegroundStates.map((state) => {
-              const sortedCandidates = CANDIDATES
+              const sortedCandidates = electionCandidates
                 .map(c => ({ ...c, votes: state.candidateVotes?.[c.id] || 0 }))
                 .sort((a, b) => b.votes - a.votes);
               const leader = sortedCandidates[0];
@@ -449,7 +482,7 @@ export default function ElectionHub() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {CANDIDATES.map((candidate) => {
+            {electionCandidates.map((candidate) => {
               const party = getParty(candidate.party);
               const votes = nationalTotals.candidateVotes[candidate.id] || 0;
               const pct = nationalTotals.candidatePercentages[candidate.id] || 0;
@@ -496,7 +529,7 @@ export default function ElectionHub() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {FACT_CHECKS.slice(0, 6).map((fc) => (
+            {electionFactChecks.slice(0, 6).map((fc) => (
               <FactCheckCard key={fc.id} factCheck={fc} />
             ))}
           </div>

@@ -7,6 +7,7 @@ import {
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import SEO from '../components/SEO';
+import { useElection } from '../context/ElectionContext';
 import { CANDIDATES, PARTIES } from '../data/electionData';
 
 function getParty(id) {
@@ -14,6 +15,12 @@ function getParty(id) {
 }
 
 export default function CandidateProfiles() {
+  const { candidates: ctxCandidates, elections } = useElection();
+  const activeElection = elections.find(e => e.status === 'active') || elections[0];
+  const electionCandidates = activeElection
+    ? ctxCandidates.filter(c => c.electionId === activeElection.id || c.position === 'president')
+    : CANDIDATES;
+
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917]">
       <SEO
@@ -43,7 +50,7 @@ export default function CandidateProfiles() {
 
         {/* Candidate Cards */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
-          {CANDIDATES.map((candidate) => {
+          {electionCandidates.map((candidate) => {
             const party = getParty(candidate.party);
             return (
               <div
@@ -125,7 +132,7 @@ export default function CandidateProfiles() {
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-100">
                     <th className="text-left px-4 py-3 font-bold text-xs uppercase tracking-wider text-gray-500 w-40">Bayani</th>
-                    {CANDIDATES.map((c) => {
+                    {electionCandidates.map((c) => {
                       const party = getParty(c.party);
                       return (
                         <th key={c.id} className="text-center px-4 py-3 font-bold" style={{ color: party.color }}>
@@ -149,7 +156,7 @@ export default function CandidateProfiles() {
                   ].map((row) => (
                     <tr key={row.key} className="border-b border-gray-50">
                       <td className="px-4 py-3 font-bold text-xs uppercase tracking-wider text-gray-500">{row.label}</td>
-                      {CANDIDATES.map((c) => (
+                      {electionCandidates.map((c) => (
                         <td key={c.id} className="px-4 py-3 text-center text-sm">
                           {row.format ? row.format(c) : c[row.key]}
                         </td>

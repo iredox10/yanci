@@ -283,10 +283,10 @@ const GuardianHome = () => {
                     </div>
 
                     <div className="p-4 border-t border-gray-100 bg-gray-50/30">
-                      <button className="w-full py-3 text-xs font-bold uppercase tracking-wider text-[#0f3036] hover:text-[#c59d5f] transition-colors flex items-center justify-center gap-2 group">
+                      <Link to="/labarai" className="w-full py-3 text-xs font-bold uppercase tracking-wider text-[#0f3036] hover:text-[#c59d5f] transition-colors flex items-center justify-center gap-2 group">
                         Duba labarai duka 
                         <FaArrowUpRightFromSquare className="w-3 h-3 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -407,10 +407,10 @@ const GuardianHome = () => {
                 <span className="text-xs font-bold uppercase tracking-widest text-[#e05e00] mb-2 block">Ra'ayi & Sharhi</span>
                 <h2 className="text-4xl font-serif font-black text-[#1c1917]">Ra'ayoyin Masana</h2>
               </div>
-              <a href="#" className="hidden md:flex items-center gap-2 text-sm font-bold text-[#0f3036] hover:text-[#c59d5f] transition-colors group">
+              <Link to="/raayi" className="hidden md:flex items-center gap-2 text-sm font-bold text-[#0f3036] hover:text-[#c59d5f] transition-colors group">
                 Duba duk ra'ayoyi 
                 <FaChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </a>
+              </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -714,9 +714,9 @@ const GuardianHome = () => {
                     ))}
                   </div>
 
-                  <button className="w-full mt-6 py-3 border-2 border-[#0f3036] text-[#0f3036] rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-[#0f3036] hover:text-white transition-all flex items-center justify-center gap-2">
+                  <Link to="/wasanni" className="w-full mt-6 py-3 border-2 border-[#0f3036] text-[#0f3036] rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-[#0f3036] hover:text-white transition-all flex items-center justify-center gap-2">
                     <FaCalendar className="w-4 h-4" /> Duba Jadawalin Duka
-                  </button>
+                  </Link>
                 </div>
               </div>
 

@@ -7,6 +7,7 @@ import {
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import SEO from '../components/SEO';
+import { useElection } from '../context/ElectionContext';
 import { FACT_CHECKS, PARTIES } from '../data/electionData';
 
 const VERDICT_STYLES = {
@@ -53,11 +54,16 @@ function getParty(id) {
 }
 
 export default function FactCheckPage() {
+  const { factChecks: ctxFactChecks, elections } = useElection();
+  const activeElection = elections.find(e => e.status === 'active') || elections[0];
+  const electionFactChecks = activeElection
+    ? ctxFactChecks.filter(fc => fc.electionId === activeElection.id)
+    : FACT_CHECKS;
   const [filterVerdict, setFilterVerdict] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredChecks = useMemo(() => {
-    let checks = FACT_CHECKS;
+    let checks = electionFactChecks;
     if (filterVerdict !== 'all') {
       checks = checks.filter((fc) => fc.verdict === filterVerdict);
     }
@@ -71,15 +77,15 @@ export default function FactCheckPage() {
       );
     }
     return checks;
-  }, [filterVerdict, searchQuery]);
+  }, [electionFactChecks, filterVerdict, searchQuery]);
 
   const verdictCounts = useMemo(() => {
-    const counts = { all: FACT_CHECKS.length, true: 0, false: 0, misleading: 0, unverified: 0 };
-    FACT_CHECKS.forEach((fc) => {
+    const counts = { all: electionFactChecks.length, true: 0, false: 0, misleading: 0, unverified: 0 };
+    electionFactChecks.forEach((fc) => {
       if (counts[fc.verdict] !== undefined) counts[fc.verdict]++;
     });
     return counts;
-  }, []);
+  }, [electionFactChecks]);
 
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917]">
