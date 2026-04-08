@@ -39,6 +39,55 @@ import SEO from '../components/SEO';
 import { useViewTracker } from '../hooks/useViewTracker';
 import NotificationPrompt from '../components/NotificationPrompt';
 import { useNewsletter } from '../hooks/useNewsletter';
+import { useAdminData } from '../hooks/useAdminData';
+
+const ICON_MAP = {
+  trend: FaArrowTrendUp,
+  radio: FaTowerBroadcast,
+  innovation: FaWandMagicSparkles,
+  fire: FaFire,
+  calendar: FaCalendar,
+  users: FaUsers,
+};
+
+const HighlightPanel = ({ panel, index }) => {
+  const Icon = typeof panel.icon === 'string' ? (ICON_MAP[panel.icon] || FaArrowTrendUp) : panel.icon;
+  return (
+    <article
+      className="group relative bg-white rounded-2xl p-8 shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+      style={{ transitionDelay: `${index * 100}ms` }}
+    >
+      <div className={`absolute inset-0 bg-gradient-to-br ${panel.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+      <div
+        className="absolute -right-8 -top-8 w-32 h-32 rounded-full opacity-10 group-hover:scale-150 transition-transform duration-700"
+        style={{ backgroundColor: panel.accent }}
+      />
+      <div className="relative z-10">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 rounded-xl text-white shadow-lg" style={{ backgroundColor: panel.accent }}>
+            <Icon className="w-6 h-6" />
+          </div>
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: panel.accent }}>
+            {panel.tag}
+          </span>
+        </div>
+        <h3 className="text-xl font-serif font-bold text-[#1c1917] leading-tight mb-3 group-hover:text-[#0f3036] transition-colors">
+          {panel.title}
+        </h3>
+        <p className="text-sm text-gray-600 leading-relaxed mb-6">
+          {panel.copy}
+        </p>
+        <button
+          className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all group-hover:gap-3"
+          style={{ color: panel.accent }}
+        >
+          Bincika
+          <FaArrowUpRightFromSquare className="w-3 h-3" />
+        </button>
+      </div>
+    </article>
+  );
+};
 
 const highlightPanels = [
   {
@@ -111,10 +160,27 @@ const GuardianHome = () => {
   const { playTrack } = useAudio();
   const { getMostRead } = useViewTracker();
   const { subscribe: subscribeNewsletter, count: newsletterCount } = useNewsletter();
+  const { highlights, homepageStats, sportsData, isSectionEnabled } = useAdminData();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState('latest');
   const [isVisible, setIsVisible] = useState({});
+
+  // Use admin-managed highlights if available, fallback to hardcoded
+  const highlightPanelsData = highlights.length > 0 ? highlights : [];
+  // Use admin-managed stats if available, fallback to hardcoded
+  const statsData = homepageStats.length > 0 ? homepageStats : [
+    { label: 'Labarai', value: 12500, suffix: '+' },
+    { label: 'Masu karatu', value: 500, suffix: 'K+' },
+    { label: 'Kasashen duniya', value: 45, suffix: '' },
+  ];
+  // Use admin-managed sports data if available
+  const sportsDataFallback = sportsData || {
+    liveMatches: [],
+    standings: [],
+    fixtures: [],
+    playerOfWeek: null,
+  };
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
@@ -303,58 +369,9 @@ const GuardianHome = () => {
         >
           <div className="max-w-[1400px] mx-auto px-4 md:px-6">
             <div className="grid gap-6 md:grid-cols-3">
-              {highlightPanels.map((panel, index) => {
-                const Icon = panel.icon;
-                return (
-                  <article 
-                    key={panel.id} 
-                    className="group relative bg-white rounded-2xl p-8 shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
-                    style={{ transitionDelay: `${index * 100}ms` }}
-                  >
-                    {/* Gradient background */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${panel.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                    
-                    {/* Decorative circle */}
-                    <div 
-                      className="absolute -right-8 -top-8 w-32 h-32 rounded-full opacity-10 group-hover:scale-150 transition-transform duration-700"
-                      style={{ backgroundColor: panel.accent }}
-                    />
-
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div 
-                          className="p-3 rounded-xl text-white shadow-lg"
-                          style={{ backgroundColor: panel.accent }}
-                        >
-                          <Icon className="w-6 h-6" />
-                        </div>
-                        <span 
-                          className="text-xs font-bold uppercase tracking-widest"
-                          style={{ color: panel.accent }}
-                        >
-                          {panel.tag}
-                        </span>
-                      </div>
-                      
-                      <h3 className="text-xl font-serif font-bold text-[#1c1917] leading-tight mb-3 group-hover:text-[#0f3036] transition-colors">
-                        {panel.title}
-                      </h3>
-                      
-                      <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                        {panel.copy}
-                      </p>
-                      
-                      <button 
-                        className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all group-hover:gap-3"
-                        style={{ color: panel.accent }}
-                      >
-                        Bincika 
-                        <FaArrowUpRightFromSquare className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
+              {(highlightPanelsData.length > 0 ? highlightPanelsData : highlightPanels).map((panel, index) => (
+                <HighlightPanel key={panel.id} panel={panel} index={index} />
+              ))}
             </div>
           </div>
         </section>
@@ -374,10 +391,10 @@ const GuardianHome = () => {
 
           <div className="max-w-[1400px] mx-auto px-4 md:px-6 relative">
             <div className="grid md:grid-cols-3 gap-8">
-              {stats.map((stat, index) => {
+              {statsData.map((stat, index) => {
                 const { count, ref } = useCountUp(stat.value);
                 return (
-                  <div 
+                  <div
                     key={stat.label}
                     ref={ref}
                     className="text-center group"

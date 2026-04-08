@@ -24,22 +24,25 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const { getMostRead } = useViewTracker();
 
+  // Guard against undefined articles
+  const safeArticles = articles || [];
+
   const relevantArticles = user?.category
-    ? articles.filter(a => a.pillar === user.category)
-    : articles;
+    ? safeArticles.filter(a => a.pillar === user.category)
+    : safeArticles;
 
   const totalArticles = relevantArticles.length;
   const liveArticles = relevantArticles.filter(a => a.isLive).length;
   const categoryArticles = user?.category
     ? relevantArticles.length
-    : articles.filter(a => a.pillar === 'news').length;
+    : safeArticles.filter(a => a.pillar === 'news').length;
 
   const thirdCardTitle = user?.category ? `${user.category} Articles` : "News Pillar";
 
-  // Get real most-read articles
+  // Get real most-read articles (pass articles as first arg)
   const mostRead = useMemo(() => {
-    return getMostRead(5);
-  }, [getMostRead]);
+    return getMostRead(safeArticles, 5);
+  }, [getMostRead, safeArticles]);
 
   // Calculate total views from most read
   const totalViews = useMemo(() => {

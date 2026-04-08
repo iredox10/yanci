@@ -7,7 +7,7 @@ import { useNews } from '../context/NewsContext';
 
 const KasuwanciPage = () => {
     const { articles } = useNews();
-    const businessArticles = articles.filter(a => a.section === 'lifestyle'); // Using lifestyle as proxy for business for now
+    const businessArticles = articles.filter(a => a.section === 'kasuwanci' || a.pillar === 'lifestyle');
 
     return (
         <div className="bg-[#f3f4f6] min-h-screen font-sans text-[#1c1917]">
@@ -55,9 +55,11 @@ const KasuwanciPage = () => {
                                         <span className="text-xs font-bold uppercase tracking-widest text-[#2c7a7b]">{story.kicker}</span>
                                     </div>
                                     <h3 className="font-serif font-bold text-2xl mb-3 group-hover:text-[#2c7a7b] transition-colors">{story.headline}</h3>
-                                    <p className="text-gray-600 leading-relaxed">
-                                        Binciken masana ya nuna cewa manufofin babban banki na baya-bayan nan sun fara haifar da da mai ido...
-                                    </p>
+                                    {story.trail && (
+                                        <p className="text-gray-600 leading-relaxed">
+                                            {story.trail}
+                                        </p>
+                                    )}
                                 </div>
                             </article>
                         ))}

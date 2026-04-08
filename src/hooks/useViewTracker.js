@@ -45,6 +45,7 @@ export function useViewTracker() {
 
   const getMostRead = useCallback(
     (articles = [], limit = 5) => {
+      if (!Array.isArray(articles)) return [];
       const store = getViewStore();
       return [...articles]
         .sort((a, b) => (store[String(b.id)] || 0) - (store[String(a.id)] || 0))

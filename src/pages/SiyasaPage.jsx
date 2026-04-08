@@ -61,7 +61,7 @@ const SiyasaPage = () => {
                                         {heroStory.headline}
                                     </h2>
                                     <p className="text-gray-600 text-lg leading-relaxed max-w-3xl">
-                                        Yayin da jam'iyyun siyasa ke shirin tunkarar zaben cike gurbi, masana sun yi gargadin cewa...
+                                        {heroStory.trail}
                                     </p>
 
                                     <div className="mt-4 flex items-center gap-2 text-xs font-bold text-[#8a2c2c]">
@@ -84,7 +84,7 @@ const SiyasaPage = () => {
                                         {story.headline}
                                     </h3>
                                     <p className="text-sm text-gray-600 line-clamp-3 mb-3">
-                                        Ana ci gaba da tafka muhawara kan sabuwar dokar zabe da majalisa ta amince da ita...
+                                        {story.trail}
                                     </p>
                                     {story.author && (
                                         <div className="text-xs font-bold text-gray-500">Daga {story.author}</div>
@@ -152,7 +152,7 @@ const SiyasaPage = () => {
                                             {story.headline}
                                         </h3>
                                         <p className="text-gray-600 text-sm leading-relaxed mb-3 line-clamp-2">
-                                            Gwamnatin tarayya ta bayyana cewa za ta dauki matakin gaggawa kan batun tsaro a yankunan da ke fama da rikici...
+                                            {story.trail}
                                         </p>
                                         <div className="flex items-center gap-4">
                                             <button className="text-xs font-bold bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-sm transition-colors text-gray-600">

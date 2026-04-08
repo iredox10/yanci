@@ -7,8 +7,8 @@ import { useNews } from '../context/NewsContext';
 
 const FasahaPage = () => {
     const { articles } = useNews();
-    // Mock tech articles
-    const techArticles = articles.filter(a => a.section === 'culture' || a.section === 'lifestyle').slice(0, 5);
+    // Use fasaha section first, fall back to culture/lifestyle
+    const techArticles = articles.filter(a => a.section === 'fasaha' || a.section === 'culture' || a.pillar === 'lifestyle').slice(0, 8);
 
     return (
         <div className="bg-[#0f172a] min-h-screen font-sans text-gray-100">
@@ -46,9 +46,9 @@ const FasahaPage = () => {
                                 <h3 className={`font-serif font-bold leading-tight mb-3 group-hover:text-[#e9d8fd] transition-colors ${idx === 0 ? 'text-4xl' : 'text-xl'}`}>
                                     {story.headline}
                                 </h3>
-                                {idx === 0 && (
+                                {idx === 0 && story.trail && (
                                     <p className="text-gray-400 text-lg leading-relaxed">
-                                        Sabuwar manhajar da matasan Kano suka kirkira tana taimakawa wajen gano cututtukan shuka ta hanyar daukar hoto da waya...
+                                        {story.trail}
                                     </p>
                                 )}
                             </div>

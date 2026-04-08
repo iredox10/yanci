@@ -1,13 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaMusic, FaFilm, FaPalette } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import NewsCard from '../components/guardian/NewsCard';
 import { useNews } from '../context/NewsContext';
 
+const FILTERS = [
+  { label: 'Duka', icon: null, filter: () => true },
+  { label: 'Waka', icon: FaMusic, filter: (a) => a.kicker?.toLowerCase().includes('kida') || a.kicker?.toLowerCase().includes('waka') || a.tags?.toLowerCase().includes('kida') },
+  { label: 'Fina-finai', icon: FaFilm, filter: (a) => a.kicker?.toLowerCase().includes('fina') || a.kicker?.toLowerCase().includes('film') || a.tags?.toLowerCase().includes('fina-finai') },
+  { label: 'Abinci', icon: FaPalette, filter: (a) => a.kicker?.toLowerCase().includes('abinci') || a.tags?.toLowerCase().includes('abinci') },
+  { label: 'Sutura', icon: FaPalette, filter: (a) => a.kicker?.toLowerCase().includes('sutura') || a.tags?.toLowerCase().includes('sutura') },
+];
+
 const AladuPage = () => {
     const { articles } = useNews();
+    const [activeFilter, setActiveFilter] = useState('Duka');
     const cultureArticles = articles.filter(a => a.section === 'culture');
+    const currentFilter = FILTERS.find(f => f.label === activeFilter)?.filter || (() => true);
+    const filteredArticles = cultureArticles.filter(currentFilter);
 
     return (
         <div className="bg-[#1c1917] min-h-screen font-sans text-white">
@@ -31,16 +42,24 @@ const AladuPage = () => {
             <main className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
                 {/* Filter Bar */}
                 <div className="flex gap-8 border-b border-gray-800 pb-4 mb-12 overflow-x-auto">
-                    <button className="text-[#eacca0] font-bold text-lg border-b-2 border-[#eacca0] pb-4 -mb-4.5">Duka</button>
-                    <button className="text-gray-500 font-bold text-lg hover:text-white transition-colors">Waka</button>
-                    <button className="text-gray-500 font-bold text-lg hover:text-white transition-colors">Fina-finai</button>
-                    <button className="text-gray-500 font-bold text-lg hover:text-white transition-colors">Abinci</button>
-                    <button className="text-gray-500 font-bold text-lg hover:text-white transition-colors">Sutura</button>
+                    {FILTERS.map(f => (
+                        <button
+                            key={f.label}
+                            onClick={() => setActiveFilter(f.label)}
+                            className={`font-bold text-lg pb-4 -mb-4.5 transition-colors ${
+                                activeFilter === f.label
+                                    ? 'text-[#eacca0] border-b-2 border-[#eacca0]'
+                                    : 'text-gray-500 hover:text-white'
+                            }`}
+                        >
+                            {f.label}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Masonry-style Grid */}
                 <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-                    {cultureArticles.map((story, idx) => (
+                    {filteredArticles.length > 0 ? filteredArticles.map((story, idx) => (
                         <div key={story.id} className="break-inside-avoid group cursor-pointer">
                             <div className="relative overflow-hidden rounded-sm mb-4">
                                 <img src={story.image} alt={story.headline} className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -52,11 +71,17 @@ const AladuPage = () => {
                             <h3 className={`font-serif font-bold leading-tight mb-2 group-hover:text-[#eacca0] transition-colors ${idx % 3 === 0 ? 'text-3xl' : 'text-xl'}`}>
                                 {story.headline}
                             </h3>
-                            <p className="text-gray-400 text-sm leading-relaxed">
-                                Wani bincike kan yadda fina-finan Kannywood suke canza tunanin matasa...
-                            </p>
+                            {story.trail && (
+                                <p className="text-gray-400 text-sm leading-relaxed">
+                                    {story.trail}
+                                </p>
+                            )}
                         </div>
-                    ))}
+                    )) : (
+                        <div className="text-center py-20 text-gray-500">
+                            <p className="text-lg">Babu labarai a wannan rukuni tukuna.</p>
+                        </div>
+                    )}
                 </div>
             </main>
 

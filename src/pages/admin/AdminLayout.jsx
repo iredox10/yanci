@@ -15,6 +15,14 @@ import {
   FaImage,
   FaPhotoFilm,
   FaCheckToSlot,
+  FaBell,
+  FaNewspaper,
+  FaTrophy,
+  FaStar,
+  FaChartLine,
+  FaComment,
+  FaPalette,
+  FaShieldHalved,
 } from 'react-icons/fa6';
 
 const AdminLayout = () => {
@@ -119,6 +127,69 @@ const AdminLayout = () => {
             className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/multimedia') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
           >
             <FaPhotoFilm className="w-5 h-5" /> Multimedia
+          </Link>
+
+          <Link
+            to="/admin/sports"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${location.pathname.startsWith('/admin/sports') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaTrophy className="w-5 h-5" /> Sports
+          </Link>
+
+          <Link
+            to="/admin/highlights"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/highlights') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaStar className="w-5 h-5" /> Highlight Panels
+          </Link>
+
+          <Link
+            to="/admin/newsletter"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/newsletter') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaNewspaper className="w-5 h-5" /> Newsletter
+          </Link>
+
+          <Link
+            to="/admin/comments"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/comments') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaComment className="w-5 h-5" /> Comments
+          </Link>
+
+          <Link
+            to="/admin/analytics"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/analytics') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaChartLine className="w-5 h-5" /> Analytics
+          </Link>
+
+          <Link
+            to="/admin/homepage-stats"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/homepage-stats') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaChartLine className="w-5 h-5" /> Homepage Stats
+          </Link>
+
+          <Link
+            to="/admin/homepage"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/homepage') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaPalette className="w-5 h-5" /> Homepage Builder
+          </Link>
+
+          <Link
+            to="/admin/seo"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/seo') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaShieldHalved className="w-5 h-5" /> SEO & Metadata
+          </Link>
+
+          <Link
+            to="/admin/notifications"
+            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/notifications') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+          >
+            <FaBell className="w-5 h-5" /> Notifications
           </Link>
 
           {user.role === 'super_admin' && (

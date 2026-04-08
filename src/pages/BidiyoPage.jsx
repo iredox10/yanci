@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { FaPlay, FaClock, FaXmark, FaExpand, FaVolumeHigh, FaVolumeXmark } from 'react-icons/fa6';
 import GuardianNav from '../components/guardian/GuardianNav';
 import GuardianFooter from '../components/guardian/GuardianFooter';
@@ -142,7 +142,19 @@ const BidiyoPage = () => {
   const [activeCategory, setActiveCategory] = useState('Duka');
   const heroRef = useRef(null);
 
-  const featured = videoArticles[0] || null;
+  // Filter video articles by category
+  const filteredVideoArticles = useMemo(() => {
+    if (activeCategory === 'Duka') return videoArticles;
+    const catMap = {
+      'Labarai': (a) => a.section === 'headlines' || a.pillar === 'news' || a.kicker?.toLowerCase().includes('labari'),
+      'Wasanni': (a) => a.section === 'sport' || a.pillar === 'sport' || a.kicker?.toLowerCase().includes('wasa'),
+      'Nishadi': (a) => a.section === 'culture' || a.section === 'lifestyle' || a.kicker?.toLowerCase().includes('nishadi'),
+    };
+    const filterFn = catMap[activeCategory];
+    return filterFn ? videoArticles.filter(filterFn) : videoArticles;
+  }, [videoArticles, activeCategory]);
+
+  const featured = filteredVideoArticles[0] || null;
 
   const handlePlay = (article) => {
     setActiveVideo(article);
@@ -231,7 +243,7 @@ const BidiyoPage = () => {
                 <h3 className="font-bold text-white uppercase tracking-widest text-sm">Na Gaba</h3>
               </div>
               <div className="divide-y divide-gray-800">
-                {videoArticles.slice(0, 10).map((video) => (
+                {filteredVideoArticles.slice(0, 10).map((video) => (
                   <VideoCard
                     key={video.id}
                     article={video}
@@ -269,7 +281,7 @@ const BidiyoPage = () => {
 
         {/* Video Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {videoArticles.map((video) => (
+          {filteredVideoArticles.map((video) => (
             <VideoCard
               key={video.id}
               article={video}
@@ -280,7 +292,7 @@ const BidiyoPage = () => {
         </div>
 
         {/* Empty state */}
-        {videoArticles.length === 0 && (
+        {filteredVideoArticles.length === 0 && (
           <div className="text-center py-20 text-gray-500">
             <FaPlay size={40} className="mx-auto mb-4 opacity-30" />
             <p>Ba a sami bidiyo ba tukuna</p>

@@ -56,7 +56,7 @@ const WasanniPage = () => {
                                     {sportArticles[0].headline}
                                 </h2>
                                 <p className="text-xl text-gray-600 max-w-2xl">
-                                    Kocin Super Eagles ya bayyana cewa kungiyar ta shirya tsaf domin tunkarar gasar cin kofin duniya...
+                                    {sportArticles[0].trail}
                                 </p>
                             </div>
                         )}

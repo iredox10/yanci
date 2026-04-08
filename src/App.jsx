@@ -46,6 +46,17 @@ const AdminElectionResults = lazy(() => import('./pages/admin/AdminElectionResul
 const AdminCandidates = lazy(() => import('./pages/admin/AdminCandidates'));
 const AdminFactChecks = lazy(() => import('./pages/admin/AdminFactChecks'));
 
+// New Admin Pages
+const AdminSports = lazy(() => import('./pages/admin/AdminSports'));
+const AdminHighlights = lazy(() => import('./pages/admin/AdminHighlights'));
+const AdminNewsletter = lazy(() => import('./pages/admin/AdminNewsletter'));
+const AdminHomepageStats = lazy(() => import('./pages/admin/AdminHomepageStats'));
+const AdminComments = lazy(() => import('./pages/admin/AdminComments'));
+const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
+const AdminSeo = lazy(() => import('./pages/admin/AdminSeo'));
+const AdminHomepageBuilder = lazy(() => import('./pages/admin/AdminHomepageBuilder'));
+const NotificationSettings = lazy(() => import('./pages/admin/NotificationSettings'));
+
 function App() {
   return (
     <HelmetProvider>
@@ -95,6 +106,17 @@ function App() {
                   <Route path="elections/:id/results" element={<AdminElectionResults />} />
                   <Route path="elections/:id/candidates" element={<AdminCandidates />} />
                   <Route path="elections/:id/factchecks" element={<AdminFactChecks />} />
+
+                  {/* New Admin Routes */}
+                  <Route path="sports" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminSports /></Suspense>} />
+                  <Route path="highlights" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminHighlights /></Suspense>} />
+                  <Route path="newsletter" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminNewsletter /></Suspense>} />
+                  <Route path="homepage-stats" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminHomepageStats /></Suspense>} />
+                  <Route path="comments" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminComments /></Suspense>} />
+                  <Route path="analytics" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminAnalytics /></Suspense>} />
+                  <Route path="seo" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminSeo /></Suspense>} />
+                  <Route path="homepage" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminHomepageBuilder /></Suspense>} />
+                  <Route path="notifications" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><NotificationSettings /></Suspense>} />
                 </Route>
 
                 <Route path="*" element={<NotFoundPage />} />
