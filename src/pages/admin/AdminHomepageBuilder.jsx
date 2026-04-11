@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { appwriteService } from '../../lib/appwrite';
 import { FaPalette, FaEye, FaArrowUp, FaArrowDown, FaToggleOn, FaToggleOff, FaFloppyDisk, FaSpinner, FaCheck } from 'react-icons/fa6';
 
 const STORAGE_KEY = 'yanci_homepage_builder';
@@ -16,42 +17,68 @@ const defaultSections = [
 ];
 
 const AdminHomepageBuilder = () => {
-  const [sections, setSections] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : defaultSections;
-  });
+  const [sections, setSections] = useState(defaultSections);
+  const [useAppwrite, setUseAppwrite] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    const load = async () => {
+      try {
+        const layout = await appwriteService.getHomepageLayout();
+        if (layout.length > 0) {
+          try {
+            const parsed = JSON.parse(layout[0].sections || '[]');
+            if (parsed.length > 0) {
+              setSections(parsed);
+              setUseAppwrite(true);
+              return;
+            }
+          } catch {}
+        }
+      } catch {}
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try { setSections(JSON.parse(saved)); } catch {}
+      }
+    };
+    load();
+  }, []);
+
+  const persist = async () => {
+    if (useAppwrite) {
+      try {
+        await appwriteService.updateHomepageLayout(sections);
+      } catch {}
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
-  }, [sections]);
+  };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaving(true);
-    setTimeout(() => {
-      setSaved(true);
-      setSaving(false);
-      setTimeout(() => setSaved(false), 3000);
-    }, 500);
+    await persist();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+    setSaving(false);
   };
 
-  const toggleSection = (id) => {
-    setSections(prev => prev.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s));
+  const toggleSection = async (id) => {
+    const updated = sections.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s);
+    setSections(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   };
 
-  const moveSection = (index, direction) => {
+  const moveSection = async (index, direction) => {
     const newSections = [...sections];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= newSections.length) return;
-
-    // Swap orders
     const tempOrder = newSections[index].order;
     newSections[index] = { ...newSections[index], order: newSections[targetIndex].order };
     newSections[targetIndex] = { ...newSections[targetIndex], order: tempOrder };
-
-    setSections(newSections.sort((a, b) => a.order - b.order));
+    const sorted = newSections.sort((a, b) => a.order - b.order);
+    setSections(sorted);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sorted));
   };
 
   const enabledCount = sections.filter(s => s.enabled).length;
@@ -64,7 +91,7 @@ const AdminHomepageBuilder = () => {
           <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2">
             <FaPalette className="text-[#c59d5f]" /> Homepage Builder
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Control layout, section ordering, da widget visibility na shafin farko</p>
+          <p className="text-sm text-gray-500 mt-1">Control layout, section ordering, da widget visibility na shafin farko {useAppwrite ? '(Appwrite)' : '(Local)'}</p>
         </div>
         <div className="flex gap-2">
           <button

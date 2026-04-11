@@ -28,6 +28,7 @@ import ElectionResults from './pages/ElectionResults';
 import CandidateProfiles from './pages/CandidateProfiles';
 import FactCheckPage from './pages/FactCheckPage';
 import VoterEducation from './pages/VoterEducation';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Admin — lazy loaded so they don't inflate the public bundle
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -89,9 +90,9 @@ function App() {
                 <Route path="/zabe/gaskiya" element={<FactCheckPage />} />
                 <Route path="/zabe/ilimi" element={<VoterEducation />} />
 
-                {/* Admin Routes — lazy loaded, wrapped in Suspense */}
+                {/* Admin Routes — lazy loaded, wrapped in Suspense + ProtectedRoute */}
                 <Route path="/admin/login" element={<Suspense fallback={<div className="min-h-screen bg-[#0f3036]" />}><AdminLogin /></Suspense>} />
-                <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen bg-[#fafaf9] animate-pulse" />}><AdminLayout /></Suspense>}>
+                <Route path="/admin" element={<ProtectedRoute><Suspense fallback={<div className="min-h-screen bg-[#fafaf9] animate-pulse" />}><AdminLayout /></Suspense></ProtectedRoute>}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="articles" element={<AdminArticles />} />
                   <Route path="create" element={<AdminEditor />} />

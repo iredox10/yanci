@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FaEnvelope, FaTwitter, FaFacebook, FaInstagram, FaLinkedin, FaCircleCheck } from 'react-icons/fa6';
 import { useNewsletter } from '../../hooks/useNewsletter';
 
@@ -8,6 +9,13 @@ const SOCIAL_LINKS = {
   instagram: 'https://instagram.com/yanci_ng',
   linkedin: 'https://linkedin.com/company/yanci',
 };
+
+const SOCIAL_ICONS = [
+  { Icon: FaTwitter, href: SOCIAL_LINKS.twitter },
+  { Icon: FaFacebook, href: SOCIAL_LINKS.facebook },
+  { Icon: FaInstagram, href: SOCIAL_LINKS.instagram },
+  { Icon: FaLinkedin, href: SOCIAL_LINKS.linkedin },
+];
 
 const GuardianFooter = () => {
   const { subscribe } = useNewsletter();
@@ -64,14 +72,9 @@ const GuardianFooter = () => {
             </div>
 
             <div className="flex gap-4">
-              {[
-                { Icon: FaTwitter, href: SOCIAL_LINKS.twitter },
-                { Icon: FaFacebook, href: SOCIAL_LINKS.facebook },
-                { Icon: FaInstagram, href: SOCIAL_LINKS.instagram },
-                { Icon: FaLinkedin, href: SOCIAL_LINKS.linkedin },
-              ].map(({ Icon, href }, i) => (
-                <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-yanci-accent hover:text-yanci-primary transition-all">
-                  <Icon className="w-5 h-5" />
+              {SOCIAL_ICONS.map((social, i) => (
+                <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-yanci-accent hover:text-yanci-primary transition-all">
+                  <social.Icon className="w-5 h-5" />
                 </a>
               ))}
             </div>
@@ -109,20 +112,19 @@ const GuardianFooter = () => {
             <div>
               <h4 className="font-bold text-yanci-accent border-b border-white/10 pb-3 mb-6 uppercase tracking-wider text-xs">Kamfani</h4>
               <ul className="space-y-4 text-sm text-gray-400">
-                {[['Game da Mu', '#'], ['Tuntube Mu', '#'], ['Dokoki', '#']].map(([item, path]) => (
-                  <li key={item}><a href={path} className="hover:text-white hover:translate-x-1 transition-all block">{item}</a></li>
-                ))}
+                <li><span className="text-gray-600 cursor-not-allowed" title="Coming soon">Game da Mu</span></li>
+                <li><Link to="/contact" className="hover:text-white hover:translate-x-1 transition-all block">Tuntube Mu</Link></li>
+                <li><span className="text-gray-600 cursor-not-allowed" title="Coming soon">Dokoki</span></li>
               </ul>
             </div>
           </div>
         </div>
         
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-gray-500 font-medium tracking-wide">
-          <p>&copy; 2025 Yanci Media Ltd. An kiyaye haƙƙin mallaka.</p>
+          <p>&copy; {new Date().getFullYear()} Yanci Media Ltd. An kiyaye haƙƙin mallaka.</p>
           <div className="flex gap-8">
-            <a href="#" className="hover:text-white transition-colors">Dokoki</a>
-            <a href="#" className="hover:text-white transition-colors">Tsare Sirri</a>
-            <a href="#" className="hover:text-white transition-colors">Taswirar Shafin</a>
+            <span className="text-gray-600 cursor-not-allowed" title="Coming soon">Tsare Sirri</span>
+            <Link to="/search" className="hover:text-white transition-colors">Taswirar Shafin</Link>
           </div>
         </div>
       </div>

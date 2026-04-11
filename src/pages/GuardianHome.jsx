@@ -31,7 +31,6 @@ import GuardianNav from '../components/guardian/GuardianNav';
 import NewsCard from '../components/guardian/NewsCard';
 import OpinionCard from '../components/guardian/OpinionCard';
 import SectionContainer from '../components/guardian/SectionContainer';
-import { PILLARS } from '../data/guardianData';
 import { useNews } from '../context/NewsContext';
 import { useAudio } from '../context/AudioContext';
 import { Link } from 'react-router-dom';
@@ -86,6 +85,21 @@ const HighlightPanel = ({ panel, index }) => {
         </button>
       </div>
     </article>
+  );
+};
+
+// Animated stat counter - extracted as component so useCountUp hook is called at top level
+const StatCounter = ({ stat }) => {
+  const { count, ref } = useCountUp(stat.value);
+  return (
+    <div ref={ref} className="text-center group">
+      <div className="text-5xl md:text-6xl font-serif font-black text-white mb-2">
+        {count.toLocaleString()}{stat.suffix}
+      </div>
+      <div className="text-sm font-bold uppercase tracking-widest text-[#c59d5f]">
+        {stat.label}
+      </div>
+    </div>
   );
 };
 
@@ -157,7 +171,7 @@ const useCountUp = (end, duration = 2000) => {
 
 const GuardianHome = () => {
   const { articles, ticker } = useNews();
-  const { playTrack } = useAudio();
+  const { playTrack: _playTrack } = useAudio();
   const { getMostRead } = useViewTracker();
   const { subscribe: subscribeNewsletter, count: newsletterCount } = useNewsletter();
   const { highlights, homepageStats, sportsData, isSectionEnabled } = useAdminData();
@@ -223,20 +237,14 @@ const GuardianHome = () => {
     return () => observer.disconnect();
   }, [articles]);
 
-  const stats = [
-    { label: 'Labarai', value: 12500, suffix: '+' },
-    { label: 'Masu karatu', value: 500, suffix: 'K+' },
-    { label: 'Kasashen duniya', value: 45, suffix: '' },
-  ];
-
   return (
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917] selection:bg-[#c59d5f] selection:text-white overflow-x-hidden">
       <SEO />
       <GuardianNav />
 
       <main className="relative" id="main-content" role="main" aria-label="Babban ciki">
-        {/* Breaking News Ticker - Modern Glassmorphism */}
-        {ticker?.length > 0 && (
+        {/* Breaking News Ticker */}
+        {isSectionEnabled('ticker') && ticker?.length > 0 && (
           <section className="sticky top-[48px] z-30 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
             <div className="max-w-[1400px] mx-auto px-4 md:px-6">
               <div className="flex items-center gap-4 py-2.5">
@@ -262,8 +270,8 @@ const GuardianHome = () => {
           </section>
         )}
 
-        {/* Hero Section - Modern Bento Grid with Parallax */}
-        {heroStory && (
+        {/* Hero Section */}
+        {isSectionEnabled('hero') && heroStory && (
           <section className="relative pt-8 pb-16 overflow-hidden">
             {/* Background decoration */}
             <div className="absolute inset-0 pointer-events-none">
@@ -361,8 +369,9 @@ const GuardianHome = () => {
           </section>
         )}
 
-        {/* Feature Cards - Modern Glassmorphism */}
-        <section 
+        {/* Feature Cards / Highlights */}
+        {isSectionEnabled('highlights') && (
+        <section
           id="features-section"
           data-animate
           className={`py-16 transition-all duration-1000 ${isVisible['features-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
@@ -375,9 +384,11 @@ const GuardianHome = () => {
             </div>
           </div>
         </section>
+        )}
 
-        {/* Stats Section - Modern Design */}
-        <section 
+        {/* Stats Section */}
+        {isSectionEnabled('stats') && (
+        <section
           id="stats-section"
           data-animate
           className={`py-16 bg-[#0f3036] relative overflow-hidden transition-all duration-1000 ${isVisible['stats-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
@@ -391,28 +402,16 @@ const GuardianHome = () => {
 
           <div className="max-w-[1400px] mx-auto px-4 md:px-6 relative">
             <div className="grid md:grid-cols-3 gap-8">
-              {statsData.map((stat, index) => {
-                const { count, ref } = useCountUp(stat.value);
-                return (
-                  <div
-                    key={stat.label}
-                    ref={ref}
-                    className="text-center group"
-                  >
-                    <div className="text-5xl md:text-6xl font-serif font-black text-white mb-2">
-                      {count.toLocaleString()}{stat.suffix}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-widest text-[#c59d5f]">
-                      {stat.label}
-                    </div>
-                  </div>
-                );
-              })}
+              {statsData.map((stat) => (
+                <StatCounter key={stat.label} stat={stat} />
+              ))}
             </div>
           </div>
         </section>
+        )}
 
-        {/* Opinion Section - Editorial Magazine Style */}
+        {/* Opinion Section */}
+        {isSectionEnabled('opinion') && (
         <section 
           id="opinion-section"
           data-animate
@@ -477,22 +476,33 @@ const GuardianHome = () => {
                   <h3 className="font-serif text-xl font-bold text-[#1c1917] mb-2">Tafiyar da Wasiku</h3>
                   <p className="text-sm text-gray-600 mb-4">Samu labarai kai tsaye a cikin akwatin saƙonku kowane safiya.</p>
                 </div>
-                <div className="space-y-3">
-                  <input 
-                    type="email" 
+                <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+                  <input
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
                     placeholder="Adireshin imel..."
                     className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#c59d5f]/20 focus:border-[#c59d5f] transition-all"
                   />
-                  <button className="w-full py-3 bg-[#0f3036] text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-[#1a454c] transition-colors shadow-lg shadow-[#0f3036]/20">
+                  <button type="submit" className="w-full py-3 bg-[#0f3036] text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-[#1a454c] transition-colors shadow-lg shadow-[#0f3036]/20">
                     Yi Rajista
                   </button>
-                </div>
+                </form>
               </div>
             </div>
           </div>
         </section>
+        )}
 
-        {/* Sport Section - Enhanced Modern Design */}
+        {/* Sport Section */}
+        {isSectionEnabled('sport') && (() => {
+          const sd = sportsDataFallback;
+          const liveMatch = sd?.liveMatches?.find(m => m.isLive) || sd?.liveMatches?.[0];
+          const standings = sd?.standings || [];
+          const fixtures = sd?.fixtures || [];
+          const player = sd?.playerOfWeek;
+
+          return (
         <section className="py-20 bg-gradient-to-b from-[#0f3036] via-[#1a454c] to-[#0f3036] relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
@@ -521,17 +531,17 @@ const GuardianHome = () => {
               {/* Sports Category Tabs */}
               <div className="flex flex-wrap gap-2">
                 {[
-                  { id: 'football', icon: FaFutbol, label: 'Kwallon Kafa', active: true },
-                  { id: 'basketball', icon: FaBasketball, label: 'Basketball', active: false },
-                  { id: 'athletics', icon: FaPersonRunning, label: 'Gudun', active: false },
-                  { id: 'tabletennis', icon: FaStar, label: 'Tennis', active: false },
-                ].map((sport) => {
+                  { id: 'football', icon: FaFutbol, label: 'Kwallon Kafa' },
+                  { id: 'basketball', icon: FaBasketball, label: 'Basketball' },
+                  { id: 'athletics', icon: FaPersonRunning, label: 'Gudun' },
+                  { id: 'tabletennis', icon: FaStar, label: 'Tennis' },
+                ].map((sport, idx) => {
                   const Icon = sport.icon;
                   return (
                     <button
                       key={sport.id}
                       className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
-                        sport.active
+                        idx === 0
                           ? 'bg-[#c59d5f] text-[#0f3036] shadow-lg shadow-[#c59d5f]/30'
                           : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'
                       }`}
@@ -548,6 +558,7 @@ const GuardianHome = () => {
               {/* Left Column - Live Matches & Standings */}
               <div className="lg:col-span-4 space-y-6">
                 {/* Live Match Card */}
+                {liveMatch ? (
                 <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
                   <div className="bg-gradient-to-r from-[#0f3036] to-[#1a454c] p-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -557,66 +568,68 @@ const GuardianHome = () => {
                       </span>
                       <span className="text-white text-xs font-bold uppercase tracking-widest">Kai Tsaye</span>
                     </div>
-                    <span className="text-[#c59d5f] text-xs font-bold">Premier League</span>
+                    <span className="text-[#c59d5f] text-xs font-bold">{liveMatch.league}</span>
                   </div>
 
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-16 h-16 bg-gradient-to-br from-[#0f3036] to-[#1a454c] rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg">
-                          YS
+                          {liveMatch.homeLogo || liveMatch.homeTeam.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </div>
-                        <span className="font-bold text-sm text-[#1c1917]">Yanci Stars</span>
+                        <span className="font-bold text-sm text-[#1c1917]">{liveMatch.homeTeam}</span>
                       </div>
 
                       <div className="text-center">
                         <div className="flex items-center gap-3 text-3xl font-black">
-                          <span className="text-[#0f3036]">3</span>
+                          <span className="text-[#0f3036]">{liveMatch.homeScore}</span>
                           <span className="text-gray-300">:</span>
-                          <span className="text-gray-400">2</span>
+                          <span className="text-gray-400">{liveMatch.awayScore}</span>
                         </div>
                         <div className="mt-2 px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold">
-                          90+2'
+                          {liveMatch.minute || 'LIVE'}
                         </div>
                       </div>
 
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg">
-                          CR
+                          {liveMatch.awayLogo || liveMatch.awayTeam.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </div>
-                        <span className="font-bold text-sm text-gray-500">City Royals</span>
+                        <span className="font-bold text-sm text-gray-500">{liveMatch.awayTeam}</span>
                       </div>
                     </div>
 
                     {/* Match Timeline */}
+                    {liveMatch.events && liveMatch.events.length > 0 && (
                     <div className="space-y-3 pt-4 border-t border-gray-100">
-                      <div className="flex items-center gap-3 text-xs">
-                        <span className="w-8 text-gray-400 font-mono">88'</span>
-                        <FaCircle className="w-2 h-2 text-[#c59d5f]" />
-                        <span className="flex-1 text-gray-600">Ahmed - Yanci Stars</span>
-                        <span className="font-bold text-[#0f3036]">3-2</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs">
-                        <span className="w-8 text-gray-400 font-mono">72'</span>
-                        <FaCircle className="w-2 h-2 text-gray-400" />
-                        <span className="flex-1 text-gray-600">Johnson - City Royals</span>
-                        <span className="font-bold">2-2</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs">
-                        <span className="w-8 text-gray-400 font-mono">45'</span>
-                        <FaCircle className="w-2 h-2 text-[#c59d5f]" />
-                        <span className="flex-1 text-gray-600">Musa - Yanci Stars</span>
-                        <span className="font-bold text-[#0f3036]">2-1</span>
-                      </div>
+                      {liveMatch.events.map((evt, i) => (
+                        <div key={i} className="flex items-center gap-3 text-xs">
+                          <span className="w-8 text-gray-400 font-mono">{evt.minute}</span>
+                          <FaCircle className={`w-2 h-2 ${evt.team === 'home' ? 'text-[#c59d5f]' : 'text-gray-400'}`} />
+                          <span className="flex-1 text-gray-600">{evt.player} - {evt.team === 'home' ? liveMatch.homeTeam : liveMatch.awayTeam}</span>
+                          <span className={`font-bold ${evt.team === 'home' ? 'text-[#0f3036]' : ''}`}>{evt.score}</span>
+                        </div>
+                      ))}
                     </div>
+                    )}
 
+                    {liveMatch.streamUrl && (
                     <button className="w-full mt-6 py-3 bg-gradient-to-r from-[#0f3036] to-[#1a454c] text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:shadow-lg transition-all flex items-center justify-center gap-2">
                       <FaTv className="w-4 h-4" /> Kallon Kai Tsaye
                     </button>
+                    )}
                   </div>
                 </div>
+                ) : (
+                  <div className="bg-white/10 backdrop-blur rounded-2xl p-8 text-center border border-white/10">
+                    <FaFutbol className="w-12 h-12 text-white/30 mx-auto mb-3" />
+                    <p className="text-white/60 font-bold">Babu wasan kai tsaye a yanzu</p>
+                    <p className="text-white/40 text-sm mt-1">Check back later for live matches</p>
+                  </div>
+                )}
 
                 {/* League Standings */}
+                {standings.length > 0 && (
                 <div className="bg-white/95 backdrop-blur rounded-2xl overflow-hidden shadow-xl">
                   <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -626,13 +639,7 @@ const GuardianHome = () => {
                     <span className="text-xs text-gray-400">2024/25</span>
                   </div>
                   <div className="p-2">
-                    {[
-                      { pos: 1, team: 'Yanci Stars', p: 24, gd: '+35', pts: 58 },
-                      { pos: 2, team: 'Enyimba', p: 24, gd: '+28', pts: 52 },
-                      { pos: 3, team: 'Rangers', p: 24, gd: '+22', pts: 49 },
-                      { pos: 4, team: 'Kano Pillars', p: 24, gd: '+18', pts: 46 },
-                      { pos: 5, team: 'Shooting Stars', p: 24, gd: '+12', pts: 42 },
-                    ].map((team) => (
+                    {standings.slice(0, 5).map((team) => (
                       <div
                         key={team.pos}
                         className={`flex items-center gap-3 p-2.5 rounded-lg text-sm ${
@@ -657,6 +664,7 @@ const GuardianHome = () => {
                     Duba cikakken tebur
                   </button>
                 </div>
+                )}
               </div>
 
               {/* Center Column - Upcoming Matches */}
@@ -667,18 +675,13 @@ const GuardianHome = () => {
                       <FaCalendar className="w-5 h-5 text-[#2c7a7b]" />
                       <span className="font-bold text-lg">Wasannin Wannan Mako</span>
                     </div>
-                    <span className="text-xs px-3 py-1 bg-[#2c7a7b]/10 text-[#2c7a7b] rounded-full font-bold">5 Wasanni</span>
+                    <span className="text-xs px-3 py-1 bg-[#2c7a7b]/10 text-[#2c7a7b] rounded-full font-bold">{fixtures.length} Wasanni</span>
                   </div>
 
                   <div className="space-y-4">
-                    {[
-                      { league: 'NPFL', home: 'Yanci Stars', away: 'Enyimba', date: 'Yau', time: '16:00', stadium: 'Ahmadu Bello', odds: { home: 1.85, draw: 3.20, away: 4.50 } },
-                      { league: 'Premier League', home: 'Super Eagles', away: 'Black Stars', date: 'Gobe', time: '20:00', stadium: 'Moshood Abiola', odds: { home: 1.45, draw: 4.00, away: 6.50 } },
-                      { league: 'CAF CL', home: 'Rangers', away: 'Al Ahly', date: 'Alhamis', time: '18:00', stadium: 'Awka Stadium', odds: { home: 2.10, draw: 3.10, away: 3.40 } },
-                      { league: 'NPFL', home: 'Kano Pillars', away: 'Shooting Stars', date: 'Juma\'a', time: '15:30', stadium: 'Sani Abacha', odds: { home: 1.95, draw: 3.15, away: 3.80 } },
-                    ].map((match, idx) => (
+                    {fixtures.slice(0, 5).map((match, idx) => (
                       <div
-                        key={idx}
+                        key={match.id || idx}
                         className="group p-4 rounded-xl border border-gray-100 hover:border-[#2c7a7b]/30 hover:shadow-lg transition-all cursor-pointer bg-white"
                       >
                         <div className="flex items-center justify-between mb-3">
@@ -715,7 +718,7 @@ const GuardianHome = () => {
                           <span className="text-[10px] text-gray-400">{match.stadium}</span>
                         </div>
 
-                        {/* Odds */}
+                        {match.odds && (
                         <div className="flex gap-2">
                           <button className="flex-1 py-2 bg-gray-50 rounded-lg text-xs font-bold hover:bg-[#2c7a7b] hover:text-white transition-colors">
                             1 <span className="text-[10px] opacity-70 ml-1">{match.odds.home}</span>
@@ -727,8 +730,15 @@ const GuardianHome = () => {
                             2 <span className="text-[10px] opacity-70 ml-1">{match.odds.away}</span>
                           </button>
                         </div>
+                        )}
                       </div>
                     ))}
+                    {fixtures.length === 0 && (
+                      <div className="text-center py-12 text-gray-400">
+                        <FaCalendar className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                        <p className="text-sm">Babu fixtures tukuna</p>
+                      </div>
+                    )}
                   </div>
 
                   <Link to="/wasanni" className="w-full mt-6 py-3 border-2 border-[#0f3036] text-[#0f3036] rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-[#0f3036] hover:text-white transition-all flex items-center justify-center gap-2">
@@ -741,6 +751,7 @@ const GuardianHome = () => {
               <div className="lg:col-span-4">
                 <div className="space-y-6">
                   {/* Player of the Week Card */}
+                  {player && (
                   <div className="bg-gradient-to-br from-[#c59d5f] to-[#d4a85f] rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10" />
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-10 -mb-10" />
@@ -753,24 +764,24 @@ const GuardianHome = () => {
 
                       <div className="flex items-center gap-4">
                         <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-3xl font-bold border-2 border-white/30">
-                          AM
+                          {player.initials}
                         </div>
                         <div>
-                          <h3 className="font-serif text-2xl font-bold">Ahmed Musa</h3>
-                          <p className="text-white/80 text-sm">Yanci Stars</p>
+                          <h3 className="font-serif text-2xl font-bold">{player.name}</h3>
+                          <p className="text-white/80 text-sm">{player.team}</p>
                           <div className="flex items-center gap-3 mt-2">
                             <div className="text-center">
-                              <p className="text-xl font-black">5</p>
+                              <p className="text-xl font-black">{player.goals}</p>
                               <p className="text-[10px] uppercase tracking-wider opacity-70">Kwallaye</p>
                             </div>
                             <div className="w-px h-8 bg-white/30" />
                             <div className="text-center">
-                              <p className="text-xl font-black">3</p>
+                              <p className="text-xl font-black">{player.assists}</p>
                               <p className="text-[10px] uppercase tracking-wider opacity-70">Taimakawa</p>
                             </div>
                             <div className="w-px h-8 bg-white/30" />
                             <div className="text-center">
-                              <p className="text-xl font-black">9.2</p>
+                              <p className="text-xl font-black">{player.rating}</p>
                               <p className="text-[10px] uppercase tracking-wider opacity-70">Maki</p>
                             </div>
                           </div>
@@ -778,6 +789,7 @@ const GuardianHome = () => {
                       </div>
                     </div>
                   </div>
+                  )}
 
                   {/* Latest Sports News */}
                   <div>
@@ -786,13 +798,13 @@ const GuardianHome = () => {
                         <FaNewspaper className="w-5 h-5 text-[#c59d5f]" />
                         Sabbin Labarai
                       </h3>
-                      <a href="/wasanni" className="text-xs text-[#c59d5f] hover:underline flex items-center gap-1">
+                      <Link to="/wasanni" className="text-xs text-[#c59d5f] hover:underline flex items-center gap-1">
                         Duba duka <FaChevronRight className="w-3 h-3" />
-                      </a>
+                      </Link>
                     </div>
 
                     <div className="space-y-4">
-                      {sportArticles.slice(0, 3).map((article, idx) => (
+                      {sportArticles.slice(0, 3).map((article) => (
                         <Link
                           key={article.id}
                           to={`/article/${article.id}`}
@@ -830,19 +842,19 @@ const GuardianHome = () => {
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-3 bg-white/5 rounded-xl">
-                        <p className="text-2xl font-black text-[#c59d5f]">12</p>
+                        <p className="text-2xl font-black text-[#c59d5f]">{sd?.liveMatches?.reduce((sum, m) => sum + (m.homeScore + m.awayScore), 0) || 12}</p>
                         <p className="text-[10px] text-white/60 uppercase tracking-wider">Kwallaye a yau</p>
                       </div>
                       <div className="text-center p-3 bg-white/5 rounded-xl">
-                        <p className="text-2xl font-black text-white">8</p>
+                        <p className="text-2xl font-black text-white">{sd?.liveMatches?.filter(m => !m.isLive).length || 8}</p>
                         <p className="text-[10px] text-white/60 uppercase tracking-wider">Wasannin da suka gama</p>
                       </div>
                       <div className="text-center p-3 bg-white/5 rounded-xl">
-                        <p className="text-2xl font-black text-white">5</p>
+                        <p className="text-2xl font-black text-white">{fixtures.length || 5}</p>
                         <p className="text-[10px] text-white/60 uppercase tracking-wider">Wasannin gobe</p>
                       </div>
                       <div className="text-center p-3 bg-white/5 rounded-xl">
-                        <p className="text-2xl font-black text-[#c59d5f]">3</p>
+                        <p className="text-2xl font-black text-[#c59d5f]">{sd?.liveMatches?.filter(m => m.isLive).length || 3}</p>
                         <p className="text-[10px] text-white/60 uppercase tracking-wider">Kai tsaye</p>
                       </div>
                     </div>
@@ -876,9 +888,12 @@ const GuardianHome = () => {
             </div>
           </div>
         </section>
+          );
+        })()}
 
-        {/* Lifestyle & Culture - Magazine Layout */}
-        <section 
+        {/* Lifestyle & Culture */}
+        {isSectionEnabled('lifestyle') && (
+        <section
           id="lifestyle-section"
           data-animate
           className={`py-20 transition-all duration-1000 ${isVisible['lifestyle-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
@@ -955,7 +970,7 @@ const GuardianHome = () => {
                   </div>
                   
                   <div className="relative z-10 space-y-6">
-                    {cultureArticles.map((item, index) => (
+                    {cultureArticles.map((item) => (
                       <div 
                         key={item.id} 
                         className="group cursor-pointer bg-white/5 backdrop-blur-sm rounded-xl p-4 hover:bg-white/10 transition-all duration-300"
@@ -1005,8 +1020,10 @@ const GuardianHome = () => {
             </div>
           </div>
         </section>
+        )}
 
         {/* Newsletter Section - Full Width */}
+        {isSectionEnabled('newsletter') && (
         <section className="py-20 bg-[#0f3036] relative overflow-hidden">
           <div className="absolute inset-0">
             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5" />
@@ -1052,6 +1069,7 @@ const GuardianHome = () => {
             </div>
           </div>
         </section>
+        )}
       </main>
 
       <GuardianFooter />

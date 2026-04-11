@@ -30,10 +30,10 @@ const SiyasaPage = () => {
                     </h1>
                     <div className="flex flex-wrap gap-6 text-sm font-bold border-t border-[#a33f3f] pt-4">
                         <Link to="/zabe" className="hover:text-[#ffbac8] transition-colors">Zabe 2027</Link>
-                        <a href="#" className="hover:text-[#ffbac8] transition-colors">Majalisa</a>
-                        <a href="#" className="hover:text-[#ffbac8] transition-colors">Fadar Shugaban Kasa</a>
-                        <a href="#" className="hover:text-[#ffbac8] transition-colors">Siyasar Jihohi</a>
-                        <a href="#" className="hover:text-[#ffbac8] transition-colors">Jam'iyyu</a>
+                        <span className="text-gray-400 cursor-not-allowed" title="Coming soon">Majalisa</span>
+                        <span className="text-gray-400 cursor-not-allowed" title="Coming soon">Fadar Shugaban Kasa</span>
+                        <span className="text-gray-400 cursor-not-allowed" title="Coming soon">Siyasar Jihohi</span>
+                        <span className="text-gray-400 cursor-not-allowed" title="Coming soon">Jam'iyyu</span>
                     </div>
                 </div>
             </div>
@@ -100,9 +100,9 @@ const SiyasaPage = () => {
                     <div className="max-w-[1400px] mx-auto">
                         <div className="flex justify-between items-end mb-8">
                             <h2 className="font-serif font-black text-3xl text-[#e05e00]">Muryar 'Yan Siyasa</h2>
-                            <a href="#" className="text-sm font-bold text-[#e05e00] hover:underline flex items-center gap-1">
+                            <Link to="/raayi" className="text-sm font-bold text-[#e05e00] hover:underline flex items-center gap-1">
                                 Duba duka <FaChevronRight className="w-3 h-3" />
-                            </a>
+                            </Link>
                         </div>
 
                         <div className="grid md:grid-cols-4 gap-6">

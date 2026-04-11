@@ -28,16 +28,14 @@ import {
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const isActive = (path) => location.pathname === path;
-
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate('/admin/login');
     }
-  }, [user, navigate]);
+  }, [user, navigate, loading]);
 
   // Close sidebar on navigation (mobile)
   useEffect(() => {
@@ -49,6 +47,9 @@ const AdminLayout = () => {
     navigate('/admin/login');
   };
 
+  const isActive = (path) => location.pathname === path;
+
+  if (loading) return <div className="min-h-screen bg-[#0f3036] flex items-center justify-center"><p className="text-white">Loading...</p></div>;
   if (!user) return null;
 
   return (
@@ -75,7 +76,7 @@ const AdminLayout = () => {
             <div className="mt-2 text-xs text-gray-400">
               Logged in as <br />
               <span className="font-bold text-white text-sm">{user.name}</span>
-              {user.category && <span className="block text-[#c59d5f] capitalize">{user.category} Editor</span>}
+              {user.role && <span className="block text-[#c59d5f] capitalize">{user.role === 'super_admin' ? 'Super Admin' : `${user.category || 'General'} Editor`}</span>}
             </div>
           </div>
           <button

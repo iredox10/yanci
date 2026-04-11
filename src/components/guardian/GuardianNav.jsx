@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FaChevronDown, FaBars, FaMagnifyingGlass, FaUser, FaXmark, FaGlobe } from 'react-icons/fa6';
 
 const GuardianNav = () => {
@@ -18,17 +18,12 @@ const GuardianNav = () => {
   }, []);
 
   // Focus input when search panel opens
+  const searchAutofocus = isSearchOpen;
   useEffect(() => {
-    if (isSearchOpen && searchInputRef.current) {
+    if (searchAutofocus && searchInputRef.current) {
       searchInputRef.current.focus();
     }
-  }, [isSearchOpen]);
-
-  // Close search on route change
-  useEffect(() => {
-    setIsSearchOpen(false);
-    setSearchInput('');
-  }, [location.pathname]);
+  }, [searchAutofocus]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -61,9 +56,12 @@ const GuardianNav = () => {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <a href="#" className="hover:text-white transition-colors">Ayyuka</a>
-              <a href="#" className="hover:text-white transition-colors">Tuntube Mu</a>
-              <button className="flex items-center gap-1 font-bold text-white hover:text-yanci-accent transition-colors">
+              <span className="text-gray-400 cursor-not-allowed" title="Coming soon">Ayyuka</span>
+              <Link to="/contact" className="hover:text-white transition-colors">Tuntube Mu</Link>
+              <button
+                onClick={() => navigate('/admin/login')}
+                className="flex items-center gap-1 font-bold text-white hover:text-yanci-accent transition-colors"
+              >
                 <FaUser className="w-3 h-3" /> Shiga
               </button>
             </div>

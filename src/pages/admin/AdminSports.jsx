@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { appwriteService } from '../../lib/appwrite';
 import { FaTrophy, FaFutbol, FaPlus, FaTrash, FaPen, FaXmark, FaSpinner, FaArrowUp, FaArrowDown, FaClock, FaMapLocationDot } from 'react-icons/fa6';
 
 const STORAGE_KEY = 'yanci_sports';
@@ -52,10 +53,8 @@ const emptyMatch = { league: '', homeTeam: '', awayTeam: '', homeScore: 0, awayS
 const emptyFixture = { league: '', home: '', away: '', date: '', time: '', stadium: '', odds: { home: 1.0, draw: 1.0, away: 1.0 } };
 
 const AdminSports = () => {
-  const [sportsData, setSportsData] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : initialSportsData;
-  });
+  const [sportsData, setSportsData] = useState(initialSportsData);
+  const [useAppwrite, setUseAppwrite] = useState(false);
   const [activeTab, setActiveTab] = useState('matches');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
@@ -63,8 +62,77 @@ const AdminSports = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sportsData));
-  }, [sportsData]);
+    const load = async () => {
+      try {
+        const doc = await appwriteService.getSportsData();
+        if (doc) {
+          const parsed = {
+            liveMatches: typeof doc.liveMatches === 'string' ? JSON.parse(doc.liveMatches) : doc.liveMatches || [],
+            standings: typeof doc.standings === 'string' ? JSON.parse(doc.standings) : doc.standings || [],
+            fixtures: typeof doc.fixtures === 'string' ? JSON.parse(doc.fixtures) : doc.fixtures || [],
+            playerOfWeek: typeof doc.playerOfWeek === 'string' ? JSON.parse(doc.playerOfWeek) : doc.playerOfWeek || initialSportsData.playerOfWeek,
+            $id: doc.$id,
+          };
+          setSportsData(parsed);
+          setUseAppwrite(true);
+          return;
+        }
+      } catch {}
+      const saved = localStorage.getItem(STORAGE_KEY);
+      setSportsData(saved ? JSON.parse(saved) : initialSportsData);
+    };
+    load();
+  }, []);
+
+  const persist = async (data) => {
+    if (useAppwrite) {
+      try {
+        await appwriteService.upsertSportsData({
+          liveMatches: JSON.stringify(data.liveMatches),
+          standings: JSON.stringify(data.standings),
+          fixtures: JSON.stringify(data.fixtures),
+          playerOfWeek: JSON.stringify(data.playerOfWeek),
+        });
+      } catch {}
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    let updated = { ...sportsData };
+    if (modalType === 'match') {
+      const exists = updated.liveMatches.find(m => m.id === draft.id);
+      updated.liveMatches = exists ? updated.liveMatches.map(m => m.id === draft.id ? draft : m) : [draft, ...updated.liveMatches];
+    } else if (modalType === 'fixture') {
+      const exists = updated.fixtures.find(f => f.id === draft.id);
+      updated.fixtures = exists ? updated.fixtures.map(f => f.id === draft.id ? draft : f) : [draft, ...updated.fixtures];
+    } else if (modalType === 'player') {
+      updated.playerOfWeek = draft;
+    } else if (modalType === 'standings') {
+      const exists = updated.standings.find(s => s.pos === draft.pos);
+      if (exists) {
+        updated.standings = updated.standings.map(s => s.pos === draft.pos ? draft : s);
+      } else {
+        updated.standings = [...updated.standings, draft].sort((a, b) => a.pos - b.pos);
+      }
+    }
+    setSportsData(updated);
+    await persist(updated);
+    setIsModalOpen(false);
+    setDraft(null);
+    setSaving(false);
+  };
+
+  const handleDelete = async (type, id) => {
+    if (!window.confirm('Share wannan item?')) return;
+    let updated = { ...sportsData };
+    if (type === 'match') updated.liveMatches = updated.liveMatches.filter(m => m.id !== id);
+    if (type === 'fixture') updated.fixtures = updated.fixtures.filter(f => f.id !== id);
+    if (type === 'standings') updated.standings = updated.standings.filter(s => s.pos !== id).map((s, i) => ({ ...s, pos: i + 1 }));
+    setSportsData(updated);
+    await persist(updated);
+  };
 
   const openModal = (type, item = null) => {
     setModalType(type);
@@ -73,50 +141,6 @@ const AdminSports = () => {
     if (type === 'player') setDraft(item || { ...sportsData.playerOfWeek });
     if (type === 'standings') setDraft(item || { pos: 0, team: '', p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: '0', pts: 0 });
     setIsModalOpen(true);
-  };
-
-  const handleSave = () => {
-    setSaving(true);
-    setTimeout(() => {
-      if (modalType === 'match') {
-        const exists = sportsData.liveMatches.find(m => m.id === draft.id);
-        setSportsData(prev => ({
-          ...prev,
-          liveMatches: exists ? prev.liveMatches.map(m => m.id === draft.id ? draft : m) : [draft, ...prev.liveMatches],
-        }));
-      } else if (modalType === 'fixture') {
-        const exists = sportsData.fixtures.find(f => f.id === draft.id);
-        setSportsData(prev => ({
-          ...prev,
-          fixtures: exists ? prev.fixtures.map(f => f.id === draft.id ? draft : f) : [draft, ...prev.fixtures],
-        }));
-      } else if (modalType === 'player') {
-        setSportsData(prev => ({ ...prev, playerOfWeek: draft }));
-      } else if (modalType === 'standings') {
-        const exists = sportsData.standings.find(s => s.pos === draft.pos);
-        if (exists) {
-          setSportsData(prev => ({
-            ...prev,
-            standings: prev.standings.map(s => s.pos === draft.pos ? draft : s),
-          }));
-        } else {
-          setSportsData(prev => ({
-            ...prev,
-            standings: [...prev.standings, draft].sort((a, b) => a.pos - b.pos),
-          }));
-        }
-      }
-      setIsModalOpen(false);
-      setDraft(null);
-      setSaving(false);
-    }, 300);
-  };
-
-  const handleDelete = (type, id) => {
-    if (!window.confirm('Share wannan item?')) return;
-    if (type === 'match') setSportsData(prev => ({ ...prev, liveMatches: prev.liveMatches.filter(m => m.id !== id) }));
-    if (type === 'fixture') setSportsData(prev => ({ ...prev, fixtures: prev.fixtures.filter(f => f.id !== id) }));
-    if (type === 'standings') setSportsData(prev => ({ ...prev, standings: prev.standings.filter(s => s.pos !== id).map((s, i) => ({ ...s, pos: i + 1 })) }));
   };
 
   const handleMove = (type, index, direction) => {
@@ -144,7 +168,7 @@ const AdminSports = () => {
           <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2">
             <FaTrophy className="text-[#c59d5f]" /> Sports Management
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Gudanar da wasanni - kai tsaye, standings, fixtures, da dan wasan mako</p>
+          <p className="text-sm text-gray-500 mt-1">Gudanar da wasanni - kai tsaye, standings, fixtures, da dan wasan mako {useAppwrite ? '(Appwrite)' : '(Local)'}</p>
         </div>
       </div>
 

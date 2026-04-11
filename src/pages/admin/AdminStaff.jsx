@@ -1,12 +1,44 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, SEED_STAFF } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useNews } from '../../context/NewsContext';
 import {
   FaUserPlus, FaTrash, FaShieldHalved, FaEnvelope, FaPencil,
   FaLock, FaCircleCheck, FaCircleXmark, FaMugHot, FaTableList,
   FaXmark, FaChevronDown, FaChevronUp, FaKey, FaUser, FaUserShield,
 } from 'react-icons/fa6';
+
+// ─── Seed staff (local to this page) ──────────────────────────────────────────
+
+const SEED_STAFF = [
+  { id: 'super',     name: 'Babban Admin',     role: 'super_admin', category: null,        label: 'Super Admin',                              pin: null, email: 'admin@yanci.ng',     status: 'active', lastActive: null, createdAt: null },
+  { id: 'news',      name: 'Editan Labarai',   role: 'editor',      category: 'news',      label: 'Labarai & Siyasa (News/Politics)',          pin: null, email: 'labarai@yanci.ng',   status: 'active', lastActive: null, createdAt: null },
+  { id: 'sport',     name: 'Editan Wasanni',   role: 'editor',      category: 'sport',     label: 'Wasanni (Sport)',                           pin: null, email: 'wasanni@yanci.ng',   status: 'active', lastActive: null, createdAt: null },
+  { id: 'opinion',   name: "Editan Ra'ayi",    role: 'editor',      category: 'opinion',   label: "Ra'ayi (Opinion)",                          pin: null, email: 'raayi@yanci.ng',     status: 'active', lastActive: null, createdAt: null },
+  { id: 'culture',   name: "Editan Al'adu",    role: 'editor',      category: 'culture',   label: "Al'adu (Culture)",                          pin: null, email: 'aladu@yanci.ng',     status: 'active', lastActive: null, createdAt: null },
+  { id: 'lifestyle', name: 'Editan Rayuwa',    role: 'editor',      category: 'lifestyle', label: 'Kasuwanci & Rayuwa (Business/Lifestyle)',   pin: null, email: 'rayuwa@yanci.ng',    status: 'active', lastActive: null, createdAt: null },
+];
+
+const STAFF_STORAGE_KEY = 'yanci_staff_list';
+
+function loadStaffFromStorage() {
+  try {
+    const raw = localStorage.getItem(STAFF_STORAGE_KEY);
+    if (!raw) return SEED_STAFF;
+    const saved = JSON.parse(raw);
+    const savedMap = Object.fromEntries(saved.map(s => [s.id, s]));
+    const merged = SEED_STAFF.map(s => savedMap[s.id] ? { ...s, ...savedMap[s.id] } : s);
+    const seedIds = new Set(SEED_STAFF.map(s => s.id));
+    const extras = saved.filter(s => !seedIds.has(s.id));
+    return [...merged, ...extras];
+  } catch {
+    return SEED_STAFF;
+  }
+}
+
+function saveStaffToStorage(list) {
+  try { localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(list)); } catch {}
+}
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -342,14 +374,17 @@ const PermissionsMatrix = ({ open, onToggle }) => (
 // ─── Main component ────────────────────────────────────────────────────────────
 
 const AdminStaff = () => {
-  const { user, staffList, addStaffMember, updateStaffMember, removeStaffMember } = useAuth();
+  const { user } = useAuth();
   const { articles } = useNews();
   const navigate = useNavigate();
 
-  const [modal, setModal] = useState(null); // null | 'add' | { mode: 'edit', member } | { mode: 'delete', member }
+  const [staffList, setStaffList] = useState(loadStaffFromStorage);
+  const [modal, setModal] = useState(null);
   const [permOpen, setPermOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterRole, setFilterRole] = useState('all');
+
+  useEffect(() => { saveStaffToStorage(staffList); }, [staffList]);
 
   // Guard
   if (!user || user.role !== 'super_admin') {
@@ -383,6 +418,28 @@ const AdminStaff = () => {
     on_leave: staffList.filter(m => m.status === 'on_leave').length,
     suspended: staffList.filter(m => m.status === 'suspended').length,
   }), [staffList]);
+
+  const addStaffMember = (data) => {
+    const id = 'staff_' + Date.now();
+    const newMember = { id, name: data.name, email: data.email, role: data.role, category: data.role === 'editor' ? data.category : null, label: data.name, pin: data.pin || null, status: data.status || 'active', lastActive: null, createdAt: new Date().toISOString() };
+    setStaffList(prev => [...prev, newMember]);
+  };
+
+  const updateStaffMember = (id, data) => {
+    setStaffList(prev => prev.map(u => {
+      if (u.id !== id) return u;
+      const updated = { ...u, ...data };
+      if (data.role === 'super_admin') updated.category = null;
+      return updated;
+    }));
+  };
+
+  const removeStaffMember = (id) => {
+    const isSeed = SEED_IDS.has(id);
+    if (isSeed) return false;
+    setStaffList(prev => prev.filter(u => u.id !== id));
+    return true;
+  };
 
   // Add
   const handleAdd = (form) => {

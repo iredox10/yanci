@@ -1,4 +1,4 @@
-import { Client, Databases, Storage, ID, Query } from 'appwrite';
+import { Client, Databases, Storage, Account, ID, Query } from 'appwrite';
 
 export const PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID;
 export const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -7,6 +7,10 @@ export const COLLECTION_ID_ELECTIONS = import.meta.env.VITE_APPWRITE_COLLECTION_
 export const COLLECTION_ID_CANDIDATES = import.meta.env.VITE_APPWRITE_COLLECTION_ID_CANDIDATES;
 export const COLLECTION_ID_RESULTS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_RESULTS;
 export const COLLECTION_ID_FACTCHECKS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_FACTCHECKS;
+export const COLLECTION_ID_HIGHLIGHTS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_HIGHLIGHTS;
+export const COLLECTION_ID_HOMEPAGE_STATS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_HOMEPAGE_STATS;
+export const COLLECTION_ID_SPORTS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_SPORTS;
+export const COLLECTION_ID_HOMEPAGE_LAYOUT = import.meta.env.VITE_APPWRITE_COLLECTION_ID_HOMEPAGE_LAYOUT;
 export const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET_ID;
 export const ENDPOINT = import.meta.env.VITE_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
 
@@ -16,6 +20,7 @@ const client = new Client()
 
 export const databases = new Databases(client);
 export const storage = new Storage(client);
+export const account = new Account(client);
 
 export const appwriteService = {
     getArticles: async () => {
@@ -275,6 +280,89 @@ export const appwriteService = {
             console.error("AppwriteService :: deleteFactCheck :: error", error);
             return false;
         }
+    },
+
+    // ─── Highlights CRUD ─────────────────────────────────────────────────────
+    getHighlights: async () => {
+        try {
+            if (!COLLECTION_ID_HIGHLIGHTS) return [];
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_HIGHLIGHTS, [Query.orderAsc('order')]);
+            return response.documents;
+        } catch { return []; }
+    },
+    createHighlight: async (data) => {
+        try {
+            return await databases.createDocument(DATABASE_ID, COLLECTION_ID_HIGHLIGHTS, ID.unique(), data);
+        } catch (error) { console.error("AppwriteService :: createHighlight :: error", error); throw error; }
+    },
+    updateHighlight: async (id, data) => {
+        try {
+            return await databases.updateDocument(DATABASE_ID, COLLECTION_ID_HIGHLIGHTS, id, data);
+        } catch (error) { console.error("AppwriteService :: updateHighlight :: error", error); throw error; }
+    },
+    deleteHighlight: async (id) => {
+        try { await databases.deleteDocument(DATABASE_ID, COLLECTION_ID_HIGHLIGHTS, id); return true; }
+        catch (error) { console.error("AppwriteService :: deleteHighlight :: error", error); return false; }
+    },
+
+    // ─── Homepage Stats CRUD ─────────────────────────────────────────────────
+    getHomepageStats: async () => {
+        try {
+            if (!COLLECTION_ID_HOMEPAGE_STATS) return [];
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_HOMEPAGE_STATS, [Query.orderAsc('order')]);
+            return response.documents;
+        } catch { return []; }
+    },
+    createHomepageStat: async (data) => {
+        try {
+            return await databases.createDocument(DATABASE_ID, COLLECTION_ID_HOMEPAGE_STATS, ID.unique(), data);
+        } catch (error) { console.error("AppwriteService :: createHomepageStat :: error", error); throw error; }
+    },
+    updateHomepageStat: async (id, data) => {
+        try {
+            return await databases.updateDocument(DATABASE_ID, COLLECTION_ID_HOMEPAGE_STATS, id, data);
+        } catch (error) { console.error("AppwriteService :: updateHomepageStat :: error", error); throw error; }
+    },
+    deleteHomepageStat: async (id) => {
+        try { await databases.deleteDocument(DATABASE_ID, COLLECTION_ID_HOMEPAGE_STATS, id); return true; }
+        catch (error) { console.error("AppwriteService :: deleteHomepageStat :: error", error); return false; }
+    },
+
+    // ─── Sports Data CRUD ────────────────────────────────────────────────────
+    getSportsData: async () => {
+        try {
+            if (!COLLECTION_ID_SPORTS) return null;
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_SPORTS, [Query.orderDesc('$updatedAt'), Query.limit(1)]);
+            return response.documents[0] || null;
+        } catch { return null; }
+    },
+    upsertSportsData: async (data) => {
+        try {
+            const existing = await appwriteService.getSportsData();
+            if (existing) {
+                return await databases.updateDocument(DATABASE_ID, COLLECTION_ID_SPORTS, existing.$id, data);
+            }
+            return await databases.createDocument(DATABASE_ID, COLLECTION_ID_SPORTS, ID.unique(), data);
+        } catch (error) { console.error("AppwriteService :: upsertSportsData :: error", error); throw error; }
+    },
+
+    // ─── Homepage Layout CRUD ────────────────────────────────────────────────
+    getHomepageLayout: async () => {
+        try {
+            if (!COLLECTION_ID_HOMEPAGE_LAYOUT) return [];
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_HOMEPAGE_LAYOUT, [Query.orderAsc('order')]);
+            return response.documents;
+        } catch { return []; }
+    },
+    updateHomepageLayout: async (sections) => {
+        try {
+            const existing = await appwriteService.getHomepageLayout();
+            if (existing.length > 0) {
+                const doc = existing[0];
+                return await databases.updateDocument(DATABASE_ID, COLLECTION_ID_HOMEPAGE_LAYOUT, doc.$id, { sections: JSON.stringify(sections) });
+            }
+            return await databases.createDocument(DATABASE_ID, COLLECTION_ID_HOMEPAGE_LAYOUT, ID.unique(), { sections: JSON.stringify(sections) });
+        } catch (error) { console.error("AppwriteService :: updateHomepageLayout :: error", error); throw error; }
     },
 };
 

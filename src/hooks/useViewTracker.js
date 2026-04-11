@@ -54,5 +54,28 @@ export function useViewTracker() {
     []
   );
 
-  return { trackView, getViewCount, getMostRead };
+  /**
+   * Get total views across all articles
+   */
+  const getTotalViews = useCallback(() => {
+    const store = getViewStore();
+    return Object.values(store).reduce((sum, v) => sum + v, 0);
+  }, []);
+
+  /**
+   * Get views grouped by article section
+   */
+  const getViewsBySection = useCallback((articles = []) => {
+    if (!Array.isArray(articles)) return {};
+    const store = getViewStore();
+    const sectionViews = {};
+    articles.forEach(article => {
+      const section = article.section || 'unknown';
+      if (!sectionViews[section]) sectionViews[section] = 0;
+      sectionViews[section] += store[String(article.id)] || 0;
+    });
+    return sectionViews;
+  }, []);
+
+  return { trackView, getViewCount, getMostRead, getTotalViews, getViewsBySection };
 }

@@ -1,43 +1,64 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { FaChartLine, FaEye, FaArrowTrendUp, FaUsers, FaFileLines, FaClock, FaGlobe, FaChevronUp, FaChevronDown, FaMagnifyingGlass } from 'react-icons/fa6';
 import { useNews } from '../../context/NewsContext';
 import { useViewTracker } from '../../hooks/useViewTracker';
 
 const AdminAnalytics = () => {
   const { articles } = useNews();
-  const { getMostRead, getViewsBySection, getTotalViews } = useViewTracker();
+  const { getMostRead, getTotalViews } = useViewTracker();
   const [timeRange, setTimeRange] = useState('7d');
   const [sortBy, setSortBy] = useState('views');
 
-  // Guard against undefined articles
-  const safeArticles = articles || [];
+  // Guard against undefined articles - memoized to avoid re-creation on every render
+  const safeArticles = useMemo(() => articles || [], [articles]);
 
-  // Simulated analytics data
-  const trafficData = useMemo(() => {
+  // Simulated analytics data - generated in useEffect to avoid impure Math.random during render
+  const [trafficData, setTrafficData] = useState([]);
+
+  useEffect(() => {
     const days = timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
     const labels = timeRange === '24h'
       ? Array.from({ length: 24 }, (_, i) => `${i}:00`)
       : Array.from({ length: days }, (_, i) => `Day ${i + 1}`);
 
-    return labels.map(label => ({
+    setTrafficData(labels.map(label => ({
       label,
       views: Math.floor(Math.random() * 5000) + 1000,
       visitors: Math.floor(Math.random() * 3000) + 500,
-    }));
+    })));
   }, [timeRange]);
 
-  const totalViews = trafficData.reduce((sum, d) => sum + d.views, 0);
+  const simulatedTotalViews = trafficData.reduce((sum, d) => sum + d.views, 0);
   const totalVisitors = trafficData.reduce((sum, d) => sum + d.visitors, 0);
-  const avgViews = Math.round(totalViews / trafficData.length);
-  const peakViews = Math.max(...trafficData.map(d => d.views));
+  const avgViews = trafficData.length > 0 ? Math.round(simulatedTotalViews / trafficData.length) : 0;
+  const peakViews = trafficData.length > 0 ? Math.max(...trafficData.map(d => d.views)) : 0;
 
-  const mostRead = getMostRead(10);
+  const mostRead = useMemo(() => {
+    return getMostRead(safeArticles, 10);
+  }, [getMostRead, safeArticles]);
+
+  // Attach view counts to articles from the view store
+  const mostReadWithViews = useMemo(() => {
+    const store = JSON.parse(localStorage.getItem('yanci_article_views') || '{}');
+    return mostRead.map(article => ({
+      ...article,
+      views: store[String(article.id)] || 0,
+    }));
+  }, [mostRead]);
+
+  // Calculate total views
+  const totalViews = useMemo(() => {
+    return getTotalViews();
+  }, [getTotalViews]);
+
+  // Section performance with real view data
   const sectionPerformance = useMemo(() => {
+    const store = JSON.parse(localStorage.getItem('yanci_article_views') || '{}');
     const sectionViews = {};
     safeArticles.forEach(article => {
       const section = article.section || 'unknown';
       if (!sectionViews[section]) sectionViews[section] = { views: 0, articles: 0 };
-      sectionViews[section].views += article.views || 0;
+      sectionViews[section].views += store[String(article.id)] || 0;
       sectionViews[section].articles += 1;
     });
     return Object.entries(sectionViews)
@@ -46,11 +67,12 @@ const AdminAnalytics = () => {
   }, [safeArticles]);
 
   const pillarPerformance = useMemo(() => {
+    const store = JSON.parse(localStorage.getItem('yanci_article_views') || '{}');
     const pillarViews = {};
     safeArticles.forEach(article => {
       const pillar = article.pillar || 'unknown';
       if (!pillarViews[pillar]) pillarViews[pillar] = { views: 0, articles: 0 };
-      pillarViews[pillar].views += article.views || 0;
+      pillarViews[pillar].views += store[String(article.id)] || 0;
       pillarViews[pillar].articles += 1;
     });
     return Object.entries(pillarViews)
@@ -186,7 +208,7 @@ const AdminAnalytics = () => {
             </select>
           </div>
           <div className="space-y-2">
-            {mostRead.slice(0, 8).map((article, idx) => (
+            {mostReadWithViews.slice(0, 8).map((article, idx) => (
               <div key={article.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                   idx < 3 ? 'bg-[#c59d5f] text-white' : 'bg-gray-100 text-gray-600'
@@ -200,7 +222,7 @@ const AdminAnalytics = () => {
                 <span className="text-xs font-bold text-gray-600">{(article.views || 0).toLocaleString()}</span>
               </div>
             ))}
-            {mostRead.length === 0 && (
+            {mostReadWithViews.length === 0 && (
               <p className="text-gray-400 text-sm text-center py-8">Babu bayanan karatu tukuna.</p>
             )}
           </div>
