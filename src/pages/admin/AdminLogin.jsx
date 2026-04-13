@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FaLock, FaEnvelope, FaKey } from 'react-icons/fa6';
@@ -12,11 +12,11 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already logged in
-  if (user) {
-    navigate('/admin');
-    return null;
-  }
+  useEffect(() => {
+    if (user) navigate('/admin', { replace: true });
+  }, [user, navigate]);
+
+  if (user) return null;
 
   const handleLogin = async (e) => {
     e.preventDefault();
