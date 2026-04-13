@@ -23,6 +23,9 @@ import {
   FaComment,
   FaPalette,
   FaShieldHalved,
+  FaUserShield,
+  FaUserGear,
+  FaUser,
 } from 'react-icons/fa6';
 
 const AdminLayout = () => {
@@ -194,12 +197,20 @@ const AdminLayout = () => {
           </Link>
 
           {user.role === 'super_admin' && (
-            <Link
-              to="/admin/staff"
-              className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/staff') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-            >
-              <FaUsers className="w-5 h-5" /> Staff
-            </Link>
+            <>
+              <Link
+                to="/admin/users"
+                className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/users') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+              >
+                <FaUsers className="w-5 h-5" /> Users
+              </Link>
+              <Link
+                to="/admin/roles"
+                className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/roles') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+              >
+                <FaUserShield className="w-5 h-5" /> Roles & Permissions
+              </Link>
+            </>
           )}
 
           <Link
@@ -218,6 +229,9 @@ const AdminLayout = () => {
         </nav>
 
         <div className="p-4 border-t border-white/10 space-y-2">
+          <Link to="/admin/profile" className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors text-sm ${isActive('/admin/profile') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10 text-gray-300 hover:text-white'}`}>
+            <FaUser className="w-5 h-5" /> My Profile
+          </Link>
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-md hover:bg-white/10 text-gray-300 hover:text-white transition-colors text-left text-sm">
             <FaArrowRightFromBracket className="w-5 h-5" /> Logout
           </button>

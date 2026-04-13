@@ -29,6 +29,7 @@ import CandidateProfiles from './pages/CandidateProfiles';
 import FactCheckPage from './pages/FactCheckPage';
 import VoterEducation from './pages/VoterEducation';
 import ProtectedRoute from './components/ProtectedRoute';
+import RegisterPage from './pages/RegisterPage';
 
 // Admin — lazy loaded so they don't inflate the public bundle
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -57,6 +58,9 @@ const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
 const AdminSeo = lazy(() => import('./pages/admin/AdminSeo'));
 const AdminHomepageBuilder = lazy(() => import('./pages/admin/AdminHomepageBuilder'));
 const NotificationSettings = lazy(() => import('./pages/admin/NotificationSettings'));
+const AdminRoles = lazy(() => import('./pages/admin/AdminRoles'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminProfile = lazy(() => import('./pages/admin/AdminProfile'));
 
 function App() {
   return (
@@ -92,6 +96,7 @@ function App() {
 
                 {/* Admin Routes — lazy loaded, wrapped in Suspense + ProtectedRoute */}
                 <Route path="/admin/login" element={<Suspense fallback={<div className="min-h-screen bg-[#0f3036]" />}><AdminLogin /></Suspense>} />
+                <Route path="/register" element={<Suspense fallback={<div className="min-h-screen bg-[#0f3036]" />}><RegisterPage /></Suspense>} />
                 <Route path="/admin" element={<ProtectedRoute><Suspense fallback={<div className="min-h-screen bg-[#fafaf9] animate-pulse" />}><AdminLayout /></Suspense></ProtectedRoute>}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="articles" element={<AdminArticles />} />
@@ -118,6 +123,9 @@ function App() {
                   <Route path="seo" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminSeo /></Suspense>} />
                   <Route path="homepage" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminHomepageBuilder /></Suspense>} />
                   <Route path="notifications" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><NotificationSettings /></Suspense>} />
+                  <Route path="roles" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminRoles /></Suspense>} />
+                  <Route path="users" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminUsers /></Suspense>} />
+                  <Route path="profile" element={<Suspense fallback={<div className="min-h-screen bg-gray-50 animate-pulse" />}><AdminProfile /></Suspense>} />
                 </Route>
 
                 <Route path="*" element={<NotFoundPage />} />

@@ -11,6 +11,9 @@ export const COLLECTION_ID_HIGHLIGHTS = import.meta.env.VITE_APPWRITE_COLLECTION
 export const COLLECTION_ID_HOMEPAGE_STATS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_HOMEPAGE_STATS;
 export const COLLECTION_ID_SPORTS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_SPORTS;
 export const COLLECTION_ID_HOMEPAGE_LAYOUT = import.meta.env.VITE_APPWRITE_COLLECTION_ID_HOMEPAGE_LAYOUT;
+export const COLLECTION_ID_SETTINGS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_SETTINGS;
+export const COLLECTION_ID_ROLES = import.meta.env.VITE_APPWRITE_COLLECTION_ID_ROLES;
+export const COLLECTION_ID_INVITATIONS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_INVITATIONS;
 export const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET_ID;
 export const ENDPOINT = import.meta.env.VITE_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
 
@@ -363,6 +366,81 @@ export const appwriteService = {
             }
             return await databases.createDocument(DATABASE_ID, COLLECTION_ID_HOMEPAGE_LAYOUT, ID.unique(), { sections: JSON.stringify(sections) });
         } catch (error) { console.error("AppwriteService :: updateHomepageLayout :: error", error); throw error; }
+    },
+
+    // ─── Site Settings CRUD ──────────────────────────────────────────────────
+    getSettings: async () => {
+        try {
+            if (!COLLECTION_ID_SETTINGS) return null;
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_SETTINGS, [Query.limit(1)]);
+            return response.documents[0] || null;
+        } catch { return null; }
+    },
+    updateSettings: async (data) => {
+        try {
+            const existing = await appwriteService.getSettings();
+            if (existing) {
+                return await databases.updateDocument(DATABASE_ID, COLLECTION_ID_SETTINGS, existing.$id, data);
+            }
+            return await databases.createDocument(DATABASE_ID, COLLECTION_ID_SETTINGS, ID.unique(), data);
+        } catch (error) { console.error("AppwriteService :: updateSettings :: error", error); throw error; }
+    },
+
+    // ─── Roles CRUD ──────────────────────────────────────────────────────────
+    getRoles: async () => {
+        try {
+            if (!COLLECTION_ID_ROLES) return [];
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_ROLES, [Query.orderDesc('priority')]);
+            return response.documents;
+        } catch { return []; }
+    },
+    createRole: async (data) => {
+        try {
+            return await databases.createDocument(DATABASE_ID, COLLECTION_ID_ROLES, ID.unique(), data);
+        } catch (error) { console.error("AppwriteService :: createRole :: error", error); throw error; }
+    },
+    updateRole: async (id, data) => {
+        try {
+            return await databases.updateDocument(DATABASE_ID, COLLECTION_ID_ROLES, id, data);
+        } catch (error) { console.error("AppwriteService :: updateRole :: error", error); throw error; }
+    },
+    deleteRole: async (id) => {
+        try {
+            await databases.deleteDocument(DATABASE_ID, COLLECTION_ID_ROLES, id);
+            return true;
+        } catch (error) { console.error("AppwriteService :: deleteRole :: error", error); return false; }
+    },
+
+    // ─── Invitations CRUD ────────────────────────────────────────────────────
+    getInvitations: async () => {
+        try {
+            if (!COLLECTION_ID_INVITATIONS) return [];
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_INVITATIONS, [Query.orderDesc('$createdAt')]);
+            return response.documents;
+        } catch { return []; }
+    },
+    createInvitation: async (data) => {
+        try {
+            return await databases.createDocument(DATABASE_ID, COLLECTION_ID_INVITATIONS, ID.unique(), data);
+        } catch (error) { console.error("AppwriteService :: createInvitation :: error", error); throw error; }
+    },
+    updateInvitation: async (id, data) => {
+        try {
+            return await databases.updateDocument(DATABASE_ID, COLLECTION_ID_INVITATIONS, id, data);
+        } catch (error) { console.error("AppwriteService :: updateInvitation :: error", error); throw error; }
+    },
+    deleteInvitation: async (id) => {
+        try {
+            await databases.deleteDocument(DATABASE_ID, COLLECTION_ID_INVITATIONS, id);
+            return true;
+        } catch (error) { console.error("AppwriteService :: deleteInvitation :: error", error); return false; }
+    },
+    getInvitationByToken: async (token) => {
+        try {
+            if (!COLLECTION_ID_INVITATIONS) return null;
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_INVITATIONS, [Query.equal('token', token), Query.limit(1)]);
+            return response.documents[0] || null;
+        } catch { return null; }
     },
 };
 
