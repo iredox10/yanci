@@ -48,21 +48,21 @@ const RelatedArticles = ({ currentArticle, allArticles, limit = 4 }) => {
   if (related.length === 0) return null;
 
   return (
-    <div className="mt-8 pt-6 border-t border-gray-200">
-      <h3 className="text-lg font-bold text-gray-800 mb-4">Related Articles</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-gray-200">
+      <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-4 md:mb-6">Related Articles</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
         {related.map(article => (
           <Link
             key={article.$id || article.id}
             to={`/article/${article.$id || article.id}`}
-            className="group block p-4 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-colors"
+            className="group block p-3 md:p-4 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-colors"
           >
-            <p className="text-xs font-bold text-gray-400 uppercase mb-1">{article.section || article.pillar || ''}</p>
-            <p className="text-sm font-bold text-gray-900 group-hover:text-[#c59d5f] transition-colors line-clamp-2">
+            <p className="text-[10px] md:text-xs font-bold text-gray-400 uppercase mb-1">{article.section || article.pillar || ''}</p>
+            <p className="text-sm font-bold text-gray-900 group-hover:text-[#c59d5f] transition-colors line-clamp-2 break-words">
               {article.headline || article.title || 'Untitled'}
             </p>
             <div className="flex items-center gap-1 mt-2 text-xs text-gray-400">
-              <span>{article.author || ''}</span>
+              <span className="truncate">{article.author || ''}</span>
               {article.$createdAt && <span>· {new Date(article.$createdAt).toLocaleDateString()}</span>}
             </div>
           </Link>

@@ -249,13 +249,13 @@ const ArticlePage = () => {
         />
       </div>
 
-      <main className="pb-32 pt-10 md:pt-16" id="main-content" role="main" aria-label="Babban ciki">
+      <main className="pb-32 pt-10 md:pt-16 overflow-hidden" id="main-content" role="main" aria-label="Babban ciki">
 
         {/* CENTERED COLUMN LAYOUT */}
-        <article className="max-w-[780px] mx-auto px-5 md:px-0">
+        <article className="max-w-[780px] mx-auto px-4 sm:px-5 md:px-0 w-full">
 
           {/* Article Header */}
-          <header className="mb-10">
+          <header className="mb-8 md:mb-10">
             <div className="flex items-center gap-3 mb-6">
               <Link
                 to={`/section/${article.section}`}
@@ -270,25 +270,25 @@ const ArticlePage = () => {
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.05] mb-8 text-[#121212] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] mb-6 md:mb-8 text-[#121212] tracking-tight break-words">
               {article.headline}
             </h1>
 
-            <div className="text-xl md:text-2xl font-serif text-gray-600 leading-[1.6] mb-10 border-l-4 border-gray-200 pl-6 py-1">
+            <div className="text-lg sm:text-xl md:text-2xl font-serif text-gray-600 leading-[1.5] mb-8 md:mb-10 border-l-4 border-gray-200 pl-4 md:pl-6 py-1 break-words">
               {article.trail || "Takaitaccen bayani game da wannan labari mai mahimmanci."}
             </div>
 
             {/* Simplified Meta Data - Centered Focus */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-6 border-t border-b border-gray-100 mb-10">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center font-bold text-xl text-[#121212]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 py-4 sm:py-6 border-t border-b border-gray-100 mb-8 md:mb-10">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-100 flex items-center justify-center font-bold text-lg sm:text-xl text-[#121212] shrink-0">
                   {(article.author || "Y")[0]}
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-widest mb-0.5">Written by</span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] font-sans font-bold text-gray-400 uppercase tracking-widest mb-0.5">Written by</span>
                   <Link
                     to={`/author/${encodeURIComponent(article.author || 'Yanci Staff')}`}
-                    className="text-base font-sans font-bold text-[#121212] hover:underline transition-colors"
+                    className="text-sm sm:text-base font-sans font-bold text-[#121212] hover:underline transition-colors truncate"
                     style={{ color: pillarColor }}
                   >
                     {article.author || "Yanci Staff"}
@@ -296,7 +296,7 @@ const ArticlePage = () => {
                   {article.coAuthor && (
                     <Link
                       to={`/author/${encodeURIComponent(article.coAuthor)}`}
-                      className="text-xs font-sans text-gray-500 hover:underline transition-colors mt-0.5"
+                      className="text-xs font-sans text-gray-500 hover:underline transition-colors mt-0.5 truncate"
                     >
                       Tare da {article.coAuthor}
                     </Link>
@@ -305,9 +305,9 @@ const ArticlePage = () => {
               </div>
 
               {/* Last Updated Timestamp */}
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <FaClock className="w-3 h-3" />
-                <span>
+              <div className="flex items-center gap-2 text-xs text-gray-400 shrink-0">
+                <FaClock className="w-3 h-3 shrink-0" />
+                <span className="truncate">
                   {article.$updatedAt
                     ? `An sabawa: ${new Date(article.$updatedAt).toLocaleDateString('ha-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
                     : article.$createdAt
@@ -316,20 +316,20 @@ const ArticlePage = () => {
                 </span>
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-widest mr-2 hidden sm:block">Share</span>
-                <button onClick={shareFacebook} className="w-10 h-10 rounded-full border border-gray-100 hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Facebook">
-                  <FaFacebook size={16} />
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <span className="text-[10px] sm:text-xs font-sans font-bold text-gray-400 uppercase tracking-widest mr-1 hidden sm:block">Share</span>
+                <button onClick={shareFacebook} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-100 hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Facebook" aria-label="Share on Facebook">
+                  <FaFacebook size={14} />
                 </button>
-                <button onClick={shareTwitter} className="w-10 h-10 rounded-full border border-gray-100 hover:border-[#1DA1F2] hover:bg-[#1DA1F2] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Twitter">
-                  <FaTwitter size={16} />
+                <button onClick={shareTwitter} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-100 hover:border-[#1DA1F2] hover:bg-[#1DA1F2] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Twitter" aria-label="Share on Twitter">
+                  <FaTwitter size={14} />
                 </button>
-                <button onClick={shareWhatsapp} className="w-10 h-10 rounded-full border border-gray-100 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Whatsapp">
-                  <FaWhatsapp size={16} />
+                <button onClick={shareWhatsapp} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-100 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white flex items-center justify-center text-gray-400 transition-all duration-300" title="Whatsapp" aria-label="Share on WhatsApp">
+                  <FaWhatsapp size={14} />
                 </button>
                 {typeof navigator !== 'undefined' && navigator.share && (
-                  <button onClick={handleNativeShare} className="w-10 h-10 border border-gray-100 hover:border-[#121212] hover:bg-[#121212] hover:text-white rounded-full flex items-center justify-center text-gray-400 transition-all duration-300" title="Share via Device">
-                    <FaShareNodes size={16} />
+                  <button onClick={handleNativeShare} className="w-9 h-9 sm:w-10 sm:h-10 border border-gray-100 hover:border-[#121212] hover:bg-[#121212] hover:text-white rounded-full flex items-center justify-center text-gray-400 transition-all duration-300" title="Share via Device" aria-label="Share">
+                    <FaShareNodes size={14} />
                   </button>
                 )}
               </div>
@@ -338,12 +338,14 @@ const ArticlePage = () => {
 
           {/* Main Image - Full width of the container */}
           {article.image && (
-            <figure className="mb-12 w-full -mx-5 md:mx-0 md:w-full group">
+            <figure className="mb-8 md:mb-12 w-full">
               <div className="relative overflow-hidden bg-gray-100 rounded-sm shadow-sm">
                 <img
                   src={article.image}
-                  alt={article.headline}
+                  alt={article.imageAlt || article.headline}
                   className="w-full h-auto object-cover block transform transition-transform duration-[1.5s] group-hover:scale-105"
+                  loading="lazy"
+                  decoding="async"
                   style={{
                     objectPosition: article.imageFocalX != null && article.imageFocalY != null
                       ? `${article.imageFocalX}% ${article.imageFocalY}%`
@@ -351,15 +353,15 @@ const ArticlePage = () => {
                   }}
                 />
               </div>
-              <figcaption className="mt-3 px-5 md:px-0 text-sm text-gray-500 font-sans flex items-start gap-1.5 leading-tight">
-                <FaChevronRight size={10} className="mt-1 text-[#121212]" />
-                <span dangerouslySetInnerHTML={{ __html: `${article.imageCaption} <span class="text-gray-300 mx-1">|</span> <span class="uppercase tracking-widest text-[10px] font-bold">Photo: ${article.author}</span>` }} />
+              <figcaption className="mt-3 text-sm text-gray-500 font-sans flex items-start gap-1.5 leading-tight">
+                <FaChevronRight size={10} className="mt-1 text-[#121212] shrink-0" />
+                <span dangerouslySetInnerHTML={{ __html: `${article.imageCaption || ''} <span class="text-gray-300 mx-1">|</span> <span class="uppercase tracking-widest text-[10px] font-bold">Photo: ${article.imageCredit || article.author}</span>` }} />
               </figcaption>
             </figure>
           )}
 
           {/* Content Body - Larger Font & Better Spacing */}
-          <div className="prose prose-xl max-w-none text-[#121212] prose-headings:font-bold prose-headings:font-serif prose-headings:tracking-tight prose-p:font-serif prose-p:text-[1.35rem] prose-p:leading-[1.8] prose-p:mb-8 prose-img:rounded-lg prose-img:shadow-lg prose-img:my-10 prose-a:text-[#c70000] prose-a:no-underline hover:prose-a:underline hover:prose-a:decoration-2 hover:prose-a:underline-offset-2 prose-blockquote:border-l-[6px] prose-blockquote:border-[#c70000] prose-blockquote:bg-gray-50 prose-blockquote:py-4 prose-blockquote:px-8 prose-blockquote:not-italic prose-blockquote:font-bold prose-blockquote:text-2xl prose-blockquote:text-gray-900 prose-blockquote:rounded-r-lg">
+          <div className="article-body prose prose-lg md:prose-xl max-w-none text-[#121212] prose-headings:font-bold prose-headings:font-serif prose-headings:tracking-tight prose-p:font-serif prose-p:text-[1.125rem] md:prose-p:text-[1.35rem] prose-p:leading-[1.8] prose-p:mb-8 prose-img:rounded-lg prose-img:shadow-lg prose-img:my-10 prose-a:text-[#c70000] prose-a:no-underline hover:prose-a:underline hover:prose-a:decoration-2 hover:prose-a:underline-offset-2 prose-blockquote:border-l-[6px] prose-blockquote:border-[#c70000] prose-blockquote:bg-gray-50 prose-blockquote:py-4 prose-blockquote:px-8 prose-blockquote:not-italic prose-blockquote:font-bold prose-blockquote:text-xl md:prose-blockquote:text-2xl prose-blockquote:text-gray-900 prose-blockquote:rounded-r-lg">
             {article.body ? (
               <div className="drop-cap-container">
                 {renderBody(article.body)}
@@ -370,9 +372,9 @@ const ArticlePage = () => {
           </div>
 
           {/* Article Footer - Tags */}
-          <div className="mt-20 pt-10 border-t border-gray-200">
-            <h4 className="text-xs font-bold font-sans uppercase tracking-widest text-gray-400 mb-6">Taken Labarai</h4>
-            <div className="flex flex-wrap gap-3">
+          <div className="mt-16 md:mt-20 pt-8 md:pt-10 border-t border-gray-200">
+            <h4 className="text-xs font-bold font-sans uppercase tracking-widest text-gray-400 mb-4 md:mb-6">Taken Labarai</h4>
+            <div className="flex flex-wrap gap-2 md:gap-3">
               {(article.tags
                 ? article.tags.split(',').map(t => t.trim()).filter(Boolean)
                 : ['Najeriya', 'Arewa', 'Labarai']
@@ -380,7 +382,7 @@ const ArticlePage = () => {
                 <Link
                   key={tag}
                   to={`/tag/${encodeURIComponent(tag)}`}
-                  className="bg-gray-50 border border-gray-100 px-4 py-2 rounded-full text-sm font-bold text-gray-700 hover:bg-[#121212] hover:text-white hover:border-[#121212] cursor-pointer transition-all duration-300 font-sans shadow-sm"
+                  className="bg-gray-50 border border-gray-100 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-bold text-gray-700 hover:bg-[#121212] hover:text-white hover:border-[#121212] cursor-pointer transition-all duration-300 font-sans shadow-sm break-words max-w-full"
                 >
                   #{tag}
                 </Link>
@@ -400,8 +402,8 @@ const ArticlePage = () => {
         </article>
 
         {/* RELATED SECTION - MOVED TO BOTTOM */}
-        <section className="bg-gray-50 py-20 mt-24 border-t border-gray-200">
-          <div className="max-w-[1240px] mx-auto px-5 md:px-6">
+        <section className="bg-gray-50 py-12 md:py-20 mt-12 md:mt-24 border-t border-gray-200">
+          <div className="max-w-[1240px] mx-auto px-4 sm:px-5 md:px-6">
             <RelatedArticles
               currentArticle={article}
               allArticles={articles}
@@ -422,10 +424,10 @@ const ArticlePage = () => {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-10 right-10 w-14 h-14 bg-[#121212] text-white rounded-full hover:bg-[#c70000] border-2 border-white shadow-2xl flex items-center justify-center transition-all duration-300 z-50 animate-bounce-in"
+          className="fixed bottom-6 right-4 sm:bottom-10 sm:right-10 w-12 h-12 sm:w-14 sm:h-14 bg-[#121212] text-white rounded-full hover:bg-[#c70000] border-2 border-white shadow-2xl flex items-center justify-center transition-all duration-300 z-50 animate-bounce-in"
           aria-label="Back to top"
         >
-          <FaArrowUp className="w-5 h-5" />
+          <FaArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       )}
     </div>
