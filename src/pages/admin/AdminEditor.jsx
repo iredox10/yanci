@@ -594,6 +594,31 @@ const AdminEditor = () => {
         setShowLinkPicker(true);
         return;
       }
+      case 'body-image': {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          setUploading(true);
+          try {
+            const response = await appwriteService.uploadFile(file);
+            const fileUrl = appwriteService.getFilePreview(response.$id);
+            const caption = prompt('Image caption (optional):', '') || '';
+            const credit = prompt('Image credit (optional):', '') || '';
+            const imgHtml = `<figure style="margin:1.5rem 0;"><img src="${fileUrl}" alt="${caption}" style="width:100%;height:auto;border-radius:0.5rem;" /><figcaption style="margin-top:0.5rem;font-size:0.75rem;color:#666;font-family:sans-serif;">${caption}${credit ? ` <span style="color:#999;">| Photo: ${credit}</span>` : ''}</figcaption></figure>`;
+            quill.clipboard.dangerouslyPasteHTML(range.index, imgHtml);
+            setIsDirty(true);
+          } catch (error) {
+            alert('Image upload failed: ' + error.message);
+          } finally {
+            setUploading(false);
+          }
+        };
+        input.click();
+        return;
+      }
       default: break;
     }
     if (placeholder) {
@@ -715,10 +740,10 @@ const AdminEditor = () => {
       </header>
 
       {/* Main Content Area */}
-      <div className={`flex flex-1 overflow-hidden relative ${isFullscreen ? 'xl:mr-0' : ''}`}>
+      <div className={`flex flex-1 overflow-hidden relative ${isFullscreen ? '' : ''}`}>
 
         {/* Editor Column */}
-        <main className={`flex-1 overflow-y-auto bg-white p-4 md:p-8 lg:p-16 relative transition-all ${isFullscreen ? 'max-w-4xl mx-auto' : ''}`}>
+        <main className={`flex-1 overflow-y-auto bg-white p-4 md:p-8 lg:p-16 relative transition-all ${isFullscreen ? 'max-w-4xl mx-auto w-full' : ''}`}>
           <div className="max-w-[800px] mx-auto space-y-8 md:space-y-12">
 
             {/* Format badge picker (inline) */}
@@ -737,6 +762,74 @@ const AdminEditor = () => {
                   {f.label}
                 </button>
               ))}
+            </div>
+
+            {/* Featured Image - Prominent inline area */}
+            <div className="space-y-2">
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">Featured Image (Hoto na Labari)</label>
+              {formData.image ? (
+                <div className="relative group rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50">
+                  <img src={formData.image} alt="Featured" className="w-full h-48 md:h-64 object-cover" />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <label className="px-4 py-2 bg-white text-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 text-sm font-bold flex items-center gap-2">
+                      <FaCloudArrowUp /> Change
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
+                    </label>
+                    <button
+                      onClick={() => setFormData(p => ({ ...p, image: '', imageCaption: '', imageCredit: '', imageAlt: '' }))}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-bold flex items-center gap-2"
+                    >
+                      <FaTrash /> Remove
+                    </button>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p className="text-white text-xs font-bold truncate">{formData.imageCaption || 'No caption set'}</p>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center h-32 md:h-40 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-100 hover:border-gray-400 transition-all text-gray-400">
+                  {uploading ? (
+                    <FaSpinner className="animate-spin text-2xl" />
+                  ) : (
+                    <>
+                      <FaCloudArrowUp className="text-3xl mb-2" />
+                      <span className="text-sm font-bold">Click to upload featured image</span>
+                      <span className="text-[10px] text-gray-300 mt-1">or paste URL below</span>
+                    </>
+                  )}
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'image')} />
+                </label>
+              )}
+              {!formData.image && (
+                <input
+                  type="text"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleChange}
+                  className="w-full text-xs p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#c59d5f]"
+                  placeholder="Or paste image URL here: https://..."
+                />
+              )}
+              {formData.image && (
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    name="imageCaption"
+                    value={formData.imageCaption}
+                    onChange={handleChange}
+                    className="text-xs p-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#c59d5f]"
+                    placeholder="Caption..."
+                  />
+                  <input
+                    type="text"
+                    name="imageCredit"
+                    value={formData.imageCredit}
+                    onChange={handleChange}
+                    className="text-xs p-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#c59d5f]"
+                    placeholder="Credit (e.g. Reuters)"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Sensitivity flag */}
@@ -848,6 +941,7 @@ const AdminEditor = () => {
 
                   <p className="text-[9px] font-bold uppercase text-gray-300 px-4 py-1">Rich Content</p>
                   {[
+                    { type: 'body-image', icon: FaImage,           label: 'Insert Image',    color: 'text-blue-500' },
                     { type: 'map',       icon: FaMapLocationDot, label: 'Taswirar Wuri',  color: 'text-blue-500' },
                     { type: 'quote',     icon: FaQuoteLeft,       label: 'Maganar Zance', color: 'text-[#c59d5f]' },
                     { type: 'highlight', icon: FaCircleInfo,       label: 'Muhimmin Bayani', color: 'text-amber-500' },
@@ -905,6 +999,7 @@ const AdminEditor = () => {
           fixed inset-y-0 right-0 z-40 w-[320px] md:w-[360px] border-l border-gray-200 bg-white overflow-hidden transition-transform duration-300 transform flex flex-col
           xl:relative xl:translate-x-0 xl:block
           ${showSidebar ? 'translate-x-0 shadow-2xl' : 'translate-x-full'}
+          ${isFullscreen ? 'hidden xl:hidden' : ''}
         `}>
           {/* Panel nav tabs */}
           <div className="shrink-0 border-b border-gray-100 bg-gray-50 flex overflow-x-auto">
