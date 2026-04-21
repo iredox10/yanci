@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNews } from '../../context/NewsContext';
 import { useAuth } from '../../context/AuthContext';
 import { appwriteService } from '../../lib/appwrite';
@@ -34,6 +34,18 @@ import {
   FaBolt,
   FaRotateLeft,
   FaClockRotateLeft,
+  FaExpand,
+  FaCompress,
+  FaTable,
+  FaCode,
+  FaArrowRotateLeft,
+  FaArrowRotateRight,
+  FaYoutube,
+  FaXTwitter,
+  FaTiktok,
+  FaInstagram,
+  FaFileCirclePlus,
+  FaWandMagicSparkles,
 } from 'react-icons/fa6';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
@@ -241,11 +253,16 @@ const AdminEditor = () => {
   const [wordCount, setWordCount] = useState(0);
   const [showComponentMenu, setShowComponentMenu] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-  const [activePanel, setActivePanel] = useState('meta'); // meta | publish | seo | media | social | related
+  const [activePanel, setActivePanel] = useState('meta');
+  const [showLinkPicker, setShowLinkPicker] = useState(false);
+  const [linkSearch, setLinkSearch] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
 
   const [formData, setFormData] = useState({
     headline: '',
     kicker: '',
+    subheading: '',
     trail: '',
     body: '',
     image: '',
@@ -274,6 +291,7 @@ const AdminEditor = () => {
     ogDescription: '',
     tags: '',
     relatedArticles: '',
+    corrections: [],
   });
 
   const saveTimeoutRef = useRef(null);
@@ -289,6 +307,44 @@ const AdminEditor = () => {
     setWordCount(words.length);
   }, [formData.body]);
 
+  // Auto-generate slug from headline
+  useEffect(() => {
+    if (formData.headline && (!formData.slug || isEditing)) {
+      const auto = formData.headline
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .slice(0, 80);
+      if (auto && !formData.slug) {
+        setFormData(p => ({ ...p, slug: auto }));
+      }
+    }
+  }, [formData.headline]);
+
+  // Internal link suggestions
+  const linkSuggestions = useMemo(() => {
+    if (!linkSearch) return articles.filter(a => a.status === 'published').slice(0, 8);
+    const q = linkSearch.toLowerCase();
+    return articles.filter(a =>
+      a.status === 'published' && (
+        (a.headline || '').toLowerCase().includes(q) ||
+        (a.tags || '').toLowerCase().includes(q)
+      )
+    ).slice(0, 8);
+  }, [linkSearch, articles]);
+
+  const insertInternalLink = (article) => {
+    const quill = quillRef.current?.getEditor();
+    if (!quill) return;
+    const range = quill.getSelection(true);
+    const linkHtml = `<a href="/article/${article.$id || article.id}">${article.headline}</a>`;
+    quill.clipboard.dangerouslyPasteHTML(range.index, linkHtml);
+    setIsDirty(true);
+    setShowLinkPicker(false);
+    setLinkSearch('');
+  };
+
   // Pillar lock for editors
   useEffect(() => {
     if (user?.category) {
@@ -298,57 +354,55 @@ const AdminEditor = () => {
 
   // Load article for editing
   useEffect(() => {
-    let ignore = false;
-    if (isEditing) {
-      const article = getArticleById(id);
-      if (article) {
-        if (user?.category && article.pillar !== user.category) {
-          if (!ignore) {
-            alert("Ba ka da izinin gyara wannan labari.");
-            navigate('/admin/articles');
-          }
-          return;
-        }
-        if (!ignore) {
-          setFormData({
-            headline: article.headline || '',
-            kicker: article.kicker || '',
-            trail: article.trail || '',
-            body: article.body || '',
-            image: article.image || '',
-            imageCaption: article.imageCaption || '',
-            imageCredit: article.imageCredit || '',
-            imageAlt: article.imageAlt || '',
-            imageFocalX: article.imageFocalX ?? 50,
-            imageFocalY: article.imageFocalY ?? 50,
-            videoUrl: article.videoUrl || '',
-            keyFigures: article.keyFigures || '',
-            series: article.series || '',
-            pillar: article.pillar || user?.category || 'news',
-            section: article.section || 'headlines',
-            format: article.format || 'news',
-            type: article.type || 'standard',
-            author: article.author || user?.name || '',
-            coAuthor: article.coAuthor || '',
-            isLive: article.isLive || false,
-            isSensitive: article.isSensitive || false,
-            status: article.status || 'published',
-            publishAt: article.publishAt || '',
-            slug: article.slug || '',
-            metaTitle: article.metaTitle || '',
-            metaDescription: article.metaDescription || '',
-            ogTitle: article.ogTitle || '',
-            ogDescription: article.ogDescription || '',
-            tags: article.tags || '',
-            relatedArticles: article.relatedArticles || '',
-          });
-        }
-      } else {
-        if (!ignore) navigate('/admin/articles');
-      }
+    if (!isEditing || !id) return;
+
+    const article = getArticleById(id);
+    if (!article) {
+      navigate('/admin/articles');
+      return;
     }
-    return () => { ignore = true; };
-  }, [id, isEditing, navigate, user, getArticleById]);
+
+    if (user?.category && article.pillar !== user.category) {
+      alert("Ba ka da izinin gyara wannan labari.");
+      navigate('/admin/articles');
+      return;
+    }
+
+    setFormData({
+      headline: article.headline || '',
+      kicker: article.kicker || '',
+      subheading: article.subheading || '',
+      trail: article.trail || '',
+      body: article.body || '',
+      image: article.image || '',
+      imageCaption: article.imageCaption || '',
+      imageCredit: article.imageCredit || '',
+      imageAlt: article.imageAlt || '',
+      imageFocalX: article.imageFocalX ?? 50,
+      imageFocalY: article.imageFocalY ?? 50,
+      videoUrl: article.videoUrl || '',
+      keyFigures: article.keyFigures || '',
+      series: article.series || '',
+      pillar: article.pillar || user?.category || 'news',
+      section: article.section || 'headlines',
+      format: article.format || 'news',
+      type: article.type || 'standard',
+      author: article.author || user?.name || '',
+      coAuthor: article.coAuthor || '',
+      isLive: article.isLive || false,
+      isSensitive: article.isSensitive || false,
+      status: article.status || 'published',
+      publishAt: article.publishAt || '',
+      slug: article.slug || '',
+      metaTitle: article.metaTitle || '',
+      metaDescription: article.metaDescription || '',
+      ogTitle: article.ogTitle || '',
+      ogDescription: article.ogDescription || '',
+      tags: article.tags || '',
+      relatedArticles: article.relatedArticles || '',
+      corrections: article.corrections || [],
+    });
+  }, [id, isEditing]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -485,6 +539,61 @@ const AdminEditor = () => {
         }
         break;
       }
+      case 'youtube': {
+        const ytUrl = prompt('YouTube URL:');
+        if (ytUrl) {
+          let videoId = '';
+          const match = ytUrl.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/watch\?.+&v=))([\w-]{11})/);
+          if (match) videoId = match[1];
+          if (videoId) {
+            placeholder = `<div class="yanci-atom-embed" data-type="youtube" data-id="${videoId}" style="background:#000;color:#fff;padding:2rem;text-align:center;margin:1.5rem 0;border-radius:0.5rem;">[YOUTUBE: ${videoId}]</div>`;
+          }
+        }
+        break;
+      }
+      case 'twitter': {
+        const tweetUrl = prompt('Tweet URL:');
+        if (tweetUrl) placeholder = `<div class="yanci-atom-embed" data-type="twitter" data-url="${tweetUrl}" style="background:#f0f0f0;padding:1.5rem;text-align:center;margin:1.5rem 0;border-radius:0.5rem;border:1px solid #ddd;">[TWEET: ${tweetUrl}]</div>`;
+        break;
+      }
+      case 'tiktok': {
+        const ttUrl = prompt('TikTok URL:');
+        if (ttUrl) placeholder = `<div class="yanci-atom-embed" data-type="tiktok" data-url="${ttUrl}" style="background:#000;color:#fff;padding:1.5rem;text-align:center;margin:1.5rem 0;border-radius:0.5rem;">[TIKTOK: ${ttUrl}]</div>`;
+        break;
+      }
+      case 'instagram': {
+        const igUrl = prompt('Instagram URL:');
+        if (igUrl) placeholder = `<div class="yanci-atom-embed" data-type="instagram" data-url="${igUrl}" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;padding:1.5rem;text-align:center;margin:1.5rem 0;border-radius:0.5rem;">[INSTAGRAM: ${igUrl}]</div>`;
+        break;
+      }
+      case 'table': {
+        const rows = parseInt(prompt('Number of rows:', '3')) || 3;
+        const cols = parseInt(prompt('Number of columns:', '3')) || 3;
+        let tableHtml = '<table style="width:100%;border-collapse:collapse;margin:1.5rem 0;"><thead><tr>';
+        for (let c = 0; c < cols; c++) tableHtml += `<th style="border:1px solid #ddd;padding:0.75rem;background:#f9f9f9;font-weight:bold;">Header ${c + 1}</th>`;
+        tableHtml += '</tr></thead><tbody>';
+        for (let r = 0; r < rows - 1; r++) {
+          tableHtml += '<tr>';
+          for (let c = 0; c < cols; c++) tableHtml += `<td style="border:1px solid #ddd;padding:0.75rem;">Cell</td>`;
+          tableHtml += '</tr>';
+        }
+        tableHtml += '</tbody></table>';
+        placeholder = tableHtml;
+        break;
+      }
+      case 'code': {
+        const code = prompt('Paste your code:');
+        if (code) {
+          const lang = prompt('Language (optional):', 'javascript') || '';
+          const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          placeholder = `<pre style="background:#1e1e1e;color:#d4d4d4;padding:1.5rem;border-radius:0.5rem;overflow-x:auto;font-family:monospace;font-size:0.875rem;margin:1.5rem 0;"><code class="language-${lang}">${escaped}</code></pre>`;
+        }
+        break;
+      }
+      case 'internal-link': {
+        setShowLinkPicker(true);
+        return;
+      }
       default: break;
     }
     if (placeholder) {
@@ -499,9 +608,14 @@ const AdminEditor = () => {
       [{ 'header': [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-      ['link', 'image', 'blockquote'],
+      ['link', 'image', 'blockquote', 'code-block'],
       ['clean'],
     ],
+    history: {
+      delay: 1000,
+      maxStack: 100,
+      userOnly: true,
+    },
   };
 
   // Sidebar panels
@@ -511,6 +625,7 @@ const AdminEditor = () => {
     { id: 'media',   label: 'Hoto',      icon: FaImage },
     { id: 'seo',     label: 'SEO',       icon: FaMagnifyingGlass },
     { id: 'social',  label: 'Yada',      icon: FaShareNodes },
+    { id: 'links',   label: 'Links',     icon: FaLink },
     { id: 'related', label: 'Dangane',   icon: FaNewspaper },
     { id: 'corrections', label: 'Gyara', icon: FaTriangleExclamation },
     ...(isEditing ? [{ id: 'history', label: 'History', icon: FaClockRotateLeft }] : []),
@@ -561,6 +676,13 @@ const AdminEditor = () => {
 
         <div className="flex items-center gap-2 md:gap-3">
           <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors hidden xl:flex"
+            title={isFullscreen ? 'Exit focus mode' : 'Focus mode'}
+          >
+            {isFullscreen ? <FaCompress className="w-4 h-4" /> : <FaExpand className="w-4 h-4" />}
+          </button>
+          <button
             onClick={() => setShowSidebar(!showSidebar)}
             className={`xl:hidden p-2 rounded-full transition-colors ${showSidebar ? 'bg-[#0f3036] text-white' : 'text-gray-500 hover:bg-gray-100'}`}
           >
@@ -574,23 +696,29 @@ const AdminEditor = () => {
             <FaEye /> <span className="hidden sm:inline">Preview</span>
           </button>
           <button
-            onClick={handleSave}
-            disabled={uploading || !isDirty}
+            onClick={() => {
+              if (formData.status === 'published' && !isEditing) {
+                setShowPublishConfirm(true);
+              } else {
+                handleSave();
+              }
+            }}
+            disabled={uploading || (!isDirty && formData.status !== 'published')}
             className={`p-2 sm:px-6 sm:py-2 rounded-full sm:rounded-md text-xs font-bold flex items-center gap-2 transition-all ${
-              isDirty ? 'bg-[#0f3036] text-white hover:bg-[#1a454c] shadow-md' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              isDirty || formData.status === 'published' ? 'bg-[#0f3036] text-white hover:bg-[#1a454c] shadow-md' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
             {uploading ? <FaSpinner className="animate-spin" /> : <FaFloppyDisk />}
-            <span className="hidden sm:inline">Save</span>
+            <span className="hidden sm:inline">{formData.status === 'published' ? 'Publish' : 'Save'}</span>
           </button>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className={`flex flex-1 overflow-hidden relative ${isFullscreen ? 'xl:mr-0' : ''}`}>
 
         {/* Editor Column */}
-        <main className="flex-1 overflow-y-auto bg-white p-4 md:p-8 lg:p-16 relative">
+        <main className={`flex-1 overflow-y-auto bg-white p-4 md:p-8 lg:p-16 relative transition-all ${isFullscreen ? 'max-w-4xl mx-auto' : ''}`}>
           <div className="max-w-[800px] mx-auto space-y-8 md:space-y-12">
 
             {/* Format badge picker (inline) */}
@@ -627,6 +755,16 @@ const AdminEditor = () => {
               onChange={handleChange}
               className="w-full text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#c70000] border-none focus:ring-0 p-0 placeholder-gray-300"
               placeholder="ADD KICKER / CATEGORY"
+            />
+
+            {/* Subheading / Deck */}
+            <input
+              type="text"
+              name="subheading"
+              value={formData.subheading}
+              onChange={handleChange}
+              className="w-full text-lg md:text-xl font-serif text-gray-500 border-none focus:ring-0 p-0 placeholder-gray-200"
+              placeholder="Subheading / deck (optional)..."
             />
 
             {/* Headline + char counter */}
@@ -705,21 +843,49 @@ const AdminEditor = () => {
           <div className="fixed bottom-6 right-4 sm:bottom-10 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 md:left-auto md:translate-x-0 md:right-[360px] z-40">
             <div className="relative">
               {showComponentMenu && (
-                <div className="absolute bottom-full mb-4 right-0 sm:left-1/2 sm:-translate-x-1/2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 min-w-[200px]">
+                <div className="absolute bottom-full mb-4 right-0 sm:left-1/2 sm:-translate-x-1/2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 min-w-[220px] max-h-[80vh] overflow-y-auto">
                   <p className="text-[10px] font-bold uppercase text-gray-400 px-4 py-2">Ƙara Abun Ciki</p>
+
+                  <p className="text-[9px] font-bold uppercase text-gray-300 px-4 py-1">Rich Content</p>
                   {[
                     { type: 'map',       icon: FaMapLocationDot, label: 'Taswirar Wuri',  color: 'text-blue-500' },
                     { type: 'quote',     icon: FaQuoteLeft,       label: 'Maganar Zance', color: 'text-[#c59d5f]' },
                     { type: 'highlight', icon: FaCircleInfo,       label: 'Muhimmin Bayani', color: 'text-amber-500' },
+                    { type: 'table',     icon: FaTable,            label: 'Teburin Bayanai', color: 'text-gray-600' },
+                    { type: 'code',      icon: FaCode,             label: 'Code Block', color: 'text-green-600' },
                   ].map(item => (
                     <button
                       key={item.type}
                       onClick={() => insertComponent(item.type)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-sm transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 rounded-xl text-sm transition-colors text-left"
                     >
                       <item.icon className={item.color} /> {item.label}
                     </button>
                   ))}
+
+                  <p className="text-[9px] font-bold uppercase text-gray-300 px-4 py-1 mt-1">Embed Media</p>
+                  {[
+                    { type: 'youtube',    icon: FaYoutube,    label: 'YouTube',       color: 'text-red-600' },
+                    { type: 'twitter',    icon: FaXTwitter,   label: 'Twitter / X',   color: 'text-gray-800' },
+                    { type: 'tiktok',     icon: FaTiktok,     label: 'TikTok',        color: 'text-pink-600' },
+                    { type: 'instagram',  icon: FaInstagram,  label: 'Instagram',     color: 'text-purple-600' },
+                  ].map(item => (
+                    <button
+                      key={item.type}
+                      onClick={() => insertComponent(item.type)}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 rounded-xl text-sm transition-colors text-left"
+                    >
+                      <item.icon className={item.color} /> {item.label}
+                    </button>
+                  ))}
+
+                  <p className="text-[9px] font-bold uppercase text-gray-300 px-4 py-1 mt-1">Links</p>
+                  <button
+                    onClick={() => insertComponent('internal-link')}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 rounded-xl text-sm transition-colors text-left"
+                  >
+                    <FaLink className="text-blue-500" /> Internal Link
+                  </button>
                 </div>
               )}
               <button
@@ -1288,9 +1454,124 @@ const AdminEditor = () => {
               />
             )}
 
+            {/* ── INTERNAL LINKS PANEL ── */}
+            {activePanel === 'links' && (
+              <div className="space-y-3">
+                <p className="text-[10px] text-gray-500">Search and link to existing articles.</p>
+                <input
+                  type="text"
+                  value={linkSearch}
+                  onChange={e => setLinkSearch(e.target.value)}
+                  placeholder="Search articles..."
+                  className="w-full text-xs p-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#c59d5f]"
+                />
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {linkSuggestions.map(a => (
+                    <button
+                      key={a.$id || a.id}
+                      onClick={() => insertInternalLink(a)}
+                      className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-xs group"
+                    >
+                      <FaLink className="text-gray-300 group-hover:text-[#c59d5f] w-2.5 h-2.5 shrink-0" />
+                      <span className="line-clamp-1 text-gray-700">{a.headline}</span>
+                    </button>
+                  ))}
+                  {linkSuggestions.length === 0 && (
+                    <p className="text-center text-[11px] text-gray-400 py-3">No articles found</p>
+                  )}
+                </div>
+              </div>
+            )}
+
           </div>
         </aside>
       </div>
+
+      {/* Internal Link Picker Modal */}
+      {showLinkPicker && (
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" onClick={() => { setShowLinkPicker(false); setLinkSearch(''); }}>
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h3 className="font-bold text-sm flex items-center gap-2"><FaLink className="text-[#c59d5f]" /> Insert Internal Link</h3>
+              <button onClick={() => { setShowLinkPicker(false); setLinkSearch(''); }} className="text-gray-400 hover:text-gray-600"><FaXmark className="w-4 h-4" /></button>
+            </div>
+            <div className="p-4">
+              <input
+                type="text"
+                value={linkSearch}
+                onChange={e => setLinkSearch(e.target.value)}
+                placeholder="Search articles..."
+                className="w-full text-sm p-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#c59d5f]"
+                autoFocus
+              />
+              <div className="mt-3 space-y-1 max-h-64 overflow-y-auto">
+                {linkSuggestions.map(a => (
+                  <button
+                    key={a.$id || a.id}
+                    onClick={() => insertInternalLink(a)}
+                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-sm group"
+                  >
+                    <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center shrink-0">
+                      <FaNewspaper className="w-3.5 h-3.5 text-gray-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 line-clamp-1">{a.headline}</p>
+                      <p className="text-[10px] text-gray-400">{a.section || a.pillar} · {a.author}</p>
+                    </div>
+                  </button>
+                ))}
+                {linkSuggestions.length === 0 && (
+                  <p className="text-center text-sm text-gray-400 py-6">No articles found</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish Confirmation Modal */}
+      {showPublishConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" onClick={() => setShowPublishConfirm(false)}>
+          <div className="bg-white rounded-xl max-w-sm w-full shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <FaFileCirclePlus className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900">Publish Article</h3>
+                <p className="text-xs text-gray-500">This article will be visible to readers</p>
+              </div>
+            </div>
+
+            {/* SEO Checklist */}
+            <div className="space-y-2 mb-6 p-3 bg-gray-50 rounded-lg">
+              <p className="text-[10px] font-bold text-gray-500 uppercase">Pre-publish checklist</p>
+              {[
+                { ok: !!formData.headline, label: 'Headline is set' },
+                { ok: !!formData.trail, label: 'Trail/summary is set' },
+                { ok: !!formData.image, label: 'Featured image is set' },
+                { ok: !!formData.tags, label: 'Tags are added' },
+                { ok: (formData.metaTitle || formData.headline).length <= 60, label: 'Meta title ≤ 60 chars' },
+                { ok: (formData.metaDescription || formData.trail).length <= 160, label: 'Meta description ≤ 160 chars' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  {item.ok ? <FaCheck className="w-3 h-3 text-green-500" /> : <FaXmark className="w-3 h-3 text-red-400" />}
+                  <span className={item.ok ? 'text-gray-700' : 'text-gray-400'}>{item.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setShowPublishConfirm(false)} className="flex-1 px-4 py-2.5 text-sm font-bold text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">
+                Review
+              </button>
+              <button onClick={() => { setShowPublishConfirm(false); handleSave(); }} className="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-[#0f3036] rounded-lg hover:bg-[#1a454c]">
+                Publish Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CSS Overrides */}
       <style>{`
@@ -1309,7 +1590,12 @@ const AdminEditor = () => {
         .composer-editor .ql-editor h1 { font-family: 'Playfair Display', serif; font-weight: 900; }
         .composer-editor .ql-editor h2 { font-family: 'Playfair Display', serif; font-weight: 800; }
         .composer-editor .ql-editor h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+        .composer-editor .ql-editor pre.ql-syntax { background: #1e1e1e; color: #d4d4d4; padding: 1.5rem; border-radius: 0.5rem; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; margin: 1.5rem 0; }
+        .composer-editor .ql-editor table { border-collapse: collapse; width: 100%; margin: 1.5rem 0; }
+        .composer-editor .ql-editor table td, .composer-editor .ql-editor table th { border: 1px solid #ddd; padding: 0.75rem; }
+        .composer-editor .ql-editor table th { background: #f9f9f9; font-weight: bold; }
         .yanci-atom-map { background: #f0f9ff; border: 2px dashed #0ea5e9; color: #0369a1; padding: 1.5rem; text-align: center; font-weight: bold; margin: 1.5rem 0; border-radius: 0.5rem; font-size: 0.875rem; }
+        .yanci-atom-embed { padding: 1.5rem; text-align: center; margin: 1.5rem 0; border-radius: 0.5rem; font-weight: bold; font-size: 0.875rem; }
       `}</style>
     </div>
   );
