@@ -218,7 +218,11 @@ const LiveArticlePage = () => {
                     </div>
                   )}
                   <div className="prose prose-lg max-w-none text-gray-800 font-serif leading-relaxed">
-                    <EmbedRenderer content={pinnedPost.content} />
+                    {pinnedPost.content ? (
+                      <div dangerouslySetInnerHTML={{ __html: pinnedPost.content }} />
+                    ) : (
+                      <EmbedRenderer content={pinnedPost.content} />
+                    )}
                   </div>
                   <div className="mt-4 pt-4 border-t border-[#cc0000]/10 flex items-center justify-between">
                     <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Daga {pinnedPost.author || 'Edita'}</span>
@@ -258,7 +262,11 @@ const LiveArticlePage = () => {
                       </div>
                     )}
                     <div className="prose prose-lg max-w-none text-gray-800 font-serif leading-relaxed">
-                      <EmbedRenderer content={event.content} />
+                      {event.content ? (
+                        <div dangerouslySetInnerHTML={{ __html: event.content }} />
+                      ) : (
+                        <EmbedRenderer content={event.content} />
+                      )}
                     </div>
                     <footer className="mt-4 pt-4 flex items-center justify-between border-t border-transparent group-hover:border-gray-100 transition-colors">
                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
