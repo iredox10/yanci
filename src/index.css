@@ -468,3 +468,121 @@ html {
     animation: none;
   }
 }
+
+/* ─── Print Styles ─────────────────────────────────────────────────────────── */
+@media print {
+  /* Hide everything by default */
+  nav, header, footer, aside, .no-print,
+  .audio-player, .ad-slot, .comments-section,
+  .trending-widget, .notification-prompt,
+  [role="navigation"], [role="complementary"],
+  .skip-to-content {
+    display: none !important;
+  }
+
+  /* Reset body and page */
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* Article content */
+  .article-content, .yanci-article-body {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Show article headline prominently */
+  h1, .article-headline {
+    font-size: 24pt !important;
+    margin-bottom: 0.5rem !important;
+    page-break-after: avoid;
+  }
+
+  /* Show author and date */
+  .article-meta {
+    display: block !important;
+    font-size: 10pt;
+    color: #666;
+    margin-bottom: 1rem;
+    page-break-after: avoid;
+  }
+
+  /* Article body */
+  .yanci-article-body p {
+    font-size: 12pt;
+    line-height: 1.6;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Images */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Blockquotes */
+  blockquote {
+    border-left: 3px solid #333;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    page-break-inside: avoid;
+  }
+
+  /* Links - show URL after link text */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+    word-break: break-all;
+  }
+
+  /* Don't show URL for internal links */
+  a[href^="/"]::after {
+    content: "";
+  }
+
+  /* Page breaks */
+  h2, h3 {
+    page-break-after: avoid;
+  }
+
+  /* Add print header */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 10pt;
+    color: #666;
+  }
+
+  /* Show URL at bottom of page */
+  .print-url {
+    display: block !important;
+    text-align: center;
+    font-size: 9pt;
+    color: #999;
+    margin-top: 2rem;
+    border-top: 1px solid #ccc;
+    padding-top: 0.5rem;
+  }
+}
+
+/* Print-only elements (hidden on screen) */
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block !important;
+  }
+}

@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { usePermissions, ROLE_LABELS } from '../../hooks/usePermissions';
 import {
   FaChartPie,
   FaFileLines,
@@ -24,14 +25,27 @@ import {
   FaPalette,
   FaShieldHalved,
   FaUserShield,
-  FaUserGear,
   FaUser,
+  FaCalendarDays,
 } from 'react-icons/fa6';
+
+const NavItem = ({ to, icon: Icon, label, active, permission, hasPermission }) => {
+  if (permission && !hasPermission(permission)) return null;
+  return (
+    <Link
+      to={to}
+      className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${active ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
+    >
+      <Icon className="w-5 h-5" /> {label}
+    </Link>
+  );
+};
 
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, loading } = useAuth();
+  const { hasPermission } = usePermissions();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -40,7 +54,6 @@ const AdminLayout = () => {
     }
   }, [user, navigate, loading]);
 
-  // Close sidebar on navigation (mobile)
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [location.pathname]);
@@ -55,9 +68,10 @@ const AdminLayout = () => {
   if (loading) return <div className="min-h-screen bg-[#0f3036] flex items-center justify-center"><p className="text-white">Loading...</p></div>;
   if (!user) return null;
 
+  const roleLabel = ROLE_LABELS[user?.role] || user?.category || 'Editor';
+
   return (
     <div className="flex h-screen bg-gray-100 font-sans overflow-hidden">
-      {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300"
@@ -65,7 +79,6 @@ const AdminLayout = () => {
         />
       )}
 
-      {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-[#0f3036] text-white flex flex-col shrink-0 transition-transform duration-300 transform
         lg:relative lg:translate-x-0
@@ -79,7 +92,7 @@ const AdminLayout = () => {
             <div className="mt-2 text-xs text-gray-400">
               Logged in as <br />
               <span className="font-bold text-white text-sm">{user.name}</span>
-              {user.role && <span className="block text-[#c59d5f] capitalize">{user.role === 'super_admin' ? 'Super Admin' : `${user.category || 'General'} Editor`}</span>}
+              <span className="block text-[#c59d5f] capitalize">{roleLabel}</span>
             </div>
           </div>
           <button
@@ -90,142 +103,33 @@ const AdminLayout = () => {
           </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <Link
-            to="/admin"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaChartPie className="w-5 h-5" /> Dashboard
-          </Link>
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <NavItem to="/admin" icon={FaChartPie} label="Dashboard" active={isActive('/admin')} hasPermission={hasPermission} />
+          <NavItem to="/admin/articles" icon={FaFileLines} label="Articles" active={isActive('/admin/articles')} hasPermission={hasPermission} permission="read_articles" />
+          <NavItem to="/admin/calendar" icon={FaCalendarDays} label="Calendar" active={isActive('/admin/calendar')} hasPermission={hasPermission} permission="read_articles" />
+          <NavItem to="/admin/live" icon={FaTowerBroadcast} label="Live Coverage" active={isActive('/admin/live')} hasPermission={hasPermission} permission="manage_live_blog" />
+          <NavItem to="/admin/elections" icon={FaCheckToSlot} label="Elections" active={location.pathname.startsWith('/admin/elections')} hasPermission={hasPermission} permission="manage_elections" />
+          <NavItem to="/admin/media" icon={FaImage} label="Media Library" active={isActive('/admin/media')} hasPermission={hasPermission} permission="manage_media" />
+          <NavItem to="/admin/multimedia" icon={FaPhotoFilm} label="Multimedia" active={isActive('/admin/multimedia')} hasPermission={hasPermission} permission="manage_media" />
+          <NavItem to="/admin/sports" icon={FaTrophy} label="Sports" active={location.pathname.startsWith('/admin/sports')} hasPermission={hasPermission} permission="manage_sports" />
+          <NavItem to="/admin/highlights" icon={FaStar} label="Highlight Panels" active={isActive('/admin/highlights')} hasPermission={hasPermission} permission="manage_highlights" />
+          <NavItem to="/admin/newsletter" icon={FaNewspaper} label="Newsletter" active={isActive('/admin/newsletter')} hasPermission={hasPermission} permission="manage_newsletter" />
+          <NavItem to="/admin/comments" icon={FaComment} label="Comments" active={isActive('/admin/comments')} hasPermission={hasPermission} permission="manage_comments" />
+          <NavItem to="/admin/analytics" icon={FaChartLine} label="Analytics" active={isActive('/admin/analytics')} hasPermission={hasPermission} permission="view_analytics" />
+          <NavItem to="/admin/homepage-stats" icon={FaChartLine} label="Homepage Stats" active={isActive('/admin/homepage-stats')} hasPermission={hasPermission} permission="manage_layout" />
+          <NavItem to="/admin/homepage" icon={FaPalette} label="Homepage Builder" active={isActive('/admin/homepage')} hasPermission={hasPermission} permission="manage_layout" />
+          <NavItem to="/admin/seo" icon={FaShieldHalved} label="SEO & Metadata" active={isActive('/admin/seo')} hasPermission={hasPermission} permission="manage_seo" />
+          <NavItem to="/admin/notifications" icon={FaBell} label="Notifications" active={isActive('/admin/notifications')} hasPermission={hasPermission} permission="manage_notifications" />
 
-          <Link
-            to="/admin/articles"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/articles') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaFileLines className="w-5 h-5" /> Articles
-          </Link>
+          <div className="pt-2 pb-1 px-4 text-[10px] font-bold uppercase tracking-widest text-white/30">Administration</div>
 
-          <Link
-            to="/admin/live"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/live') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaTowerBroadcast className="w-5 h-5" /> Live Coverage
-          </Link>
+          <NavItem to="/admin/users" icon={FaUsers} label="Users" active={isActive('/admin/users')} hasPermission={hasPermission} permission="manage_users" />
+          <NavItem to="/admin/roles" icon={FaUserShield} label="Roles & Permissions" active={isActive('/admin/roles')} hasPermission={hasPermission} permission="manage_roles" />
+          <NavItem to="/admin/settings" icon={FaGear} label="Settings" active={isActive('/admin/settings')} hasPermission={hasPermission} permission="manage_settings" />
 
-          <Link
-            to="/admin/elections"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${location.pathname.startsWith('/admin/elections') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaCheckToSlot className="w-5 h-5" /> Elections
-          </Link>
+          <div className="pt-2 pb-1 px-4 text-[10px] font-bold uppercase tracking-widest text-white/30">Content</div>
 
-          <Link
-            to="/admin/media"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/media') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaImage className="w-5 h-5" /> Media Library
-          </Link>
-
-          <Link
-            to="/admin/multimedia"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/multimedia') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaPhotoFilm className="w-5 h-5" /> Multimedia
-          </Link>
-
-          <Link
-            to="/admin/sports"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${location.pathname.startsWith('/admin/sports') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaTrophy className="w-5 h-5" /> Sports
-          </Link>
-
-          <Link
-            to="/admin/highlights"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/highlights') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaStar className="w-5 h-5" /> Highlight Panels
-          </Link>
-
-          <Link
-            to="/admin/newsletter"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/newsletter') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaNewspaper className="w-5 h-5" /> Newsletter
-          </Link>
-
-          <Link
-            to="/admin/comments"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/comments') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaComment className="w-5 h-5" /> Comments
-          </Link>
-
-          <Link
-            to="/admin/analytics"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/analytics') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaChartLine className="w-5 h-5" /> Analytics
-          </Link>
-
-          <Link
-            to="/admin/homepage-stats"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/homepage-stats') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaChartLine className="w-5 h-5" /> Homepage Stats
-          </Link>
-
-          <Link
-            to="/admin/homepage"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/homepage') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaPalette className="w-5 h-5" /> Homepage Builder
-          </Link>
-
-          <Link
-            to="/admin/seo"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/seo') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaShieldHalved className="w-5 h-5" /> SEO & Metadata
-          </Link>
-
-          <Link
-            to="/admin/notifications"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/notifications') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaBell className="w-5 h-5" /> Notifications
-          </Link>
-
-          {user.role === 'super_admin' && (
-            <>
-              <Link
-                to="/admin/users"
-                className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/users') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-              >
-                <FaUsers className="w-5 h-5" /> Users
-              </Link>
-              <Link
-                to="/admin/roles"
-                className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/roles') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-              >
-                <FaUserShield className="w-5 h-5" /> Roles & Permissions
-              </Link>
-            </>
-          )}
-
-          <Link
-            to="/admin/create"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/create') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaCirclePlus className="w-5 h-5" /> New Article
-          </Link>
-
-          <Link
-            to="/admin/settings"
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/settings') ? 'bg-[#c59d5f] text-[#0f3036] font-bold' : 'hover:bg-white/10'}`}
-          >
-            <FaGear className="w-5 h-5" /> Settings
-          </Link>
+          <NavItem to="/admin/create" icon={FaCirclePlus} label="New Article" active={isActive('/admin/create')} hasPermission={hasPermission} permission="create_articles" />
         </nav>
 
         <div className="p-4 border-t border-white/10 space-y-2">
@@ -241,9 +145,7 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
-        {/* Mobile Header */}
         <header className="lg:hidden bg-[#0f3036] text-white px-4 h-16 flex items-center justify-between shrink-0 shadow-md z-30">
           <button
             className="p-2 hover:bg-white/10 rounded-md transition-colors"
@@ -259,7 +161,6 @@ const AdminLayout = () => {
           </div>
         </header>
 
-        {/* Scrollable Content Container */}
         <main className="flex-1 flex flex-col min-w-0 bg-gray-50 h-full overflow-hidden">
           <Outlet />
         </main>

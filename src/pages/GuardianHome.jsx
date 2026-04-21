@@ -28,6 +28,9 @@ import {
 import { useState, useEffect, useRef } from 'react';
 import GuardianFooter from '../components/guardian/GuardianFooter';
 import GuardianNav from '../components/guardian/GuardianNav';
+import BreakingNewsBanner from '../components/BreakingNewsBanner';
+import WhatsAppTipLine from '../components/WhatsAppTipLine';
+import LazyImage from '../components/LazyImage';
 import NewsCard from '../components/guardian/NewsCard';
 import OpinionCard from '../components/guardian/OpinionCard';
 import SectionContainer from '../components/guardian/SectionContainer';
@@ -241,6 +244,7 @@ const GuardianHome = () => {
     <div className="bg-[#fafaf9] min-h-screen font-sans text-[#1c1917] selection:bg-[#c59d5f] selection:text-white overflow-x-hidden">
       <SEO />
       <GuardianNav />
+      <BreakingNewsBanner />
 
       <main className="relative" id="main-content" role="main" aria-label="Babban ciki">
         {/* Breaking News Ticker */}
@@ -1074,6 +1078,7 @@ const GuardianHome = () => {
 
       <GuardianFooter />
       <NotificationPrompt />
+      <WhatsAppTipLine />
     </div>
   );
 };

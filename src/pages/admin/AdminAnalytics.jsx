@@ -1,13 +1,38 @@
 import { useState, useMemo, useEffect } from 'react';
-import { FaChartLine, FaEye, FaArrowTrendUp, FaUsers, FaFileLines, FaClock, FaGlobe, FaChevronUp, FaChevronDown, FaMagnifyingGlass } from 'react-icons/fa6';
+import { FaChartLine, FaEye, FaArrowTrendUp, FaUsers, FaFileLines, FaClock, FaGlobe, FaChevronUp, FaChevronDown, FaMagnifyingGlass, FaSpinner } from 'react-icons/fa6';
 import { useNews } from '../../context/NewsContext';
 import { useViewTracker } from '../../hooks/useViewTracker';
+import { appwriteService } from '../../lib/appwrite';
 
 const AdminAnalytics = () => {
   const { articles } = useNews();
   const { getMostRead, getTotalViews } = useViewTracker();
   const [timeRange, setTimeRange] = useState('7d');
   const [sortBy, setSortBy] = useState('views');
+  const [backendStats, setBackendStats] = useState({ totalViews: 0, uniqueVisitors: 0, viewsByDate: [], mostRead: [], viewsBySection: [] });
+  const [loadingBackend, setLoadingBackend] = useState(true);
+
+  // Load backend analytics
+  useEffect(() => {
+    const load = async () => {
+      setLoadingBackend(true);
+      try {
+        const [totalViews, uniqueVisitors, viewsByDate, mostRead, viewsBySection] = await Promise.all([
+          appwriteService.getTotalViews(),
+          appwriteService.getUniqueVisitors(),
+          appwriteService.getViewsByDateRange(
+            new Date(Date.now() - (timeRange === '24h' ? 1 : timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90) * 24 * 60 * 60 * 1000),
+            new Date()
+          ),
+          appwriteService.getMostReadArticles(10),
+          appwriteService.getViewsBySection(),
+        ]);
+        setBackendStats({ totalViews, uniqueVisitors, viewsByDate, mostRead, viewsBySection });
+      } catch (e) { console.error('Failed to load backend analytics:', e); }
+      finally { setLoadingBackend(false); }
+    };
+    load();
+  }, [timeRange]);
 
   // Guard against undefined articles - memoized to avoid re-creation on every render
   const safeArticles = useMemo(() => articles || [], [articles]);

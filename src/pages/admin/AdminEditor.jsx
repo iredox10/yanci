@@ -3,6 +3,7 @@ import { useNews } from '../../context/NewsContext';
 import { useAuth } from '../../context/AuthContext';
 import { appwriteService } from '../../lib/appwrite';
 import { useNavigate, useParams } from 'react-router-dom';
+import RevisionHistory from '../../components/RevisionHistory';
 import {
   FaFloppyDisk,
   FaArrowLeft,
@@ -30,9 +31,13 @@ import {
   FaXmark,
   FaImage,
   FaCircleDot,
+  FaBolt,
+  FaRotateLeft,
+  FaClockRotateLeft,
 } from 'react-icons/fa6';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import { CorrectionsEditor } from '../../components/Corrections';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -370,10 +375,38 @@ const AdminEditor = () => {
 
   const handleSave = useCallback(async () => {
     try {
+      // Check scheduled publishing: if publishAt is in the past, auto-set to published
+      let dataToSave = { ...formData };
+      if (dataToSave.status === 'scheduled' && dataToSave.publishAt) {
+        const publishTime = new Date(dataToSave.publishAt).getTime();
+        if (Date.now() >= publishTime) {
+          dataToSave.status = 'published';
+        }
+      }
+
       if (isEditing) {
-        await updateArticle(id, formData);
+        // Save revision before updating
+        try {
+          const currentArticle = articles.find(a => a.$id === id || a.id === id);
+          if (currentArticle) {
+            const diff = computeDiff(currentArticle, dataToSave);
+            if (Object.keys(diff).length > 0) {
+              await appwriteService.createRevision({
+                article_id: id,
+                author_id: user?.id || '',
+                author_name: user?.name || '',
+                diff: JSON.stringify(diff),
+                snapshot: JSON.stringify(currentArticle),
+                change_type: 'edit',
+                message: 'Auto-saved revision',
+              });
+            }
+          }
+        } catch (e) { console.warn('Failed to save revision:', e); }
+
+        await updateArticle(id, dataToSave);
       } else {
-        const newId = await addArticle(formData);
+        const newId = await addArticle(dataToSave);
         if (newId) navigate(`/admin/edit/${newId}`, { replace: true });
       }
       setLastSaved(new Date());
@@ -381,7 +414,23 @@ const AdminEditor = () => {
     } catch (error) {
       console.error('Failed to save article:', error);
     }
-  }, [isEditing, id, formData, updateArticle, addArticle, navigate]);
+  }, [isEditing, id, formData, updateArticle, addArticle, navigate, user, articles]);
+
+  // Compute diff between old and new article
+  const computeDiff = (oldArticle, newArticle) => {
+    const diff = { added: [], removed: [], changed: [] };
+    const fields = ['headline', 'kicker', 'trail', 'body', 'status', 'tags', 'section', 'pillar'];
+    for (const field of fields) {
+      const oldVal = oldArticle[field];
+      const newVal = newArticle[field];
+      if (oldVal !== newVal) {
+        if (oldVal == null || oldVal === '') diff.added.push(field);
+        else if (newVal == null || newVal === '') diff.removed.push(field);
+        else diff.changed.push(field);
+      }
+    }
+    return diff;
+  };
 
   // Auto-save
   useEffect(() => {
@@ -463,6 +512,8 @@ const AdminEditor = () => {
     { id: 'seo',     label: 'SEO',       icon: FaMagnifyingGlass },
     { id: 'social',  label: 'Yada',      icon: FaShareNodes },
     { id: 'related', label: 'Dangane',   icon: FaNewspaper },
+    { id: 'corrections', label: 'Gyara', icon: FaTriangleExclamation },
+    ...(isEditing ? [{ id: 'history', label: 'History', icon: FaClockRotateLeft }] : []),
   ];
 
   const currentSections = PILLAR_SECTIONS[formData.pillar] || PILLAR_SECTIONS.news;
@@ -904,7 +955,65 @@ const AdminEditor = () => {
                     )}
                   </div>
                 )}
+
+                {/* Breaking News Toggle */}
+                <div className="pt-3 border-t border-gray-100 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <FaBolt className="text-red-500" /> Breaking News
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, is_breaking: !prev.is_breaking }))}
+                      className={`relative w-10 h-5 rounded-full transition-colors ${formData.is_breaking ? 'bg-red-600' : 'bg-gray-300'}`}
+                      role="switch"
+                      aria-checked={formData.is_breaking}
+                      aria-label="Toggle breaking news"
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${formData.is_breaking ? 'translate-x-5' : ''}`} />
+                    </button>
+                  </div>
+                  {formData.is_breaking && (
+                    <div className="space-y-1.5">
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">Duration (hours)</label>
+                      <select
+                        value={formData.breaking_duration || 24}
+                        onChange={e => {
+                          const hours = parseInt(e.target.value);
+                          const until = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+                          setFormData(prev => ({ ...prev, breaking_duration: hours, breaking_until: until }));
+                        }}
+                        className="w-full text-sm p-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none"
+                      >
+                        <option value={1}>1 hour</option>
+                        <option value={3}>3 hours</option>
+                        <option value={6}>6 hours</option>
+                        <option value={12}>12 hours</option>
+                        <option value={24}>24 hours</option>
+                        <option value={48}>48 hours</option>
+                      </select>
+                      <p className="text-[10px] text-red-500 font-bold">
+                        Active until: {formData.breaking_until ? new Date(formData.breaking_until).toLocaleString() : 'Not set'}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </>
+            )}
+
+            {/* ── REVISION HISTORY PANEL ── */}
+            {activePanel === 'history' && isEditing && (
+              <RevisionHistory
+                articleId={id}
+                currentData={formData}
+                onRestore={(snapshot) => {
+                  try {
+                    const data = typeof snapshot === 'string' ? JSON.parse(snapshot) : snapshot;
+                    setFormData(prev => ({ ...prev, ...data }));
+                    setIsDirty(true);
+                  } catch (e) { console.error('Failed to restore revision:', e); }
+                }}
+              />
             )}
 
             {/* ── MEDIA PANEL ── */}
@@ -1169,6 +1278,14 @@ const AdminEditor = () => {
                   onChange={(v) => { setFormData(p => ({ ...p, relatedArticles: v })); setIsDirty(true); }}
                 />
               </>
+            )}
+
+            {/* ── CORRECTIONS PANEL ── */}
+            {activePanel === 'corrections' && (
+              <CorrectionsEditor
+                value={formData.corrections || []}
+                onChange={(v) => { setFormData(p => ({ ...p, corrections: v })); setIsDirty(true); }}
+              />
             )}
 
           </div>

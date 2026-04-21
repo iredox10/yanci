@@ -24,6 +24,10 @@ import AdSlot from '../components/AdSlot';
 import CommentsSection from '../components/CommentsSection';
 import { useViewTracker } from '../hooks/useViewTracker';
 import { useAnalytics } from '../hooks/useAnalytics';
+import RelatedArticles from '../components/RelatedArticles';
+import LazyImage from '../components/LazyImage';
+import { CorrectionsDisplay } from '../components/Corrections';
+import { appwriteService } from '../lib/appwrite';
 
 // Import Atoms
 import MapAtom from '../components/guardian/atoms/MapAtom';
@@ -84,6 +88,14 @@ const ArticlePage = () => {
     if (article?.id) {
       trackView(article.id);
       trackArticleView(article);
+      // Track in Appwrite (backend analytics)
+      appwriteService.trackView({
+        articleId: article.$id || article.id,
+        sessionId: sessionStorage.getItem('yanci_session') || '',
+        referrer: document.referrer || null,
+        section: article.section || article.pillar || null,
+        device: /mobile/i.test(navigator.userAgent) ? 'mobile' : /tablet/i.test(navigator.userAgent) ? 'tablet' : 'desktop',
+      });
     }
   }, [article, trackView, trackArticleView]);
 
@@ -379,6 +391,9 @@ const ArticlePage = () => {
           {/* Inline Ad Unit */}
           <AdSlot variant="inline" />
 
+          {/* Corrections & Clarifications */}
+          <CorrectionsDisplay corrections={article.corrections} className="mb-8" />
+
           {/* Comments Section */}
           <CommentsSection articleId={article.id} />
 
@@ -387,31 +402,11 @@ const ArticlePage = () => {
         {/* RELATED SECTION - MOVED TO BOTTOM */}
         <section className="bg-gray-50 py-20 mt-24 border-t border-gray-200">
           <div className="max-w-[1240px] mx-auto px-5 md:px-6">
-            <div className="flex items-center justify-between mb-12">
-              <h3 className="text-2xl font-black font-serif text-[#121212]">
-                More Stories
-              </h3>
-              <Link to="/" className="text-xs font-bold font-sans uppercase tracking-widest text-[#c70000] hover:underline flex items-center gap-2">
-                View All <FaArrowUp className="rotate-90" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-              {relatedArticles.map(item => (
-                <Link key={item.id} to={`/article/${item.id}`} className="group block h-full">
-                  <div className="aspect-[3/2] bg-gray-200 mb-5 overflow-hidden relative rounded-sm shadow-sm">
-                    <img src={item.image} alt={item.headline} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                    {item.pillar === 'music' && <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors"><FaPlay className="text-white w-10 h-10 drop-shadow-md" /></div>}
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <span className="text-[10px] font-bold font-sans uppercase tracking-widest text-[#c70000]">{item.section || "News"}</span>
-                    <h4 className="font-serif font-bold text-xl leading-tight group-hover:text-[#c70000] transition-colors line-clamp-3">
-                      {item.headline}
-                    </h4>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <RelatedArticles
+              currentArticle={article}
+              allArticles={articles}
+              limit={4}
+            />
           </div>
         </section>
 

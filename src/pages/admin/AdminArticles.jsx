@@ -25,6 +25,7 @@ const AdminArticles = () => {
   const [selected, setSelected] = useState(new Set());
   const [bulkAction, setBulkAction] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterReview, setFilterReview] = useState('all'); // all | pending | approved | rejected
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
 
   // Filter by user category
@@ -33,9 +34,14 @@ const AdminArticles = () => {
     : articles;
 
   // Filter by status tab
-  const relevantArticles = filterStatus === 'all'
+  let relevantArticles = filterStatus === 'all'
     ? ownedArticles
     : ownedArticles.filter(a => (a.status || 'published') === filterStatus);
+
+  // Filter by review status
+  if (filterReview !== 'all') {
+    relevantArticles = relevantArticles.filter(a => (a.review_status || 'approved') === filterReview);
+  }
 
   // Selection helpers
   const allSelected = relevantArticles.length > 0 && relevantArticles.every(a => selected.has(String(a.id)));
@@ -146,6 +152,34 @@ const AdminArticles = () => {
             </span>
           </button>
         ))}
+      </div>
+
+      {/* Review status filter */}
+      <div className="flex items-center gap-2 mt-3">
+        <span className="text-xs font-bold text-gray-500">Review:</span>
+        {[
+          { key: 'all', label: 'All' },
+          { key: 'pending', label: 'Pending' },
+          { key: 'approved', label: 'Approved' },
+          { key: 'rejected', label: 'Rejected' },
+        ].map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => setFilterReview(key)}
+            className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${
+              filterReview === key
+                ? key === 'pending' ? 'bg-amber-100 text-amber-800' : key === 'approved' ? 'bg-green-100 text-green-800' : key === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-[#0f3036] text-white'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+        {filterReview === 'pending' && (
+          <span className="text-[10px] font-black text-amber-600 ml-1">
+            {relevantArticles.length} need{relevantArticles.length !== 1 ? '' : 's'} review
+          </span>
+        )}
       </div>
 
       {/* Bulk Action Bar */}

@@ -14,6 +14,8 @@ export const COLLECTION_ID_HOMEPAGE_LAYOUT = import.meta.env.VITE_APPWRITE_COLLE
 export const COLLECTION_ID_SETTINGS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_SETTINGS;
 export const COLLECTION_ID_ROLES = import.meta.env.VITE_APPWRITE_COLLECTION_ID_ROLES;
 export const COLLECTION_ID_INVITATIONS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_INVITATIONS;
+export const COLLECTION_ID_REVISIONS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_REVISIONS;
+export const COLLECTION_ID_VIEWS = import.meta.env.VITE_APPWRITE_COLLECTION_ID_VIEWS;
 export const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET_ID;
 export const ENDPOINT = import.meta.env.VITE_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
 
@@ -441,6 +443,97 @@ export const appwriteService = {
             const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_INVITATIONS, [Query.equal('token', token), Query.limit(1)]);
             return response.documents[0] || null;
         } catch { return null; }
+    },
+
+    // ─── Article Revisions CRUD ──────────────────────────────────────────────
+    getRevisions: async (articleId) => {
+        try {
+            if (!COLLECTION_ID_REVISIONS) return [];
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_REVISIONS, [Query.equal('article_id', articleId), Query.orderDesc('$createdAt'), Query.limit(50)]);
+            return response.documents;
+        } catch { return []; }
+    },
+    createRevision: async (data) => {
+        try {
+            return await databases.createDocument(DATABASE_ID, COLLECTION_ID_REVISIONS, ID.unique(), data);
+        } catch (error) { console.error("AppwriteService :: createRevision :: error", error); throw error; }
+    },
+
+    // ─── Article Views (Backend Analytics) ───────────────────────────────────
+    trackView: async (data) => {
+        try {
+            return await databases.createDocument(DATABASE_ID, COLLECTION_ID_VIEWS, ID.unique(), {
+                article_id: data.articleId,
+                session_id: data.sessionId || null,
+                ip_hash: data.ipHash || null,
+                referrer: data.referrer || null,
+                section: data.section || null,
+                country: data.country || null,
+                device: data.device || null,
+                viewed_at: new Date().toISOString(),
+            });
+        } catch (error) { console.error("AppwriteService :: trackView :: error", error); }
+    },
+    getArticleViews: async (articleId) => {
+        try {
+            if (!COLLECTION_ID_VIEWS) return 0;
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_VIEWS, [Query.equal('article_id', articleId), Query.limit(1)]);
+            return response.total;
+        } catch { return 0; }
+    },
+    getMostReadArticles: async (limit = 10) => {
+        try {
+            if (!COLLECTION_ID_VIEWS) return [];
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_VIEWS, [Query.limit(1000)]);
+            const counts = {};
+            response.documents.forEach(doc => {
+                counts[doc.article_id] = (counts[doc.article_id] || 0) + 1;
+            });
+            return Object.entries(counts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, limit)
+                .map(([articleId, views]) => ({ articleId, views }));
+        } catch { return []; }
+    },
+    getViewsBySection: async () => {
+        try {
+            if (!COLLECTION_ID_VIEWS) return [];
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_VIEWS, [Query.limit(1000)]);
+            const counts = {};
+            response.documents.forEach(doc => {
+                const section = doc.section || 'unknown';
+                counts[section] = (counts[section] || 0) + 1;
+            });
+            return Object.entries(counts).map(([section, views]) => ({ section, views }));
+        } catch { return []; }
+    },
+    getTotalViews: async () => {
+        try {
+            if (!COLLECTION_ID_VIEWS) return 0;
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_VIEWS, [Query.limit(1)]);
+            return response.total;
+        } catch { return 0; }
+    },
+    getViewsByDateRange: async (startDate, endDate) => {
+        try {
+            if (!COLLECTION_ID_VIEWS) return [];
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_VIEWS, [Query.greaterThanEqual('viewed_at', startDate.toISOString()), Query.lessThanEqual('viewed_at', endDate.toISOString()), Query.limit(1000)]);
+            const daily = {};
+            response.documents.forEach(doc => {
+                const date = doc.viewed_at?.slice(0, 10) || 'unknown';
+                daily[date] = (daily[date] || 0) + 1;
+            });
+            return Object.entries(daily).sort((a, b) => a[0].localeCompare(b[0])).map(([date, views]) => ({ date, views }));
+        } catch { return []; }
+    },
+    getUniqueVisitors: async () => {
+        try {
+            if (!COLLECTION_ID_VIEWS) return 0;
+            const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_VIEWS, [Query.limit(1000)]);
+            const sessions = new Set();
+            response.documents.forEach(doc => { if (doc.session_id) sessions.add(doc.session_id); });
+            return sessions.size;
+        } catch { return 0; }
     },
 };
 
